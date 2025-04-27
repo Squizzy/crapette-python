@@ -1,7 +1,8 @@
+from cardstack import CardStack
 from deck import Deck
 from card import Card
 
-class CrapetteStack:
+class CrapetteStack(CardStack):
     _cards: list[Card]
 
     def __init__(self, deck: Deck):
@@ -9,25 +10,25 @@ class CrapetteStack:
         self._cards = deck.draw_n_cards(13)
         self._cards[len(self._cards) - 1].turn_face_up()
 
-    @property
-    def cards(self) -> list[Card]:
-        """Return the list of cards in the Crapette Stack
+    # @property
+    # def cards(self) -> list[Card]:
+    #     """Return the list of cards in the Crapette Stack
 
-        Returns:
-            list[Card]: the list of cards
-        """
-        return self._cards
+    #     Returns:
+    #         list[Card]: the list of cards
+    #     """
+    #     return self._cards
 
-    @property
-    def is_crapette_stack_empty(self) -> bool:
-        """Confirms if there are still cards on the Crapette Stack or not
+    # @property
+    # def is_crapette_stack_empty(self) -> bool:
+    #     """Confirms if there are still cards on the Crapette Stack or not
 
-        Returns:
-            bool: True if no card on the stack, False otherwise
-        """
-        return len(self._cards) == 0
+    #     Returns:
+    #         bool: True if no card on the stack, False otherwise
+    #     """
+    #     return len(self._cards) == 0
 
-    def is_card_stackable(self, card:Card) -> bool:
+    def can_be_added(self, card:Card) -> bool:
         """Check that a card can be added to the Crapette Stack
 
         Args:
@@ -53,38 +54,38 @@ class CrapetteStack:
         Returns: 
             True if the card was added, False if card was not added
         """
-        if self.is_card_stackable(card):
+        if self.can_be_added(card):
             card.turn_face_up()
             self._cards.append(card)
             return True
         return False
     
-    def force_add_card(self, card: Card) -> None:
-        """Force add a card, for debug purpose
+    # def force_add_card(self, card: Card) -> None:
+    #     """Force add a card, for debug purpose
 
-        Args:
-            card (Card): The card to add
-        """
-        card.turn_face_up()
-        self._cards.append(card)
+    #     Args:
+    #         card (Card): The card to add
+    #     """
+    #     card.turn_face_up()
+    #     self._cards.append(card)
 
-    def remove_card(self) -> bool:
-        """Remove the top card from the Crapette Stack
+    # def remove_top_card(self) -> bool:
+    #     """Remove the top card from the Crapette Stack
 
-        Returns:
-            bool: True if the card was removed, False if no card was removed
-        """
-        if len(self._cards) == 0:
-            return False
-        else:
-            try:
-                self._cards.pop()
-            except:
-                print("Error removing a card from the Crapette Stack")
-                return False
-            if len(self._cards) > 0:
-                self._cards[len(self._cards) - 1].turn_face_up()
-            return True
+    #     Returns:
+    #         bool: True if the card was removed, False if no card was removed
+    #     """
+    #     if len(self._cards) == 0:
+    #         return False
+    #     else:
+    #         try:
+    #             self._cards.pop()
+    #         except:
+    #             print("Error removing a card from the Crapette Stack")
+    #             return False
+    #         if len(self._cards) > 0:
+    #             self._cards[len(self._cards) - 1].turn_face_up()
+    #         return True
          
     def draw_card(self) -> Card | None:
         """Draw the top card from the pack (but leaves it there)
@@ -94,7 +95,7 @@ class CrapetteStack:
         Returns:
             Card: the top card if the card could be drawn, otherwise none
         """
-        if self.is_crapette_stack_empty:
+        if self.is_empty:
             print("No card on Crapette stack")
             return None
         
