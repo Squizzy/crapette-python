@@ -91,10 +91,10 @@ class Card:
         return card._suit == self._suit
     
     def is_one_above(self, card: "Card") -> bool:
-        return card._rank.value == self._rank.value + 1
+        return card._rank.value == self._rank.value - 1
     
     def is_one_below(self, card: "Card") -> bool:
-        return card._rank.value == self._rank.value - 1
+        return card._rank.value == self._rank.value + 1
     
     def is_one_above_or_below(self, card: "Card") -> bool:
         return self.is_one_above(card) or self.is_one_below(card)
