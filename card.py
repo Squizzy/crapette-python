@@ -64,8 +64,8 @@ class Card:
         return f"{self._rank.display_name} of {self._suit.value} - {face_status}"
 
     @property
-    def value(self) -> str:
-        return self.values[self._rank.display_name]
+    def rank(self) -> str:
+        return self._rank.display_name
     
     @property
     def suit(self) -> str:
