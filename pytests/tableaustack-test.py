@@ -55,13 +55,13 @@ def test_add_card():
 
 def test_remove_card():
     size1:int = tableau.size
-    tableau.remove_card()
+    tableau.remove_top_card()
     assert tableau.size == size1 - 1
 
 
 tableau1 = []
 tableau1 = TableauStack(deck)
-tableau1.remove_card()
+tableau1.remove_top_card()
 tableau1.force_add_card(card_8S)
 tableau1.force_add_card(card_9H)
 tableau1.force_add_card(card_QS)
