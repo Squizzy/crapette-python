@@ -1,0 +1,58 @@
+import sys
+sys.path.append('..')
+
+from card import Card, Rank, Suit
+import pytest
+
+card_8H = Card(rank=Rank.EIGHT, suit=Suit.HEARTS, player_num=1)
+card_QS = Card(rank=Rank.QUEEN, suit=Suit.SPADES, player_num=1)
+
+
+def test_card_generation():
+    card_KC = Card(rank=Rank.KING, suit=Suit.CLUBS, player_num=1)
+    assert card_KC._rank == Rank.KING
+    assert card_KC._suit == Suit.CLUBS
+    assert card_KC._face_up == False
+    assert card_KC._back_img == ""
+    assert card_KC._face_img == ""
+    assert card_KC._player_num == 1
+
+
+def test_rank():
+    assert card_8H.rank == '8'
+    assert card_QS.rank == 'Queen'
+    
+
+def test_suit():
+    assert card_8H.suit == 'Hearts'
+    assert card_QS.suit == 'Spades'
+    assert card_QS.suit != 'clubs'
+
+
+def test_repr():
+    assert str(card_QS) == 'Queen of Spades - face down'
+
+
+def test_face_up():
+    assert card_8H.face_up == False
+    card_8H.flip_card()
+    assert card_8H.face_up == True
+    card_8H.flip_card()
+    assert card_8H.face_up == False
+
+
+def test_turn_face_up():
+    assert card_8H.face_up == False
+    card_8H.turn_face_up()
+    assert card_8H.face_up == True
+    card_8H.turn_face_up()
+    assert card_8H.face_up == True
+
+
+def test_turn_face_down():
+    assert card_8H.face_up == True
+    card_8H.turn_face_down()
+    assert card_8H.face_up == False
+    card_8H.turn_face_down()
+    assert card_8H.face_up == False
+    
