@@ -4,8 +4,11 @@ sys.path.append('..')
 from card import Card, Rank, Suit
 import pytest
 
+card_7S = Card(rank=Rank.SEVEN, suit=Suit.SPADES, player_num=1)
 card_8H = Card(rank=Rank.EIGHT, suit=Suit.HEARTS, player_num=1)
+card_9S = Card(rank=Rank.NINE, suit=Suit.SPADES, player_num=1)
 card_QS = Card(rank=Rank.QUEEN, suit=Suit.SPADES, player_num=1)
+
 
 
 def test_card_generation():
@@ -55,4 +58,8 @@ def test_turn_face_down():
     assert card_8H.face_up == False
     card_8H.turn_face_down()
     assert card_8H.face_up == False
+    
+def test_is_one_above():
+    assert card_8H.is_one_above(card_7S)
+    assert card_8H.is_one_below(card_9S)
     
