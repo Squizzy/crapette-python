@@ -1,8 +1,8 @@
+from cardstack import CardStack
 from deck import Deck
 from card import Card
-from icecream import ic
 
-class TableauStack:
+class TableauStack(CardStack):
     _cards: list[Card]
     _selected_cards: list[Card]
 
@@ -13,17 +13,17 @@ class TableauStack:
         self._cards.append(first_card)
 
 
-    @property
-    def top_card(self) -> Card:
-        return self._cards[len(self._cards) - 1]
+    # @property
+    # def top_card(self) -> Card:
+    #     return self._cards[len(self._cards) - 1]
 
-    @property
-    def is_empty(self) -> bool:
-        return len(self._cards) == 0
+    # @property
+    # def is_empty(self) -> bool:
+    #     return len(self._cards) == 0
 
-    @property
-    def size(self) -> int:
-        return len(self._cards)
+    # @property
+    # def size(self) -> int:
+    #     return len(self._cards)
 
     def position_in_stack(self, card) -> int | None:
         if card in self._cards:
@@ -39,11 +39,11 @@ class TableauStack:
             return True
         return False
 
-    def add_card(self, card: Card) -> bool:
-        if self.can_be_added(card):
-            self._cards.append(card)
-            return True
-        return False
+    # def add_card(self, card: Card) -> bool:
+    #     if self.can_be_added(card):
+    #         self._cards.append(card)
+    #         return True
+    #     return False
 
     def add_n_cards(self, cards_to_add: list[Card]) -> bool:
         # ic(self.top_card)
@@ -57,17 +57,17 @@ class TableauStack:
         return False
 
 
-    def force_add_card(self, card: Card) -> None:
-        """add a card to the tableau without checking rule, used for debug
+    # def force_add_card(self, card: Card) -> None:
+    #     """add a card to the tableau without checking rule, used for debug
 
-        Args:
-            card (Card): the card to add
-        """
-        self._cards.append(card)
+    #     Args:
+    #         card (Card): the card to add
+    #     """
+    #     self._cards.append(card)
 
 
-    def remove_card(self) -> None:
-        self._cards.pop()
+    # def remove_top_card(self) -> None:
+    #     self._cards.pop()
 
     def select_cards(self, card: Card) -> list[Card]|None:
         """Selects all the cards from the card provided to the top of the stack
@@ -99,7 +99,8 @@ class TableauStack:
         inverted_selected_cards: list[Card] = self._selected_cards[::-1]
         for card in inverted_selected_cards:
             if card == self.top_card:
-                self._cards.pop()
+                # self._cards.pop()
+                self.remove_top_card()
             else:
                 print("Error removing the selected card from the Tableau stack")
                 return False
