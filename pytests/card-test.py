@@ -2,7 +2,7 @@ import sys
 sys.path.append('..')
 
 from card import Card, Rank, Suit
-import pytest
+# import pytest
 
 card_7S = Card(rank=Rank.SEVEN, suit=Suit.SPADES, player_num=1)
 card_8H = Card(rank=Rank.EIGHT, suit=Suit.HEARTS, player_num=1)
@@ -15,7 +15,7 @@ def test_card_generation():
     card_KC = Card(rank=Rank.KING, suit=Suit.CLUBS, player_num=1)
     assert card_KC._rank == Rank.KING
     assert card_KC._suit == Suit.CLUBS
-    assert card_KC._face_up == False
+    assert not card_KC._face_up
     assert card_KC._back_img == ""
     assert card_KC._face_img == ""
     assert card_KC._player_num == 1
@@ -37,27 +37,27 @@ def test_repr():
 
 
 def test_face_up():
-    assert card_8H.face_up == False
+    assert not card_8H.face_up
     card_8H.flip_card()
-    assert card_8H.face_up == True
+    assert card_8H.face_up
     card_8H.flip_card()
-    assert card_8H.face_up == False
+    assert not card_8H.face_up
 
 
 def test_turn_face_up():
-    assert card_8H.face_up == False
+    assert not card_8H.face_up
     card_8H.turn_face_up()
-    assert card_8H.face_up == True
+    assert card_8H.face_up
     card_8H.turn_face_up()
-    assert card_8H.face_up == True
+    assert card_8H.face_up
 
 
 def test_turn_face_down():
-    assert card_8H.face_up == True
+    assert card_8H.face_up
     card_8H.turn_face_down()
-    assert card_8H.face_up == False
+    assert not card_8H.face_up
     card_8H.turn_face_down()
-    assert card_8H.face_up == False
+    assert not card_8H.face_up
     
 def test_is_one_above():
     assert card_8H.is_one_above(card_7S)
