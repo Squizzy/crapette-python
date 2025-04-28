@@ -4,6 +4,7 @@ from card import Card
 
 class CrapetteStack(CardStack):
     _cards: list[Card]
+    _stack_name:str = "Crapette"
 
     def __init__(self, deck: Deck):
         self._cards = []
@@ -87,21 +88,21 @@ class CrapetteStack(CardStack):
     #             self._cards[len(self._cards) - 1].turn_face_up()
     #         return True
          
-    def draw_card(self) -> Card | None:
-        """Draw the top card from the pack (but leaves it there)
-        if the pile is empty or there is a problem drawing out a card, returns None.
-        The drawn card is left on the crapette stack and will need to be removed with remove_card once it has been placed on another stack
+    # def draw_card(self) -> Card | None:
+    #     """Draw the top card from the pack (but leaves it there)
+    #     if the pile is empty or there is a problem drawing out a card, returns None.
+    #     The drawn card is left on the crapette stack and will need to be removed with remove_card once it has been placed on another stack
 
-        Returns:
-            Card: the top card if the card could be drawn, otherwise none
-        """
-        if self.is_empty:
-            print("No card on Crapette stack")
-            return None
+    #     Returns:
+    #         Card: the top card if the card could be drawn, otherwise none
+    #     """
+    #     if self.is_empty:
+    #         print("No card on Crapette stack")
+    #         return None
         
-        try:
-            drawn_card:Card = self._cards[len(self._cards) - 1]
-        except:
-            print("Could not draw card from Crapette stack")
-            return None
-        return drawn_card
+    #     try:
+    #         drawn_card:Card = self._cards[len(self._cards) - 1]
+    #     except:
+    #         print("Could not draw card from Crapette stack")
+    #         return None
+    #     return drawn_card
