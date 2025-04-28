@@ -5,6 +5,7 @@ from card import Card
 class TableauStack(CardStack):
     _cards: list[Card]
     _selected_cards: list[Card]
+    _stackname: str = "Tableau"
 
     def __init__(self, deck: Deck):
         self._cards = []
