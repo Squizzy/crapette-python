@@ -19,7 +19,7 @@ for card in p1crapette_cards:
     # print(f"{card._rank.display_name} of {card.suit()} - {card.face_up()}")
     print(f"{card}")
 print("###")
-crapette_card = p1crapette.draw_card()
+crapette_card = p1crapette.draw_top_card()
 # print(f"{crapette_card.value()} of {crapette_card.suit()} - {crapette_card.face_up()}")
 print("###")
 # for card in p1crapette_cards:
