@@ -2,7 +2,8 @@ from card import Card
 
 class CardStack:
     _cards: list[Card]
-    _stackname:str = "Parent Stack Class"
+    _stack_name: str = "Parent Stack Class"
+    _player_num: int = 0 # Cartstack number
     # _stackname:str
     
     @property
@@ -23,7 +24,7 @@ class CardStack:
     
     # This method contains the specific stack's rules for adding a card
     # So needs to be overridden
-    def can_be_added(self, card: Card) -> bool:
+    def can_be_added(self, card: Card, player_num: int) -> bool:
         print("The method 'can_be_added' has not yet been overridden, but it must be")
         print(card)
         return False
@@ -37,8 +38,8 @@ class CardStack:
         """
         return self._cards
 
-    def add_card(self, card: Card) -> bool:
-        if self.can_be_added(card):
+    def add_card(self, card: Card, player_num: int) -> bool:
+        if self.can_be_added(card, player_num):
             self._cards.append(card)
             return True
         return False
@@ -64,7 +65,7 @@ class CardStack:
             try:
                 self._cards.pop()
             except Exception as e:
-                print(f"Error {e} removing a card from the {self._stackname} stack")
+                print(f"Error {e} removing a card from the {self._stack_name} stack")
                 return False
             if len(self._cards) > 0:
                 self._cards[len(self._cards) - 1].turn_face_up()
@@ -79,12 +80,12 @@ class CardStack:
             Card: the top card if the card could be drawn, otherwise none
         """
         if self.is_empty:
-            print(f"No card on {self._stackname} stack")
+            print(f"No card on {self._stack_name} stack")
             return None
         
         try:
             drawn_card:Card = self._cards[len(self._cards) - 1]
         except Exception as e:
-            print(f"error {e}: Could not draw card from {self._stackname} stack")
+            print(f"error {e}: Could not draw card from {self._stack_name} stack")
             return None
         return drawn_card
