@@ -1,4 +1,4 @@
-from cardstack import CardStack
+from cardstack import CardStack, Stacks, Transferred_Card
 from deck import Deck
 from card import Card
 
@@ -35,11 +35,19 @@ class TableauStack(CardStack):
         else:
             return None
 
-    def can_be_added(self, card: Card, player_num: int) -> bool:
+    def can_be_added(self, proposed_card:Transferred_Card) -> bool:
+
+        # If no card in this stack, regardless of who is placing the card, no issue
         if self.is_empty:
             return True
-        if self.top_card.is_one_above(card) and not self.top_card.is_same_colour(card):
+
+        # Otherwise (card already present),
+        #   If the card is one below in value from the card already there, and it is not the same colour
+        #       That's fine
+        if self.top_card.is_one_above(proposed_card._card) and not self.top_card.is_same_colour(proposed_card._card):
             return True
+        
+        # Otherwise, can't add card
         return False
 
     # def add_card(self, card: Card) -> bool:
@@ -49,9 +57,7 @@ class TableauStack(CardStack):
     #     return False
 
     def add_n_cards(self, cards_to_add: list[Card], player_num: int) -> bool:
-        # ic(self.top_card)
-        # ic(cards_to_add[0])
-        # ic(self.can_be_added(cards_to_add[0]))
+
         if self.can_be_added(cards_to_add[0], player_num):
             for card in cards_to_add:
                 # ic(card)
