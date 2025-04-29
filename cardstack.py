@@ -12,7 +12,7 @@ class CardStack:
     
     @property
     def what_stack_am_i(self):
-        return self._stackname
+        return self._stack_name
     
     @property
     def top_card(self) -> Card:
