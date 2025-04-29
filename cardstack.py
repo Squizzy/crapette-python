@@ -1,10 +1,25 @@
-from card import Card
+from enum import Enum
+
+from card import Card, Transferred_Card
+
+class Stacks(Enum):
+    CRAPETTE = "Crapette"
+    REMAINDER = "Remainder"
+    BIN = "Bim"
+    TABLEAU = "Tableau"
+    FOUNDATION = "Foundation"
+
+    
+    # @property
+    # def color(self) -> str:
+    #     if self in (Suit.HEARTS, Suit.DIAMONDS):
+    #         return "red"
+    #     return "black"
 
 class CardStack:
     _cards: list[Card]
     _stack_name: str = "Parent Stack Class"
     _player_num: int = 0 # Cartstack number
-    # _stackname:str
     
     @property
     def size(self) -> int:
@@ -19,9 +34,17 @@ class CardStack:
         return self._cards[len(self._cards) - 1]
     
     @property
+    def second_top_card(self) -> Card:
+        return self._cards[len(self._cards) - 2]
+
+    @property
     def is_empty(self) -> bool:
         return len(self._cards) == 0
     
+    @property
+    def is_player(self, player_num: int) -> bool:
+        return player_num == self._player_num
+
     # This method contains the specific stack's rules for adding a card
     # So needs to be overridden
     def can_be_added(self, card: Card, player_num: int) -> bool:
@@ -71,7 +94,7 @@ class CardStack:
                 self._cards[len(self._cards) - 1].turn_face_up()
             return True
         
-    def draw_top_card(self) -> Card | None:
+    def draw_top_card(self, drawing_player: int) -> Transferred_Card | None:
         """Draw the top card from the pack (but leaves it there)
         if the pile is empty or there is a problem drawing out a card, returns None.
         The drawn card is left on the crapette stack and will need to be removed with remove_card once it has been placed on another stack
@@ -84,8 +107,16 @@ class CardStack:
             return None
         
         try:
-            drawn_card:Card = self._cards[len(self._cards) - 1]
+            drawn_card: Transferred_Card = Transferred_Card()
+            drawn_card._from_player = drawing_player
+            drawn_card._from_stack_name = self._stack_name
+            drawn_card._from_stack_owner = self._player_num
+            drawn_card._card = self._cards[len(self._cards) - 1]
+            # drawn_card:Card = self._cards[len(self._cards) - 1]
+            # self._drawn_card = drawn_card
+
         except Exception as e:
             print(f"error {e}: Could not draw card from {self._stack_name} stack")
             return None
+        
         return drawn_card
