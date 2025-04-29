@@ -1,34 +1,37 @@
 import sys
 sys.path.append('..')
 
-from card import Card, Rank, Suit
-from deck import Deck
-from tableaustack import TableauStack
-from icecream import ic
+from card import Card #, Rank, Suit
+# from deck import Deck
+from icecream import ic #type:ignore
+
+from samples import deck, card_8H, card_9H, card_10H, card_7D, card_7S, card_8S, card_9S, card_QS
 # import pytest
 
+from tableaustack import TableauStack
+player_num: int = 1
 
-# A set of sample cards
-card_8H: Card = Card(rank=Rank.EIGHT, suit=Suit.HEARTS, player_num=1)
-card_9H: Card = Card(rank=Rank.NINE, suit=Suit.HEARTS, player_num=1)
-card_10H: Card = Card(rank=Rank.TEN, suit=Suit.HEARTS, player_num=1)
+# # A set of sample cards
+# card_8H: Card = Card(rank=Rank.EIGHT, suit=Suit.HEARTS, player_num=1)
+# card_9H: Card = Card(rank=Rank.NINE, suit=Suit.HEARTS, player_num=1)
+# card_10H: Card = Card(rank=Rank.TEN, suit=Suit.HEARTS, player_num=1)
 
-card_7S: Card = Card(rank=Rank.SEVEN, suit=Suit.SPADES, player_num=1)
-card_8S: Card = Card(rank=Rank.EIGHT, suit=Suit.SPADES, player_num=1)
-card_9S: Card = Card(rank=Rank.NINE, suit=Suit.SPADES, player_num=1)
+# card_7S: Card = Card(rank=Rank.SEVEN, suit=Suit.SPADES, player_num=1)
+# card_8S: Card = Card(rank=Rank.EIGHT, suit=Suit.SPADES, player_num=1)
+# card_9S: Card = Card(rank=Rank.NINE, suit=Suit.SPADES, player_num=1)
 
-card_7D: Card = Card(rank=Rank.SEVEN, suit=Suit.DIAMONDS, player_num=1)
+# card_7D: Card = Card(rank=Rank.SEVEN, suit=Suit.DIAMONDS, player_num=1)
 
-card_QS: Card = Card(rank=Rank.QUEEN, suit=Suit.SPADES, player_num=1)
+# card_QS: Card = Card(rank=Rank.QUEEN, suit=Suit.SPADES, player_num=1)
 
-# One deck
-deck: Deck = Deck(1)
+# # One deck
+# deck: Deck = Deck(1)
 
 # Normal initialised deck
-tableau: TableauStack = TableauStack(deck)
+tableau: TableauStack = TableauStack(deck, player_num)
 
-# Deci initialised with some cards
-tableau1: TableauStack = TableauStack(deck)
+# Deck initialised with some cards
+tableau1: TableauStack = TableauStack(deck, player_num)
 tableau1.remove_top_card()
 tableau1.force_add_card(card_8S)
 tableau1.force_add_card(card_9H)
@@ -39,10 +42,15 @@ tableau1.force_add_card(card_7S)
 
 
 
-def test_tableau_initialisation():
+def test_tableau_constructor():
+    print()
     ic(tableau.what_stack_am_i)
-    assert not tableau.is_empty
-    assert type(tableau._cards[0]) is Card
+
+    assert tableau.what_stack_am_i == "Tableau" 
+    assert not tableau.is_empty 
+    assert type(tableau.top_card) is Card
+    assert tableau.top_card.face_up
+    
 
 def test_size():
     assert tableau.size == 1
@@ -66,8 +74,8 @@ def test_add_card():
     assert tableau.add_card(card_7S)
     assert tableau.top_card == card_7S
 
-def test_remove_card():
-    size1:int = tableau.size
+def test_remove_card() -> None:
+    size1: int = tableau.size
     tableau.remove_top_card()
     assert tableau.size == size1 - 1
 
@@ -80,9 +88,9 @@ def test_return_position_in_cards():
 
 def test_select_cards():
     tableau1.select_cards(card_9S)
-    assert tableau1._selected_cards[0] == card_9S
-    assert tableau1._selected_cards[1] == card_7D
-    assert tableau1._selected_cards[2] == card_7S
+    assert tableau1.get_selected_Cards[0] == card_9S
+    assert tableau1.get_selected_Cards[1] == card_7D
+    assert tableau1.get_selected_Cards[2] == card_7S
     assert tableau1._cards[tableau1.position_in_stack(card_9S)] == card_9S
 
 def test_deselect():
