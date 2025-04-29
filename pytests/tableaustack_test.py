@@ -1,11 +1,12 @@
 import sys
 sys.path.append('..')
+sys.path.append('.')
 
 from card import Card #, Rank, Suit
-# from deck import Deck
+from deck import Deck
 from icecream import ic #type:ignore
 
-from samples import deck, card_8H, card_9H, card_10H, card_7D, card_7S, card_8S, card_9S, card_QS
+from samples import card_8H, card_9H, card_10H, card_7D, card_7S, card_8S, card_9S, card_QS
 # import pytest
 
 from tableaustack import TableauStack
@@ -24,8 +25,8 @@ player_num: int = 1
 
 # card_QS: Card = Card(rank=Rank.QUEEN, suit=Suit.SPADES, player_num=1)
 
-# # One deck
-# deck: Deck = Deck(1)
+# One deck
+deck: Deck = Deck(1)
 
 # Normal initialised deck
 tableau: TableauStack = TableauStack(deck, player_num)
@@ -45,6 +46,7 @@ tableau1.force_add_card(card_7S)
 def test_tableau_constructor():
     print()
     ic(tableau.what_stack_am_i)
+    ic(tableau.top_card)
 
     assert tableau.what_stack_am_i == "Tableau" 
     assert not tableau.is_empty 
@@ -60,18 +62,18 @@ def test_top_card():
 
 def test_tableau_adder_rules():
     tableau.force_add_card(card_8H)
-    assert not tableau.can_be_added(card_8S) # same rank, should fail
-    assert not tableau.can_be_added(card_9H) # same suit, should fail
-    assert not tableau.can_be_added(card_QS) # rank far away, should fail
-    assert not tableau.can_be_added(card_9S) # rank above, should fail
-    assert not tableau.can_be_added(card_7D) # rank below but same colour, should fail
-    assert tableau.can_be_added(card_7S) # rank below, opposite colour, should pass
+    assert not tableau.can_be_added(card_8S, player_num) # same rank, should fail
+    assert not tableau.can_be_added(card_9H, player_num) # same suit, should fail
+    assert not tableau.can_be_added(card_QS, player_num) # rank far away, should fail
+    assert not tableau.can_be_added(card_9S, player_num) # rank above, should fail
+    assert not tableau.can_be_added(card_7D, player_num) # rank below but same colour, should fail
+    assert tableau.can_be_added(card_7S, player_num) # rank below, opposite colour, should pass
 
 def test_add_card():
     # top card is 8H
-    assert not tableau.add_card(card_7D)
-    assert not tableau.add_card(card_9H)
-    assert tableau.add_card(card_7S)
+    assert not tableau.add_card(card_7D, player_num)
+    assert not tableau.add_card(card_9H, player_num)
+    assert tableau.add_card(card_7S, player_num)
     assert tableau.top_card == card_7S
 
 def test_remove_card() -> None:
@@ -80,7 +82,7 @@ def test_remove_card() -> None:
     assert tableau.size == size1 - 1
 
 def test_return_position_in_cards():
-    ic(tableau1.what_stack_am_i)
+    # ic(tableau1.what_stack_am_i)
     assert tableau1.position_in_stack(card_QS) != 5
     assert tableau1.position_in_stack(card_QS) == 2
     assert tableau1.position_in_stack(card_8H) is None
@@ -117,5 +119,5 @@ def test_add_n_cards():
     ic(tableau1._selected_cards[1])
     ic(tableau1._selected_cards[2])
     # add_worked = tableau1.add_n_cards(tableau1._selected_cards)
-    assert tableau1.add_n_cards(tableau1._selected_cards)
+    assert tableau1.add_n_cards(tableau1._selected_cards, player_num)
     assert tableau1.size == 7
