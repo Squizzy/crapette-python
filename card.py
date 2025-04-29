@@ -1,4 +1,5 @@
 from enum import Enum
+from cardstack import Stacks
 
 class Suit(Enum):
     CLUBS = "Clubs"
@@ -98,3 +99,11 @@ class Card:
     
     def is_one_above_or_below(self, card: "Card") -> bool:
         return self.is_one_above(card) or self.is_one_below(card)
+    
+class Transferred_Card:
+    _from_player: int
+    _from_stack_name: Stacks
+    _from_stack_owner: int
+    _card: Card
+    # _to_stack_name: Stacks
+    # _to_stack_owner: int
