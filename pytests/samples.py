@@ -4,6 +4,7 @@ from tableaustack import TableauStack
 
 # A set of sample cards
 #red
+card_7H: Card = Card(rank=Rank.SEVEN, suit=Suit.HEARTS, player_num=1)
 card_8H: Card = Card(rank=Rank.EIGHT, suit=Suit.HEARTS, player_num=1)
 card_9H: Card = Card(rank=Rank.NINE, suit=Suit.HEARTS, player_num=1)
 card_10H: Card = Card(rank=Rank.TEN, suit=Suit.HEARTS, player_num=1)
@@ -27,10 +28,10 @@ correct_stacked_cards_down_high: list[Card]  = [card_10H, card_JS]
 deck: Deck = Deck(1)
 
 # Normal initialised deck
-tableau: TableauStack = TableauStack(deck)
+tableau: TableauStack = TableauStack(deck, 1)
 
 # Deci initialised with some cards
-tableau1: TableauStack = TableauStack(deck)
+tableau1: TableauStack = TableauStack(deck, 1)
 tableau1.remove_top_card()
 tableau1.force_add_card(card_8S)
 tableau1.force_add_card(card_9H)
