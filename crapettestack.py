@@ -1,11 +1,12 @@
-from cardstack import CardStack
+from cardstack import CardStack, Transferred_Card, Stacks
 from deck import Deck
 from card import Card
 
 class CrapetteStack(CardStack):
-    _stack_name: str = "Crapette"
+    _stack_name: Stacks = Stacks.CRAPETTE
     _cards: list[Card] # probably redundant as defined in cardstack
     _player_num: int  # probably redundant as defined in cardstack
+    _drawn_card: Transferred_Card
 
 
     def __init__(self, deck: Deck, player_num: int):
@@ -34,7 +35,7 @@ class CrapetteStack(CardStack):
     #     """
     #     return len(self._cards) == 0
 
-    def can_be_added(self, card:Card, player_num: int) -> bool:
+    def can_be_added(self, proposed_card:Transferred_Card) -> bool:
         """Check that a card can be added to the Crapette Stack
 
         Args:
@@ -49,20 +50,49 @@ class CrapetteStack(CardStack):
         if len(self._cards) == 0:
             return False
         
-        # If the card we have is one that was picked by the player
-        # Then it can only be placed if it comes from the same stack.
-        # This is the case is the top_card is not returned 
-        # TODO: check top_card is not the same card
-        if player_num == self._player_num:
-            if not self.top_card.face_up:
+        # If the card is being plauyed by the player
+        #   if the card comes from this stack
+        #     that's fine
+        if proposed_card._from_player is self.is_player:
+            if proposed_card._from_stack_name in [Stacks.CRAPETTE]:
                 return True
-            
-        if card.is_same_family(self._cards[len(self._cards) - 1]) and card.is_one_above_or_below(self._cards[len(self._cards) - 1]):
-            return True
         
+        # If the card is being played picked by the opponent
+        else:
+            #   if it does not adhere to the stacking rule (same family and  1+ or 1-)
+            #       then the card can't be added
+            if not proposed_card._card.is_one_above_or_below(self.top_card) or not proposed_card._card.is_same_family(self.top_card):
+                return False
+            
+            #   If the stack was from the opponent's crapette or remainder stack
+            #       That's fine
+            if proposed_card._from_stack_name in [Stacks.CRAPETTE, Stacks.REMAINDER] \
+                and proposed_card._from_stack_owner is not self.is_player:
+                    return True
+            
+            #   or if the card was from the tableau (not caring for who's)
+            #       That's fine
+            elif proposed_card._from_stack_name in [Stacks.TABLEAU]:
+                    return True                
+        
+        # In any other case, card can't be added
         return False
+
+
+        # # Then it can only be placed if it comes from the same stack.
+        # # This is the case is the top_card is not returned 
+        # # TODO: check top_card is not the same card
+        # if source_player_num == self._player_num:
+
+        #     if not self.top_card.face_up:
+        #         return True
+            
+        # if card.is_same_family(self._cards[len(self._cards) - 1]) and card.is_one_above_or_below(self._cards[len(self._cards) - 1]):
+        #     return True
+        
+        # return False
     
-    def add_card(self, card:Card, player_num: int) -> bool: 
+    def add_card(self, proposed_card:Transferred_Card) -> bool: 
         """ Add a card to the Crapette Stack after checking it can be added
 
         Args: 
@@ -71,9 +101,9 @@ class CrapetteStack(CardStack):
         Returns: 
             True if the card was added, False if card was not added
         """
-        if self.can_be_added(card, player_num):
-            card.turn_face_up()
-            self._cards.append(card)
+        if self.can_be_added(proposed_card):
+            proposed_card._card.turn_face_up()
+            self._cards.append(proposed_card._card)
             return True
         return False
     
