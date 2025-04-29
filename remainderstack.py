@@ -3,12 +3,16 @@ from card import Card
 from deck import Deck
 
 class RemainderStack(CardStack):
+    _stack_name: str = "Remainder"
     _cards: list[Card]
-    _stackname: str = "Remainder"
+    _player_num: int
 
-    def __init__(self, deck: Deck):
+    def __init__(self, deck: Deck, player_num: int):
+        self._player_num = player_num
         self._cards = []
         self._cards = deck.draw_remaining_cards()
+        if len(self._cards) != 52 - 13 - 4:
+            raise ValueError(f"Error: The {self._stack_name} deck should have {52 - 13 - 4} cards, but it has {len(self._cards)} cards")
 
     # @property
     # def size(self) -> int:
