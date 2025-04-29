@@ -3,11 +3,13 @@ from deck import Deck
 from card import Card
 
 class TableauStack(CardStack):
+    _stack_name: str = "Tableau"
     _cards: list[Card]
     _selected_cards: list[Card]
-    _stackname: str = "Tableau"
+    _player_num: int
 
-    def __init__(self, deck: Deck):
+    def __init__(self, deck: Deck, player_num):
+        self._player_num = player_num
         self._cards = []
         first_card: Card = deck.draw_n_cards(1)[0]
         first_card.turn_face_up()
@@ -33,7 +35,7 @@ class TableauStack(CardStack):
         else:
             return None
 
-    def can_be_added(self, card: Card) -> bool:
+    def can_be_added(self, card: Card, player_num: int) -> bool:
         if self.is_empty:
             return True
         if self.top_card.is_one_above(card) and not self.top_card.is_same_colour(card):
@@ -46,14 +48,14 @@ class TableauStack(CardStack):
     #         return True
     #     return False
 
-    def add_n_cards(self, cards_to_add: list[Card]) -> bool:
+    def add_n_cards(self, cards_to_add: list[Card], player_num: int) -> bool:
         # ic(self.top_card)
         # ic(cards_to_add[0])
         # ic(self.can_be_added(cards_to_add[0]))
-        if self.can_be_added(cards_to_add[0]):
+        if self.can_be_added(cards_to_add[0], player_num):
             for card in cards_to_add:
                 # ic(card)
-                self.add_card(card)
+                self.add_card(card, player_num)
             return True
         return False
 
@@ -107,3 +109,10 @@ class TableauStack(CardStack):
                 return False
         return True
 
+    @property
+    def get_selected_Cards(self) -> list[Card] | None:
+        """Returns the selected cards
+        Returns:
+        list[Card]: the selected cards
+        """
+        return self._selected_cards if len(self._selected_cards) != 0 else None
