@@ -3,12 +3,17 @@ from deck import Deck
 from card import Card
 
 class CrapetteStack(CardStack):
-    _cards: list[Card]
-    _stack_name:str = "Crapette"
+    _stack_name: str = "Crapette"
+    _cards: list[Card] # probably redundant as defined in cardstack
+    _player_num: int  # probably redundant as defined in cardstack
 
-    def __init__(self, deck: Deck):
+
+    def __init__(self, deck: Deck, player_num: int):
+        self._player_num = player_num
         self._cards = []
         self._cards = deck.draw_n_cards(13)
+        if len(self._cards) != 13:
+            raise ValueError(f"Error: The {self._stack_name} deck should have 13 cards, but it has {len(self._cards)} cards")
         self._cards[len(self._cards) - 1].turn_face_up()
 
     # @property
@@ -29,24 +34,35 @@ class CrapetteStack(CardStack):
     #     """
     #     return len(self._cards) == 0
 
-    def can_be_added(self, card:Card) -> bool:
+    def can_be_added(self, card:Card, player_num: int) -> bool:
         """Check that a card can be added to the Crapette Stack
 
         Args:
             card (Card): the card to be checked
+            player_num: The ID of the player wanting to place the card
 
         Returns:
             bool: True if the card can be added, False if it cannot be added
         """
+        
+        # If there is no card, no more card can be added
         if len(self._cards) == 0:
             return False
         
+        # If the card we have is one that was picked by the player
+        # Then it can only be placed if it comes from the same stack.
+        # This is the case is the top_card is not returned 
+        # TODO: check top_card is not the same card
+        if player_num == self._player_num:
+            if not self.top_card.face_up:
+                return True
+            
         if card.is_same_family(self._cards[len(self._cards) - 1]) and card.is_one_above_or_below(self._cards[len(self._cards) - 1]):
             return True
         
         return False
     
-    def add_card(self, card:Card) -> bool:
+    def add_card(self, card:Card, player_num: int) -> bool: 
         """ Add a card to the Crapette Stack after checking it can be added
 
         Args: 
@@ -55,7 +71,7 @@ class CrapetteStack(CardStack):
         Returns: 
             True if the card was added, False if card was not added
         """
-        if self.can_be_added(card):
+        if self.can_be_added(card, player_num):
             card.turn_face_up()
             self._cards.append(card)
             return True
