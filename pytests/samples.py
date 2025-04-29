@@ -25,13 +25,13 @@ correct_stacked_cards_down_low: list[Card]   = [card_7S, card_8H, card_9S]
 correct_stacked_cards_down_high: list[Card]  = [card_10H, card_JS]
 
 # One deck
-deck: Deck = Deck(1)
+tableaux_deck: Deck = Deck(1)
 
 # Normal initialised deck
-tableau: TableauStack = TableauStack(deck, 1)
+tableau: TableauStack = TableauStack(tableaux_deck, 1)
 
 # Deci initialised with some cards
-tableau1: TableauStack = TableauStack(deck, 1)
+tableau1: TableauStack = TableauStack(tableaux_deck, 1)
 tableau1.remove_top_card()
 tableau1.force_add_card(card_8S)
 tableau1.force_add_card(card_9H)
@@ -39,3 +39,5 @@ tableau1.force_add_card(card_QS)
 tableau1.force_add_card(card_9S)
 tableau1.force_add_card(card_7D)
 tableau1.force_add_card(card_7S)
+
+
