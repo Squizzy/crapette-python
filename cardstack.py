@@ -5,21 +5,15 @@ from card import Card, Transferred_Card
 class Stacks(Enum):
     CRAPETTE = "Crapette"
     REMAINDER = "Remainder"
-    BIN = "Bim"
+    BIN = "Bin"
     TABLEAU = "Tableau"
     FOUNDATION = "Foundation"
 
-    
-    # @property
-    # def color(self) -> str:
-    #     if self in (Suit.HEARTS, Suit.DIAMONDS):
-    #         return "red"
-    #     return "black"
 
 class CardStack:
     _cards: list[Card]
     _stack_name: str = "Parent Stack Class"
-    _player_num: int = 0 # Cartstack number
+    _player_num: int = 0 # 0 = Cartstack player number (undefined player)
     
     @property
     def size(self) -> int:
