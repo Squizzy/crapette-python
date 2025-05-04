@@ -2,23 +2,23 @@ import sys
 sys.path.append('..')
 sys.path.append('.')
 
-from card import Card #, Rank, Suit
+from card import Card, TransferredCard #, Rank, Suit, 
 from deck import Deck
 from samples import random_stacked_cards
+from player import Players
 from icecream import ic #type:ignore
 
 from remainderstack import RemainderStack
-player_num: int = 1
 
 # One deck
-deck: Deck = Deck(1)
+deck: Deck = Deck(Players.PLAYER1)
 
 # ic(deck.size)
 
 deck.draw_n_cards(13) # remove the crapette cards that won't be distributed before this test here
 deck.draw_n_cards(4) # remove the Tableau cards that won't be distributed before this test here
 
-remainder = RemainderStack(deck, player_num)
+remainder = RemainderStack(deck, Players.PLAYER1)
 
 def test_constructor():
     print ()
@@ -31,12 +31,13 @@ def test_constructor():
     
     
 def test_draw_top_card() -> None:
-    card: Card|None = remainder.draw_top_card()
+    # card: Card|None = remainder.draw_top_card()
+    card: TransferredCard|None = remainder.draw_top_card(Players.PLAYER1)
     assert card == remainder.top_card
     
     tempStack: list[Card] = remainder._cards
     remainder._cards  = []
-    card = remainder.draw_top_card()
+    card = remainder.draw_top_card(Players.PLAYER1)
     assert not card # card is None
     remainder._cards = tempStack
 
