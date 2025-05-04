@@ -1,10 +1,11 @@
 from random import shuffle
 from card import Card, Suit, Rank
+from player import Players
 
 class Deck:
     _cards: list[Card]
 
-    def __init__(self, playerNum:int):
+    def __init__(self, playerNum:Players):
         self._cards = []
         for suit in Suit:
             for rank in Rank:
