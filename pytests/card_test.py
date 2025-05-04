@@ -1,6 +1,8 @@
 import sys
 sys.path.append('..')
 sys.path.append('.')
+# from icecream import ic #type:ignore
+
 
 from card import Card, Rank, Suit
 from player import Players
@@ -20,7 +22,7 @@ def test_card_generation():
     assert not card_KC._face_up
     assert card_KC._back_img == ""
     assert card_KC._face_img == ""
-    assert card_KC._player_num == 1
+    assert card_KC._player_num == Players.PLAYER1
 
 
 def test_rank():
@@ -62,6 +64,11 @@ def test_turn_face_down():
     assert not card_8H.face_up
     
 def test_is_one_above():
+    # ic(card_8H.rank)
+    # ic(card_8H._rank.value)
+    # ic(card_7S._rank.value)
+    # ic(card_QS._rank.value)
+    # ic(card_QS.rank)
     assert card_8H.is_one_above(card_7S)
     assert card_8H.is_one_below(card_9S)
     
