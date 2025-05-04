@@ -41,8 +41,9 @@ class CardStack:
     def is_empty(self) -> bool:
         return len(self._cards) == 0
     
-    def is_player(self, player_num: int) -> bool:
-        return player_num == self._player_num
+    @property
+    def is_player(self) -> int:
+        return self._player_num
 
     # This method contains the specific stack's rules for adding a card
     # So needs to be overridden
