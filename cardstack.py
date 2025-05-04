@@ -17,15 +17,15 @@ class Stacks(Enum):
 
 class StacksInitSizes(Enum):
     """The number of cards in each stack at the start of the initialised game."""
-    DECK:int = 52
-    CRAPETTE: int = 13
-    REMAINDER: int = 35
-    BIN: int = 0
-    TABLEAU_STACK: int = 1
-    FOUNDATION_STACK:int = 0
+    DECK:int = 52  # 52 cards in the deck
+    CRAPETTE: int = 13  # 13 cards in the crapette stack
+    REMAINDER: int = 35  # 35 cards in the remainder stack (52 - 13 - 4)
+    BIN: int = 0  # 0 cards in the bin stack
+    TABLEAU_STACK: int = 1  # 1 card per tableau stack
+    FOUNDATION_STACK:int = 0  # 0 cards in the foundation stack
     # The below do not contain cards, only stacks of cards
-    TABLEAU: int = 0
-    FOUNDATION: int = 0
+    TABLEAU: int = 4  # 4 tableau stacks
+    FOUNDATION: int = 4 # 4 foundation stacks
 
 
 
