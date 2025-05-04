@@ -107,3 +107,32 @@ class Transferred_Card:
     _card: Card
     # _to_stack_name: Stacks
     # _to_stack_owner: int
+    def __init__(self, from_player: int, from_stack_name: Stacks, from_stack_owner: int, card: Card):
+        self._from_player = from_player
+        self._from_stack_name = from_stack_name
+        self._from_stack_owner = from_stack_owner
+        self._card = card
+        # self._to_stack_name = to_stack_name
+        # self._to_stack_owner = to_stack_owner
+        
+    def __repr__(self):
+        return f"{self._card._rank.display_name} of {self._card._suit.value} - from {self._from_player} - {self._from_stack_name} - {self._from_stack_owner}"
+    
+class Transferred_N_Cards:
+    _from_player: int
+    _from_stack_name: Stacks
+    _from_stack_owner: int
+    _cards: list[Card]
+    
+    def __init__(self, from_player: int, from_stack_name: Stacks, from_stack_owner: int, cards: list[Card]):
+        self._from_player = from_player
+        self._from_stack_name = from_stack_name
+        self._from_stack_owner = from_stack_owner
+        self._cards = cards
+        
+    def __repr__(self) -> str:
+        return f"{self.size} cards starting with {self._cards[0]._rank.display_name} of {self._cards[0]._suit.value} - from {self._from_player} - {self._from_stack_name} - {self._from_stack_owner}"
+    
+    @property
+    def size(self) -> int:
+        return len(self._cards)
