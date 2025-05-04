@@ -41,15 +41,14 @@ class CardStack:
     def is_empty(self) -> bool:
         return len(self._cards) == 0
     
-    @property
     def is_player(self, player_num: int) -> bool:
         return player_num == self._player_num
 
     # This method contains the specific stack's rules for adding a card
     # So needs to be overridden
-    def can_be_added(self, card: Card, player_num: int) -> bool:
+    def can_be_added(self, card: Transferred_Card, player_num: int) -> bool:
         print("The method 'can_be_added' has not yet been overridden, but it must be")
-        print(card)
+        print(card._card, card._from_player, card._from_stack_name, card._from_stack_owner, player_num)
         return False
 
     @property
