@@ -1,13 +1,18 @@
 from deck import Deck
 from tableaustack import TableauStack
+from player import Players
+from cardstack import Stacks, StacksInitSizes
 
 class TableauStacks:
+    _stack_name: Stacks
     _TableauStacks: list[TableauStack]
-    _player_num: int
+    _player_num: Players
 
-    def __init__(self, deck:Deck, player_num: int):
+    def __init__(self, deck:Deck, player_num: Players):
+        if player_num not in [Players.PLAYER1, Players.PLAYER2]:
+            raise ValueError(f"Error: Problem initiating Tableau stacks - player specified incorrect: {player_num}")
         self._player_num =  player_num
         self._TableauStacks = []
-        for _ in range(4):
-            TS = TableauStack(deck, player_num)
-            self._TableauStacks.append(TS)
+        for _ in range(StacksInitSizes.TABLEAU.value):
+            tableau_stack = TableauStack(deck, player_num)
+            self._TableauStacks.append(tableau_stack)
