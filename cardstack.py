@@ -60,9 +60,9 @@ class CardStack:
         """
         return self._cards
 
-    def add_card(self, card: Card, player_num: int) -> bool:
-        if self.can_be_added(card, player_num):
-            self._cards.append(card)
+    def add_card(self, card: Transferred_Card) -> bool:
+        if self.can_be_added(card):
+            self._cards.append(card._card)
             return True
         return False
     
