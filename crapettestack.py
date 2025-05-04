@@ -40,7 +40,6 @@ class CrapetteStack(CardStack):
 
         Args:
             proposed_card (Transferred_Card): the card to be checked
-            player_num: The ID of the player wanting to place the card
 
         Returns:
             bool: True if the card can be added, False if it cannot be added
@@ -96,7 +95,7 @@ class CrapetteStack(CardStack):
         """ Add a card to the Crapette Stack after checking it can be added
 
         Args: 
-            the card to be added
+            proposed_card(Transferred_Card): the card to be added
 
         Returns: 
             True if the card was added, False if card was not added
