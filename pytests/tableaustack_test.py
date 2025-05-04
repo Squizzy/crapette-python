@@ -90,9 +90,9 @@ def test_return_position_in_cards():
 
 def test_select_cards():
     tableau1.select_cards(card_9S)
-    assert tableau1.get_selected_Cards[0] == card_9S
-    assert tableau1.get_selected_Cards[1] == card_7D
-    assert tableau1.get_selected_Cards[2] == card_7S
+    assert tableau1.selected_cards[0] == card_9S
+    assert tableau1.selected_cards[1] == card_7D
+    assert tableau1.selected_cards[2] == card_7S
     assert tableau1._cards[tableau1.position_in_stack(card_9S)] == card_9S
 
 def test_deselect():
