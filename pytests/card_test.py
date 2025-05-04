@@ -3,17 +3,18 @@ sys.path.append('..')
 sys.path.append('.')
 
 from card import Card, Rank, Suit
+from player import Players
 # import pytest
 
-card_7S = Card(rank=Rank.SEVEN, suit=Suit.SPADES, player_num=1)
-card_8H = Card(rank=Rank.EIGHT, suit=Suit.HEARTS, player_num=1)
-card_9S = Card(rank=Rank.NINE, suit=Suit.SPADES, player_num=1)
-card_QS = Card(rank=Rank.QUEEN, suit=Suit.SPADES, player_num=1)
+card_7S = Card(rank=Rank.SEVEN, suit=Suit.SPADES, player_num=Players.PLAYER1)
+card_8H = Card(rank=Rank.EIGHT, suit=Suit.HEARTS, player_num=Players.PLAYER1)
+card_9S = Card(rank=Rank.NINE, suit=Suit.SPADES, player_num=Players.PLAYER1)
+card_QS = Card(rank=Rank.QUEEN, suit=Suit.SPADES, player_num=Players.PLAYER1)
 
 
 
 def test_card_generation():
-    card_KC = Card(rank=Rank.KING, suit=Suit.CLUBS, player_num=1)
+    card_KC = Card(rank=Rank.KING, suit=Suit.CLUBS, player_num=Players.PLAYER1)
     assert card_KC._rank == Rank.KING
     assert card_KC._suit == Suit.CLUBS
     assert not card_KC._face_up
