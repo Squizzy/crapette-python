@@ -116,7 +116,7 @@ class TableauStack(CardStack):
         return True
 
     @property
-    def get_selected_Cards(self) -> list[Card] | None:
+    def selected_cards(self) -> list[Card] | None:
         """Returns the selected cards
         Returns:
         list[Card]: the selected cards
