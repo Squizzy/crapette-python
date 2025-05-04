@@ -125,6 +125,9 @@ class Transferred_N_Cards:
     _cards: list[Card]
     
     def __init__(self, from_player: int, from_stack_name: Stacks, from_stack_owner: int, cards: list[Card]):
+        if from_stack_name != Stacks.TABLEAU:
+            raise ValueError("Error: Transferred_N_Cards can only be created from the Tableau stack")
+        
         self._from_player = from_player
         self._from_stack_name = from_stack_name
         self._from_stack_owner = from_stack_owner
