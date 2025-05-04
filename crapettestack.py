@@ -39,7 +39,7 @@ class CrapetteStack(CardStack):
         """Check that a card can be added to the Crapette Stack
 
         Args:
-            card (Card): the card to be checked
+            proposed_card (Transferred_Card): the card to be checked
             player_num: The ID of the player wanting to place the card
 
         Returns:
