@@ -9,6 +9,7 @@ class GameStates(Flag):
     # START = auto()
     # PLAYING = auto()
     # END  = auto()
+    GAME_WON =  auto()
     
     # Player-related Stacks States
     class Player(Flag):
