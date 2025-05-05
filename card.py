@@ -1,5 +1,6 @@
 from enum import Enum
-from cardstack import Stacks
+# from cardstack import Stacks
+from stacks import Stacks
 from player import Players
 
 class Suit(Enum):
@@ -70,6 +71,10 @@ class Card:
         return self._rank.display_name
     
     @property
+    def value(self) -> int:
+        return self._rank.value
+    
+    @property
     def suit(self) -> str:
         return self._suit.value
     
@@ -97,10 +102,10 @@ class Card:
         return card.suit == self.suit
     
     def is_one_above(self, card: "Card") -> bool:
-        return card.rank == self._rank.value - 1
+        return card.value == self.value - 1
     
     def is_one_below(self, card: "Card") -> bool:
-        return card.rank == self._rank.value + 1
+        return card.value == self._rank.value + 1
     
     def is_one_above_or_below(self, card: "Card") -> bool:
         return self.is_one_above(card) or self.is_one_below(card)
@@ -144,7 +149,7 @@ class TransferredNCards:
     # _cards: list[Card]
     
     def __init__(self, from_player: Players, from_stack_name: Stacks, from_stack_owner: Players, cards: list[Card]):
-        if from_stack_name != Stacks.TABLEAU:
+        if from_stack_name != Stacks.TABLEAU_STACK:
             raise ValueError("Error: Transferred_N_Cards can only be created from the Tableau stack")
         
         if len(cards) == 0:
