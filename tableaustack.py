@@ -1,6 +1,7 @@
-from cardstack import CardStack, Stacks, TransferredCard, StacksInitSizes
+from cardstack import CardStack
+from stacks import Stacks, StacksInitSizes
 from deck import Deck
-from card import Card, TransferredNCards
+from card import Card, TransferredNCards, TransferredCard
 from player import Players
 
 class TableauStack(CardStack):
@@ -16,10 +17,10 @@ class TableauStack(CardStack):
         self._player_num = player_num  # Player number of the stack owner
         self._cards = []  # create the empty stack of cards
         first_card: Card = deck.draw_n_cards(StacksInitSizes.TABLEAU_STACK.value)[0]  # draw the first card from the deck
-        if self.size != StacksInitSizes.TABLEAU_STACK.value:
-            raise ValueError(f"Error: The {self.what_stack_am_i} deck should have {StacksInitSizes.TABLEAU_STACK.value} cards, but it has {len(self._cards)} cards")
         first_card.turn_face_up() # turn the first card face up
         self._cards.append(first_card)  # add the first card to the stack
+        if self.size != StacksInitSizes.TABLEAU_STACK.value:
+            raise ValueError(f"Error: The {self.what_stack_am_i} deck should have {StacksInitSizes.TABLEAU_STACK.value} cards, but it has {len(self._cards)} cards")
         self._selected_cards = []  # create the empty list of selected cards
 
     @property
