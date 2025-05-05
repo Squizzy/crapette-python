@@ -3,6 +3,7 @@ from card import Card, TransferredCard
 from player import Players
 from gamestates import GameStates, PlayersGameState
 
+# Generic stack class from which all the stacks that hold cards inherit.
 
 class CardStack:
     _cards: list[Card]
@@ -75,6 +76,15 @@ class CardStack:
         if self.is_empty:
             print(f"No card on {self.what_stack_am_i} stack")
             return None
+        
+        # No player can draw fromm a bin or foundation stack
+        if self.what_stack_am_i in [Stacks.BIN, Stacks.FOUNDATION_STACK]:
+            return None
+        
+        # Only the owner can draw from his own crapette or remainder stack
+        if self.what_stack_am_i in [Stacks.CRAPETTE, Stacks.REMAINDER]:
+            if drawing_player != self.is_player:
+                return None
         
         try:
             # create the transferred card
