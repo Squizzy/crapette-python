@@ -69,7 +69,7 @@ class TableauStack(CardStack):
         #If the bottom card of the proposed cards can be added (bottom_card is of format transferred_card)
         #   then add all the cards to the stack
         if self.can_be_added(proposed_cards.bottom_card):
-            for transferred_card in proposed_cards.cards:
+            for transferred_card in proposed_cards.transferred_cards:
                 self.add_card(transferred_card)
             return True
         return False
