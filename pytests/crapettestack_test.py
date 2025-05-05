@@ -7,11 +7,11 @@ from deck import Deck
 from player import Players
 from stacks import Stacks
 
-from samples import card_8H, card_9H, card_10H, card_7D, card_7S, card_7H 
-from samples import card_7H_transferred_1c1, card_7H_transferred_1c2, card_7H_transferred_2c1, card_7H_transferred_1t1, card_7H_transferred_2t1
-from samples import card_9H_transferred_1c1, card_10H_transferred_1c1
-from samples import card_7D_transferred_1c1
-from samples import card_7S_transferred_1c1
+from pytests.samples import card_8H, card_9H, card_10H, card_7D, card_7S, card_7H 
+from pytests.samples import card_7H_transferred_1c1, card_7H_transferred_1c2, card_7H_transferred_2c1, card_7H_transferred_1t1, card_7H_transferred_2t1
+from pytests.samples import card_9H_transferred_1c1, card_10H_transferred_1c1
+from pytests.samples import card_7D_transferred_1c1
+from pytests.samples import card_7S_transferred_1c1
 
 
 from icecream import ic #type:ignore
