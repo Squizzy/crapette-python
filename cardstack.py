@@ -64,7 +64,7 @@ class CardStack:
             return True
         return False
      
-        def draw_top_card(self, drawing_player: Players) -> TransferredCard | None:
+    def draw_top_card(self, drawing_player: Players) -> TransferredCard | None:
         """Draw the top card from the pack (but leaves it there)
         if the pile is empty or there is a problem drawing out a card, returns None.
         The drawn card is left on the crapette stack and will need to be removed with remove_card once it has been placed on another stack
