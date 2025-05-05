@@ -4,6 +4,7 @@ sys.path.append('.')
 
 from card import Card, TransferredCard #, Rank, Suit, 
 from deck import Deck
+from stacks import Stacks
 from samples import random_stacked_cards
 from player import Players
 from icecream import ic #type:ignore
@@ -25,15 +26,16 @@ def test_constructor():
     ic(remainder.what_stack_am_i)
     ic(remainder.top_card)
 
-    assert remainder.what_stack_am_i == "Remainder"
+    assert remainder.what_stack_am_i == Stacks.REMAINDER
     assert remainder.size == 52 - 13 - 4
     assert not remainder.top_card.face_up
     
     
 def test_draw_top_card() -> None:
     # card: Card|None = remainder.draw_top_card()
-    card: TransferredCard|None = remainder.draw_top_card(Players.PLAYER1)
-    assert card == remainder.top_card
+    drawn_card: TransferredCard|None = remainder.draw_top_card(Players.PLAYER1)
+    assert drawn_card is not None
+    assert drawn_card.card == remainder.top_card
     
     tempStack: list[Card] = remainder._cards
     remainder._cards  = []
