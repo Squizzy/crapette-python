@@ -1,7 +1,7 @@
-from cardstack import CardStack, TransferredCard
+from cardstack import CardStack
 from stacks import Stacks, StacksInitSizes
 from deck import Deck
-from card import Card
+from card import Card, TransferredCard
 from player import Players
 
 class CrapetteStack(CardStack):
