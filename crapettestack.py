@@ -85,20 +85,20 @@ class CrapetteStack(CardStack):
         
         # return False
     
-    def add_card(self, proposed_card:TransferredCard) -> bool: 
-        """ Add a card to the Crapette Stack after checking it can be added
+    # def add_card(self, proposed_card:TransferredCard) -> bool: 
+    #     """ Add a card to the Crapette Stack after checking it can be added
 
-        Args: 
-            proposed_card(Transferred_Card): the card to be added
+    #     Args: 
+    #         proposed_card(Transferred_Card): the card to be added
 
-        Returns: 
-            True if the card was added, False if card was not added
-        """
-        if self.can_be_added(proposed_card):
-            proposed_card.card.turn_face_up()
-            self._cards.append(proposed_card.card)
-            return True
-        return False
+    #     Returns: 
+    #         True if the card was added, False if card was not added
+    #     """
+    #     if self.can_be_added(proposed_card):
+    #         proposed_card.card.turn_face_up()
+    #         self._cards.append(proposed_card.card)
+    #         return True
+    #     return False
     
     
     
