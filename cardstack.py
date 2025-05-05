@@ -1,7 +1,7 @@
 from stacks import Stacks
 from card import Card, TransferredCard
 from player import Players
-
+from gamestates import GameStates, PlayersGameState
 
 
 class CardStack:
@@ -90,6 +90,20 @@ class CardStack:
         
         if self.size > 0:
             self.top_card.turn_face_up()
+            
+        if self.size == 0:
+            flag: GameStates.Player
+            match self.what_stack_am_i:
+                case Stacks.CRAPETTE:
+                    flag = GameStates.Player.CRAPETTE_IS_EMPTY
+                case Stacks.REMAINDER:
+                    flag = GameStates.Player.REMAINDER_IS_EMPTY
+                # NOTE: It is not possible to pick from the bin so this is not set here
+                # TODO: Add Tableau and Foundation stacks if needed
+                case _:
+                    pass
+            if flag in [GameStates.Player.CRAPETTE_IS_EMPTY, GameStates.Player.REMAINDER_IS_EMPTY]:
+                PlayersGameState.set_player_flag(self.is_player, flag)
             
         return True
         
