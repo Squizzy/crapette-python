@@ -51,7 +51,14 @@ class CardStack:
         return False
 
     def add_card(self, transferred_card: TransferredCard) -> bool:
-        
+        """Add a card to the Stack, if the Stack allows it.
+
+        Args:
+            transferred_card (TransferredCard): The card to be added
+
+        Returns:
+            bool: True if the card was added, False if it was not
+        """        
         if self.can_be_added(transferred_card):
             self._cards.append(transferred_card.card)
             return True
@@ -75,16 +82,7 @@ class CardStack:
         if self.is_empty:
             return False
         
-try:/*************  ✨ Windsurf Command ⭐  *************/
-        """Add a card to the Stack, if the Stack allows it.
-
-        Args:
-            transferred_card (TransferredCard): The card to be added
-
-        Returns:
-            bool: True if the card was added, False if it was not
-        """
-/*******  a9c5df7e-4d82-4523-8941-5bece34a4f59  *******/
+        try:
             self._cards.pop()
         except Exception as e:
             print(f"Error {e} removing a card from the {self.what_stack_am_i} stack")
