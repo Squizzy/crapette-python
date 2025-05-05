@@ -179,8 +179,12 @@ class TransferredNCards:
         return self._transferred_cards[0]._from_stack_owner
     
     @property
-    def cards(self) -> list[TransferredCard]:
+    def transferred_cards(self) -> list[TransferredCard]:
         return self._transferred_cards
+    
+    @property
+    def cards(self) -> list[Card]:
+        return [transferred_card.card for transferred_card in self._transferred_cards]
     
     @property
     def bottom_card(self) -> TransferredCard:
