@@ -1,6 +1,8 @@
 from enum import Flag, auto
 from player import Players
 
+# The flags representing the game states
+
 class GameStates(Flag):
     """The various states of the game."""
     # General Game States
@@ -27,6 +29,8 @@ class GameStates(Flag):
         # TODO: the BIN_IS_EMPTY flag needs to be set
         PLAYER_MOVED_BIN_CARDS_TO_REMAINDER = auto() 
 
+
+# The class maintaining the state of the game for the players.
 class PlayersGameState:
     """Maintains the state of the game for the players.
     The class does not need to be instantiated, 

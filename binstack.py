@@ -4,6 +4,8 @@ from stacks import Stacks, StacksInitSizes
 from player import Players
 from gamestates import PlayersGameState, GameStates
 
+# The class representing the player's bin object
+
 class BinStack(CardStack):
     _stack_name: Stacks
     _cards: list[Card]

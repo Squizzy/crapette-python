@@ -1,8 +1,8 @@
 from enum import Enum
-# from cardstack import Stacks
 from stacks import Stacks
 from player import Players
 
+# the enum representing the card suits
 class Suit(Enum):
     CLUBS = "Clubs"
     HEARTS = "Hearts"
@@ -15,6 +15,7 @@ class Suit(Enum):
             return "red"
         return "black"
     
+# the enum representing the card values
 class Rank(Enum):
     ACE = 1
     TWO = 2
@@ -44,6 +45,8 @@ class Rank(Enum):
             return "King"
         return str(self.value)
 
+
+# The class representing the card object
 class Card:
     _rank: Rank
     _suit: Suit

@@ -4,6 +4,8 @@ from deck import Deck
 from card import Card, TransferredNCards, TransferredCard
 from player import Players
 
+# the class representing one tableau stack object in the game
+
 class TableauStack(CardStack):
     _stack_name: Stacks
     _cards: list[Card]
@@ -23,9 +25,9 @@ class TableauStack(CardStack):
             raise ValueError(f"Error: The {self.what_stack_am_i} deck should have {StacksInitSizes.TABLEAU_STACK.value} cards, but it has {len(self._cards)} cards")
         self._selected_cards = []  # create the empty list of selected cards
 
-    @property
-    def cards(self) -> list[Card]:
-        return self._cards
+    # @property
+    # def cards(self) -> list[Card]:
+    #     return self._cards
 
     def position_in_stack(self, card) -> int | None:
         if card in self._cards:

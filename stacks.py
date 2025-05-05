@@ -1,5 +1,6 @@
 from enum import Enum
 
+# The enum representing the various stacks in the game
 class Stacks(Enum):
     """The various stacks in the game."""
     DECK = "Deck"
@@ -12,6 +13,7 @@ class Stacks(Enum):
     TABLEAU = "Tableau"
     FOUNDATION = "Foundation"
 
+# The enum represeting the number of cards (or stacks) per stack at initialisatio 
 class StacksInitSizes(Enum):
     """The number of cards in each stack at the start of the initialised game."""
     DECK = 52  # 52 cards in the deck

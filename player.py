@@ -1,5 +1,6 @@
 from enum import Enum
 
+# The enum representing the players
 class Players(Enum):
     PLAYER1 = 0,
     PLAYER2 = 1,
