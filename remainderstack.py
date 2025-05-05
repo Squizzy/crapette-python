@@ -1,8 +1,9 @@
 from cardstack import CardStack
 from stacks import Stacks, StacksInitSizes
 from player import Players
-from card import Card
+from card import Card, TransferredCard
 from deck import Deck
+from gamestates import GameStates, PlayersGameState
 
 class RemainderStack(CardStack):
     _stack_name: Stacks
@@ -18,6 +19,7 @@ class RemainderStack(CardStack):
         self._cards = deck.draw_remaining_cards()  # draw the remaining cards from the deck
         if len(self._cards) != StacksInitSizes.REMAINDER.value:  # check the number of cards in the stack
             raise ValueError(f"Error: The {self.what_stack_am_i} deck should have {StacksInitSizes.REMAINDER.value} cards, but it has {self.size} cards")
+        PlayersGameState.clear_player_flag(player_num = player_num, flag = GameStates.Player.REMAINDER_IS_EMPTY)  # set the player state for the player who owns the stack
     
     def reload_from_binstack(self, binstack_cards: list[Card]) -> bool:
         """Reloads the Remainder stack from the Bin stack.
@@ -34,9 +36,50 @@ class RemainderStack(CardStack):
         if self.size != 0:
             return False
         
-        new_stack: list[Card] = binstack_cards
-        new_stack.reverse()
-        for card in new_stack:
+        # new_stack: list[Card] = binstack_cards
+        # new_stack.reverse()
+        # for card in new_stack:
+        for card in reversed(binstack_cards):
             card.turn_face_down()
             self._cards.append(card)
+        PlayersGameState.clear_player_flag(self.is_player, flag = GameStates.Player.REMAINDER_IS_EMPTY)  # set the player state for the player who owns the stack
+        PlayersGameState.set_player_flag(self.is_player, flag = GameStates.Player.PLAYER_MOVED_BIN_CARDS_TO_REMAINDER)  # set the player state for the player who owns the stack
         return True
+    
+    def can_be_added(self, transferred_card: TransferredCard) -> bool:
+        """The remainder stack can only receive cards at initialisation and when refilling from the binstack
+        A player cannot add cards to it.
+        This stack cannot make use of the "add_card" or "add_n_cards" methods
+
+        Args:
+            transferred_card (TransferredCard): the card proposed to be added
+
+        Returns:
+            bool: False
+        """
+        return False
+    
+    def add_card(self, transferred_card: TransferredCard) -> bool:
+        """The remainder stack can only receive cards at initialisation and when refilling from the binstack
+        A player cannot add cards to it.
+        If a player has lifted a card, and cancels, then this card goes to the bin stack.
+        Otherwise, the addition returns null
+
+        Args:
+            transferred_card (TransferredCard): the card proposed to be added
+
+        Returns:
+            bool: True if can comes from this stack AND HAS BEEN PLACED ON THE BIN, otherwise false
+        """
+        
+        # If player puts his remainder card on the remainder deck
+        # Then it needs to go to the bin stack
+        # TODO: Make sure that the flag is unset by the binstack once the card is placed on the bin stack
+        if transferred_card.from_player == self.is_player and \
+               transferred_card.from_stack_name == Stacks.REMAINDER and\
+               transferred_card.from_stack_owner == self.is_player:
+            PlayersGameState.set_player_flag(self.is_player, GameStates.Player.PLAYER_BINS_REMAINDER_CARD)
+            return True
+
+        return False
+    
