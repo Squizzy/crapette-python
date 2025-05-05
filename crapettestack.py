@@ -1,4 +1,5 @@
-from cardstack import CardStack, TransferredCard, Stacks, StacksInitSizes
+from cardstack import CardStack, TransferredCard
+from stacks import Stacks, StacksInitSizes
 from deck import Deck
 from card import Card
 from player import Players
@@ -34,6 +35,10 @@ class CrapetteStack(CardStack):
         # If there is no card on the crapette size, 
         #   then no more card can be added
         if self.size == 0:
+            return False
+        
+        if not proposed_card.card.is_same_family(self.top_card) or \
+           not proposed_card.card.is_one_above_or_below(self.top_card):
             return False
         
         # If the card is being played by the player
