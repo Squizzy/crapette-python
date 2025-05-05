@@ -1,8 +1,11 @@
 # from card import Card, Rank, Suit
-# from deck import Deck
+from deck import Deck
 # from crapettestack import CrapetteStack
-# from tableaustacks import TableauStacks
-# from player import Players
+from tableaustacks import TableauStacks
+from player import Players
+# from samples import deck
+
+deck = Deck(Players.PLAYER1)
 
 # player_num = 1
 
@@ -75,3 +78,4 @@
 # print(tableau._TableauStacks[2]._cards[0])
 # print(tableau._TableauStacks[3]._cards[0])
 
+# tableau = TableauStacks(deck, Players.CARDSTACK)
