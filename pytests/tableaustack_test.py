@@ -3,13 +3,20 @@ sys.path.append('..')
 sys.path.append('.')
 
 from icecream import ic #type:ignore
+# import pytest
 
 from card import Card #, Rank, Suit
 from deck import Deck
 from player import Players
+from stacks import Stacks
 
 from samples import card_8H, card_9H, card_10H, card_7D, card_7S, card_8S, card_9S, card_QS
-# import pytest
+from samples import card_7H_transferred_1c1, card_7H_transferred_1c2, card_7H_transferred_2c1, card_7H_transferred_1t1, card_7H_transferred_2t1
+from samples import card_9H_transferred_1c1, card_10H_transferred_1c1
+from samples import card_7D_transferred_1c1
+from samples import card_7S_transferred_1c1, card_8S_transferred_1c1, card_QS_transferred_1c1
+from samples import transferredNCards_9S_8H_7S
+
 
 from tableaustack import TableauStack
 # player_num: int = 1
@@ -50,7 +57,7 @@ def test_tableau_constructor():
     ic(tableau.what_stack_am_i)
     ic(tableau.top_card)
 
-    assert tableau.what_stack_am_i == "Tableau" 
+    assert tableau.what_stack_am_i == Stacks.TABLEAU_STACK
     assert not tableau.is_empty 
     assert type(tableau.top_card) is Card
     assert tableau.top_card.face_up
@@ -64,18 +71,18 @@ def test_top_card():
 
 def test_tableau_adder_rules():
     tableau.force_add_card(card_8H)
-    assert not tableau.can_be_added(card_8S, player_num=Players.PLAYER1) # same rank, should fail
-    assert not tableau.can_be_added(card_9H, player_num=Players.PLAYER1) # same suit, should fail
-    assert not tableau.can_be_added(card_QS, player_num=Players.PLAYER1) # rank far away, should fail
-    assert not tableau.can_be_added(card_9S, player_num=Players.PLAYER1) # rank above, should fail
-    assert not tableau.can_be_added(card_7D, player_num=Players.PLAYER1) # rank below but same colour, should fail
-    assert tableau.can_be_added(card_7S, player_num=Players.PLAYER1) # rank below, opposite colour, should pass
+    assert not tableau.can_be_added(card_8S_transferred_1c1) # same rank, should fail
+    assert not tableau.can_be_added(card_9H_transferred_1c1) # same suit, should fail
+    assert not tableau.can_be_added(card_QS_transferred_1c1) # rank far away, should fail
+    assert not tableau.can_be_added(card_9H_transferred_1c1) # rank above, should fail
+    assert not tableau.can_be_added(card_7D_transferred_1c1) # rank below but same colour, should fail
+    assert tableau.can_be_added(card_7S_transferred_1c1) # rank below, opposite colour, should pass
 
 def test_add_card():
     # top card is 8H
-    assert not tableau.add_card(card_7D, player_num=Players.PLAYER1)
-    assert not tableau.add_card(card_9H, player_num=Players.PLAYER1)
-    assert tableau.add_card(card_7S, player_num=Players.PLAYER1)
+    assert not tableau.add_card(card_7D_transferred_1c1)
+    assert not tableau.add_card(card_9H_transferred_1c1)
+    assert tableau.add_card(card_7S_transferred_1c1)
     assert tableau.top_card == card_7S
 
 def test_remove_card() -> None:
@@ -121,5 +128,6 @@ def test_add_n_cards():
     ic(tableau1._selected_cards[1])
     ic(tableau1._selected_cards[2])
     # add_worked = tableau1.add_n_cards(tableau1._selected_cards)
-    assert tableau1.add_n_cards(tableau1._selected_cards, player_num=Players.PLAYER1)
+    # assert tableau1.add_n_cards(tableau1.selected_cards)
+    assert tableau1.add_n_cards(transferredNCards_9S_8H_7S)
     assert tableau1.size == 7
