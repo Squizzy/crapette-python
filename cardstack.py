@@ -64,15 +64,36 @@ class CardStack:
             return True
         return False
      
-    def force_add_card(self, card: Card) -> None:
-        """Force add a card, for debug purpose
+        def draw_top_card(self, drawing_player: Players) -> TransferredCard | None:
+        """Draw the top card from the pack (but leaves it there)
+        if the pile is empty or there is a problem drawing out a card, returns None.
+        The drawn card is left on the crapette stack and will need to be removed with remove_card once it has been placed on another stack
 
-        Args:
-            card (Card): The card to add
+        Returns:
+            Card: the top card if the card could be drawn, otherwise none
         """
-        card.turn_face_up()
-        self._cards.append(card)
+        if self.is_empty:
+            print(f"No card on {self.what_stack_am_i} stack")
+            return None
+        
+        try:
+            # create the transferred card
+            drawn_card: TransferredCard = TransferredCard(#= TransferredCard()
+            from_player = drawing_player,
+            from_stack_name = self.what_stack_am_i,
+            from_stack_owner = self._player_num,
+            card = self._cards[len(self._cards) - 1]
+            )
+            
+            # Always turn a card picked face up
+            drawn_card.card.turn_face_up()  
 
+        except Exception as e:
+            print(f"error {e}: Could not draw card from {self._stack_name} stack")
+            return None
+        
+        return drawn_card
+    
     def remove_top_card(self) -> bool:
         """Remove (delete) the top card from the Stack
 
@@ -106,33 +127,14 @@ class CardStack:
                 PlayersGameState.set_player_flag(self.is_player, flag)
             
         return True
-        
-    def draw_top_card(self, drawing_player: Players) -> TransferredCard | None:
-        """Draw the top card from the pack (but leaves it there)
-        if the pile is empty or there is a problem drawing out a card, returns None.
-        The drawn card is left on the crapette stack and will need to be removed with remove_card once it has been placed on another stack
+    
+    # FOR DEBUG PURPOSE ONLY:    
+    def force_add_card(self, card: Card) -> None:
+        """Force add a card, for debug purpose
 
-        Returns:
-            Card: the top card if the card could be drawn, otherwise none
+        Args:
+            card (Card): The card to add
         """
-        if self.is_empty:
-            print(f"No card on {self.what_stack_am_i} stack")
-            return None
-        
-        try:
-            # create the transferred card
-            drawn_card: TransferredCard = TransferredCard(#= TransferredCard()
-            from_player = drawing_player,
-            from_stack_name = self.what_stack_am_i,
-            from_stack_owner = self._player_num,
-            card = self._cards[len(self._cards) - 1]
-            )
-            
-            # Always turn a card picked face up
-            drawn_card.card.turn_face_up()  
+        card.turn_face_up()
+        self._cards.append(card)
 
-        except Exception as e:
-            print(f"error {e}: Could not draw card from {self._stack_name} stack")
-            return None
-        
-        return drawn_card
