@@ -74,7 +74,7 @@ class CardStack:
         self._cards.append(card)
 
     def remove_top_card(self) -> bool:
-        """Remove the top card from the Stack
+        """Remove (delete) the top card from the Stack
 
         Returns:
             bool: True if the card was removed, False if no card was removed
@@ -106,14 +106,16 @@ class CardStack:
             return None
         
         try:
+            # create the transferred card
             drawn_card: TransferredCard = TransferredCard(#= TransferredCard()
             from_player = drawing_player,
             from_stack_name = self.what_stack_am_i,
             from_stack_owner = self._player_num,
             card = self._cards[len(self._cards) - 1]
-            # drawn_card:Card = self._cards[len(self._cards) - 1]
-            # self._drawn_card = drawn_card
             )
+            
+            # Always turn a card picked face up
+            drawn_card.card.turn_face_up()  
 
         except Exception as e:
             print(f"error {e}: Could not draw card from {self._stack_name} stack")
