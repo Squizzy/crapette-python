@@ -1,4 +1,5 @@
-from cardstack import CardStack, Stacks, StacksInitSizes
+from cardstack import CardStack
+from stacks import Stacks, StacksInitSizes
 from player import Players
 from card import Card
 from deck import Deck
