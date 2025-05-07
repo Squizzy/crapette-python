@@ -15,7 +15,7 @@ class Game:
         
         
     @property
-    def player_turn(self) -> Player:
+    def player_turn(self) -> Players:
         return self._player_turn
         
     def change_turn(self) -> None:
@@ -28,7 +28,8 @@ class Game:
             
             if GameStates.Player.PLAYER_BINS_REMAINDER_CARD:
                 if self.player_turn == Players.PLAYER1:
-                    self._player1._bin.add_card(Players.PLAYER1, self._player1._remainder.)
+                    # self._player1._bin.add_card(Players.PLAYER1, self._player1._remainder)
+                    ...
                 
 
 if __name__ == "__main__":
