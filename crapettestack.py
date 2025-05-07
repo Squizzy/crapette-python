@@ -1,9 +1,10 @@
-from cardstack import CardStack, TransferredCard
+from cardstack import CardStack
 from stacks import Stacks, StacksInitSizes
 from deck import Deck
-from card import Card
+from card import Card, TransferredCard
 from player import Players
 
+# The class representing the player's crapette stack object
 class CrapetteStack(CardStack):
     _stack_name: Stacks
     _cards: list[Card] # probably redundant as defined in cardstack
@@ -85,20 +86,20 @@ class CrapetteStack(CardStack):
         
         # return False
     
-    def add_card(self, proposed_card:TransferredCard) -> bool: 
-        """ Add a card to the Crapette Stack after checking it can be added
+    # def add_card(self, proposed_card:TransferredCard) -> bool: 
+    #     """ Add a card to the Crapette Stack after checking it can be added
 
-        Args: 
-            proposed_card(Transferred_Card): the card to be added
+    #     Args: 
+    #         proposed_card(Transferred_Card): the card to be added
 
-        Returns: 
-            True if the card was added, False if card was not added
-        """
-        if self.can_be_added(proposed_card):
-            proposed_card.card.turn_face_up()
-            self._cards.append(proposed_card.card)
-            return True
-        return False
+    #     Returns: 
+    #         True if the card was added, False if card was not added
+    #     """
+    #     if self.can_be_added(proposed_card):
+    #         proposed_card.card.turn_face_up()
+    #         self._cards.append(proposed_card.card)
+    #         return True
+    #     return False
     
     
     
