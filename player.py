@@ -29,7 +29,7 @@ class Player:
         deck = Deck(player_num)
         self._crapette = CrapetteStack(deck, player_num)
         self._remainder = RemainderStack(deck, player_num)
-        self._bin = BinStack(deck, player_num)
+        self._bin = BinStack(player_num)
         self._tableau = TableauStacks(deck, player_num)
         self._foundation = FoundationStacks(deck, player_num)
         
