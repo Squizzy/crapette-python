@@ -23,7 +23,7 @@ class StackPositions:
     _y: int
     # _name: str
 
-    def init(self, x: int, y: int) -> None:
+    def __init__(self, x: int, y: int) -> None:
         if  x < 0 or \
             y < 0 or \
             x > (GAME_WIDTH - card_game_width) or\
@@ -154,7 +154,8 @@ def load_card_faces():
 
 def place_stacks(surface: pygame.Surface):
     for stack in stacks_positions:
-        blit_blank = card_faces["EC"] if stacks_positions[stack][2] else pygame.transform.rotate(card_faces["EC"], 90)
+        blit_blank = card_faces["EC"] if stacks_positions[stack][2] \
+            else pygame.transform.rotate(card_faces["EC"], 90)
         pygame.Surface.set_colorkey(blit_blank, (255, 255, 255))
         surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
 
