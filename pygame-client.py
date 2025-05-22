@@ -102,7 +102,7 @@ stacks_positions: dict[str, tuple[int, int, bool]] = {
 
 
 card_faces: dict[str, pygame.Surface] = {}
-clock: pygame.time
+clock: pygame.time.Clock = pygame.time.Clock()
 
 def pygame_init():
     # Initialise pygame
@@ -113,8 +113,6 @@ def pygame_init():
 def window_init() -> pygame.Surface:
     # Set up the game window
     surface: pygame.Surface = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT)) #, pygame.RESIZABLE)
-    # screen = pygame.display.set_mode()
-    # print(f"{screen.get_size()=}")
 
     # Set title of window
     pygame.display.set_caption("pygame title")
@@ -122,11 +120,30 @@ def window_init() -> pygame.Surface:
     # Set icon if window
     pygame.display.set_icon(GAME_ICON)
 
-    # color = FELT_GREEN
     # Changing the surface colour
     surface.fill(FELT_GREEN)
-    # pygame.display.flip()
     return surface
+
+def server_get_stacks_cards():
+    
+def player_stacks_init(player: int):
+
+    # create the stacks dictionary
+    stacks_cards = {
+        "player_crapette":      [],
+        "player_remainder":     [],
+        "player_bin":           [],
+        "player_tableau":       [],
+        "player_foundation":    [],
+        "opponent_crapette":    [],
+        "opponent_remainder":   [],
+        "opponent_bin":         [],
+        "opponent_tableau":     [],
+        "opponent_foundation":  [],
+    }
+    
+    server_stacks_cards = server_get_stacks_cards()
+    return stacks
 
 
 def load_card_faces():
@@ -137,36 +154,40 @@ def load_card_faces():
     # Get all SVG files in the directory
     svg_files = [f for f in os.listdir(card_faces_images_dir) if f.endswith('.svg')]
     for card in svg_files:
-        # print(card)
+        # Load the card face into the card_faces dictionary
         card_faces[card[0] + card[1]] = pygame.image.load(card_faces_images_dir + "/" + card)
 
-    # print(card_faces.keys)
     # add back_blue, back_red, empty_card
     card_faces["BB"] = pygame.image.load(card_faces_images_dir + "/BB.png")
     card_faces["BR"] = pygame.image.load(card_faces_images_dir + "/BR.png")
     card_faces["EC"] = pygame.image.load(card_faces_images_dir + "/EC.png")
-    pygame.Surface.set_colorkey(card_faces["EC"], (255, 255, 255))
 
     for card in card_faces:
+        # Convert the card faces to a surface
         card_faces[card].convert()
+        # Scale the card faces to the game size
         card_faces[card] = pygame.transform.smoothscale(card_faces[card], (card_game_width, card_game_height))
+
+    # Make the EC card transparent
+    card_faces["EC"].set_colorkey(card_faces["EC"].get_at((50,50)))
 
 
 def place_stacks(surface: pygame.Surface):
     for stack in stacks_positions:
         blit_blank = card_faces["EC"] if stacks_positions[stack][2] \
-            else pygame.transform.rotate(card_faces["EC"], 90)
-        pygame.Surface.set_colorkey(blit_blank, (255, 255, 255))
+            else pygame.transform.rotate(card_faces["EC"].copy(), 90)
+
         surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
 
+def update_stacks(surface: pygame.Surface):
 
 def game_loop(surface: pygame.Surface):
     # clock = pygame.time.Clock()
 
     blit_card = card_faces["HQ"]
-    blit_card_width = card_faces["HQ"].get_width()
-    blit_card_height = card_faces["HQ"].get_height()
-    blit_card_angle = 0
+    # blit_card_width = card_faces["HQ"].get_width()
+    # blit_card_height = card_faces["HQ"].get_height()
+    # blit_card_angle = 0
 
     rect: pygame.Rect = blit_card.get_rect()
     # rect: pygame.Rect = card_faces["HQ"].get_rect()
@@ -223,7 +244,8 @@ def game_loop(surface: pygame.Surface):
         # surface.blit(card_faces["EC"], (120, 120))
 
         # update the window
-        pygame.display.update()
+        # pygame.display.update()
+        pygame.display.flip()
         pygame.time.delay(100)
 
         # clock.tick(3000)
