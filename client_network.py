@@ -1,6 +1,6 @@
 import socket
 import time
-from icecream import ic
+from icecream import ic # type: ignore
 class ClientConnection:
     # _client_ip: str
     # _client_port: int
