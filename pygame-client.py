@@ -1,24 +1,31 @@
 import pygame
 
+# dimensions of the game window
 GAME_WIDTH: int = 1024
 GAME_HEIGHT: int = 768
+
+# icon of the game
 GAME_ICON: pygame.Surface = pygame.image.load("img/two_backs_256x256.png")
 
-# Initialiasing background colour
-FELT_GREEN = (0, 96, 0) # felt dark green colour
-FELT_RED = (96, 0, 0)
-FELT_BLUE = (0, 0, 96)
-YELLOW = (255, 255, 0)
+# Initialising background colours
+FELT_GREEN = (0, 96, 0) # felt dark green 
+FELT_RED = (96, 0, 0) # felt dark red 
+FELT_BLUE = (0, 0, 96) # felt dark blue 
+YELLOW = (255, 255, 0) # yellow 
 
-# size of the image files - objective value based on the graphics files used for th game
+# dimensions of the image files - objective value based on the graphics files used for th game
 card_img_height: int = 333
 card_img_width: int = 234
-card_scale: float = GAME_HEIGHT / 7  # Assuming landscape mode is used
-card_game_height: int = int(card_scale)
+
+card_scale_landscape: float = GAME_HEIGHT / 7  # Assuming landscape mode is used - might have to adjust using GAME_WIDTH if portrait mode is used?
+# card_scale_portrait: float = GAME_WIDTH / 7 ## Value not verified or used yet
+
+# desired dimension of the images on the screen
+card_game_height: int = int(card_scale_landscape)
 card_game_width: int = int(card_img_width * card_game_height / card_img_height)
 
 
-class StackPositions:
+class StacksPositions:
     _x: int
     _y: int
     # _name: str
@@ -125,6 +132,8 @@ def window_init() -> pygame.Surface:
     return surface
 
 def server_get_stacks_cards():
+    #TODO: Implement the server_get_stacks_cards function - use get_stacks_cards_from_server() instead?
+    ...
     
 def player_stacks_init(player: int):
 
@@ -143,7 +152,8 @@ def player_stacks_init(player: int):
     }
     
     server_stacks_cards = server_get_stacks_cards()
-    return stacks
+    # TODO: convert the server_stacks_cards to the stacks_cards dictionary
+    return stacks_cards
 
 
 def load_card_faces():
@@ -180,6 +190,8 @@ def place_stacks(surface: pygame.Surface):
         surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
 
 def update_stacks(surface: pygame.Surface):
+    #TODO: Implement the update_stacks function
+    ...
 
 def game_loop(surface: pygame.Surface):
     # clock = pygame.time.Clock()
