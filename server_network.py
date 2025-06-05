@@ -1,6 +1,6 @@
 import socket
 import time
-from icecream import ic
+from icecream import ic # type: ignore
 
 class ServerConnection:
     _server_ip: str
@@ -55,6 +55,7 @@ class ServerConnection:
             print(f"Server received {data!r}")
             # self._client_socket.sendall(data)
             return data
+        return b""
 
     def listen_for_requests(self):
         ic("listening for requests")
