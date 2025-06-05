@@ -60,8 +60,8 @@ class GameState:
 class Cards:
     _cards_faces: dict[str, pygame.Surface]
     _originally_loaded_cards_faces: dict[str, pygame.Surface]
-    _card_width: int
-    _card_height: int
+    _width: int
+    _height: int
     
     def __init__(self, screen_height: int = GAME_HEIGHT) -> None:
         self._cards_faces = {}
@@ -70,16 +70,16 @@ class Cards:
         self.scale_cards_faces(screen_height)
         
     @property
-    def card_faces(self) -> dict[str, pygame.Surface]:
+    def faces(self) -> dict[str, pygame.Surface]:
         return self._cards_faces
     
     @property
-    def card_width(self) -> int:
-        return self._card_width
+    def width(self) -> int:
+        return self._width
     
     @property
-    def card_height(self) -> int:
-        return self._card_height
+    def height(self) -> int:
+        return self._height
     
     def _load_cards_faces(self) -> None:
         """
@@ -175,8 +175,8 @@ class Cards:
         Returns:
             Nothing
         """
-        self._card_height = screen_height // 7
-        self._card_width = self._card_height * CARD_IMG_WIDTH // CARD_IMG_HEIGHT
+        self._height = screen_height // 7
+        self._width = self._height * CARD_IMG_WIDTH // CARD_IMG_HEIGHT
 
     def scale_cards_faces(self, screen_height: int) -> None:
         """
@@ -187,7 +187,8 @@ class Cards:
         """
         self._scale_cards_dimensions(screen_height)
         
-        for card in self._cards_faces:
+        self._cards_faces = {}
+        for card in self._originally_loaded_cards_faces:
             # Convert the card faces to a surface
             # self._cards_faces[card].convert()
             
@@ -195,7 +196,7 @@ class Cards:
             self._cards_faces[card] = pygame.transform.smoothscale( \
                                         # self._cards_faces[card], 
                                         self._originally_loaded_cards_faces[card], 
-                                        (self.card_width, self.card_height))
+                                        (self.width, self.height))
 
         # Make the EC card transparent
         self._cards_faces["EC"].set_colorkey(self._originally_loaded_cards_faces["EC"].get_at((50,50)))
@@ -205,12 +206,11 @@ class StacksLayout:
     _screen_height: int
     _center_x: int
     _center_y: int
-    _card_width: int
-    _card_height: int
     _margin_x: int
     _margin_y: int
+    _cards:  Cards
     
-    def __init__(self) -> None:
+    def __init__(self, cards: Cards) -> None:
         """
         Initialise the stacks layout
         Calculate the positions of the stacks
@@ -218,12 +218,18 @@ class StacksLayout:
         """
         self._screen_width = GAME_WIDTH
         self._screen_height = GAME_HEIGHT
-        self._card_width = cards.card_width
-        self._card_height = cards.card_height
+        
+        self._cards = cards
+        # self._card_width = cards.card_width
+        # self._card_height = cards.card_height
         # , self._card_height = scaled_cards_dimensions(GAME_HEIGHT)
         
-        self._margin_x = self._card_width // 7
-        self._margin_y = self._card_height // 7
+        # self._margin_x = self._card_width // 7
+        # self._margin_y = self._card_height // 7
+        # self._center_x = self._screen_width // 2
+        # self._center_y = self._screen_height // 2
+        self._margin_x = self._cards.width // 7
+        self._margin_y = self._cards.height // 7
         self._center_x = self._screen_width // 2
         self._center_y = self._screen_height // 2
                 
@@ -243,6 +249,10 @@ class StacksLayout:
         """
         return self._positions
     
+    def set_screen_dimensions(self, screen_width: int, screen_height: int) -> None:
+        self._screen_width = screen_width
+        self._screen_height = screen_height
+        
     def _calculate_positions(self) -> dict[str, tuple[int, int, bool]]:
         """
         Calculate the positions of the stacks
@@ -257,24 +267,24 @@ class StacksLayout:
             
         """
         # x positions (top left corner)
-        player_center_x = self._center_x - self._card_width // 2
-        player_left_x = player_center_x - self._card_width - self._margin_x
-        player_right_x = player_center_x + self._card_width + self._margin_x
+        player_center_x = self._center_x - self._cards.width // 2
+        player_left_x = player_center_x - self._cards.width - self._margin_x
+        player_right_x = player_center_x + self._cards.width + self._margin_x
         player_foundation_x = self._center_x + self._margin_x
-        player_tableau_x = player_foundation_x + self._margin_x + self._card_height
+        player_tableau_x = player_foundation_x + self._margin_x + self._cards.height
         
-        opponent_center_x = self._center_x - self._card_width // 2
-        opponent_left_x = opponent_center_x - self._card_width - self._margin_x
-        opponent_right_x = opponent_center_x + self._card_width + self._margin_x
-        opponent_foundation_x = self._center_x - self._margin_x - self._card_height
-        opponent_tableau_x = opponent_foundation_x - self._margin_x - self._card_width
+        opponent_center_x = self._center_x - self._cards.width // 2
+        opponent_left_x = opponent_center_x - self._cards.width - self._margin_x
+        opponent_right_x = opponent_center_x + self._cards.width + self._margin_x
+        opponent_foundation_x = self._center_x - self._margin_x - self._cards.height
+        opponent_tableau_x = opponent_foundation_x - self._margin_x - self._cards.width
         
         # y positions (top left corner)
-        opponent_y = self._center_y - self._card_height * 3 - int(self._margin_y * 2.5)
-        player_y = self._center_y + self._card_height * 2 + int(self._margin_y * 2.5)
-        tableau_top_y = self._center_y - self._card_height * 2 - int(self._margin_y * 1.5)
-        foundation_top_y = tableau_top_y + (self._card_height - self._card_width) //2
-        tableau_spacing_y = self._card_height + self._margin_y
+        opponent_y = self._center_y - self._cards.height * 3 - int(self._margin_y * 2.5)
+        player_y = self._center_y + self._cards.height * 2 + int(self._margin_y * 2.5)
+        tableau_top_y = self._center_y - self._cards.height * 2 - int(self._margin_y * 1.5)
+        foundation_top_y = tableau_top_y + (self._cards.height - self._cards.width) //2
+        tableau_spacing_y = self._cards.height + self._margin_y
         # foundation_spacing_y = tableau_spacing_y + self._margin_y
         
         opponent_base_stacks_positions: dict[str, tuple[int, int, bool]] = {
@@ -323,7 +333,7 @@ class StacksLayout:
         return stacks_positions
     
     
-    def stacks_reposition_and_resize(self, width: int, height: int):
+    def stacks_reposition_and_resize(self, width: int, height: int, cards: Cards) -> None:
         """
         Resize the screen
         Recalculate the positions of the stacks
@@ -336,15 +346,17 @@ class StacksLayout:
         self._center_y = self._screen_height // 2
         
         # update the card dimensions
-        # self._card_scale = self._screen_height / 7
-        # self._card_width = int(self._card_scale * CARD_IMG_WIDTH)
-        # self._card_height = int(self._card_scale * CARD_IMG_HEIGHT)
-        # self._card_width, self._card_height = scaled_cards_dimensions(self._screen_height)
-        self._card_width = cards.card_width
-        self._card_height = cards.card_height
-        self._margin_x = self._card_width // 7
-        self._margin_y = self._card_height // 7
-        self._calculate_positions()
+        self._cards = cards
+        self._cards.scale_cards_faces(height)
+        # self._card_width = cards.card_width
+        # self._card_height = cards.card_height
+        # self._margin_x = self._card_width // 7
+        # self._margin_y = self._card_height // 7
+        # self._cards.width = cards.width
+        # self._card_height = cards.card_height
+        self._margin_x = self._cards.width // 7
+        self._margin_y = self._cards.height // 7
+        self._positions = self._calculate_positions()
 
 
 card_faces: dict[str, pygame.Surface] = {}
@@ -398,12 +410,21 @@ def player_stacks_init(player: int):
 
 
 
-def place_stacks(surface: pygame.Surface):
-    stacks_positions = StacksLayout().stacks_positions
+def place_stacks(surface: pygame.Surface, stacks_layout: StacksLayout, cards: Cards):
+    stacks_positions = stacks_layout.stacks_positions
+    # stacks_positions = StacksLayout().stacks_positions
+    
+    # for stack in stacks_positions:
+    #     blit_blank = cards.card_faces["EC"] if stacks_positions[stack][2] \
+    #         else pygame.transform.rotate(cards.card_faces["EC"].copy(), 90)
+
+    #     surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
+    
+    # stacks_positions = StacksLayout().stacks_positions
     
     for stack in stacks_positions:
-        blit_blank = cards.card_faces["EC"] if stacks_positions[stack][2] \
-            else pygame.transform.rotate(cards.card_faces["EC"].copy(), 90)
+        blit_blank = cards.faces["EC"] if stacks_positions[stack][2] \
+            else pygame.transform.rotate(cards.faces["EC"].copy(), 90)
 
         surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
 
@@ -411,11 +432,11 @@ def update_stacks(surface: pygame.Surface):
     #TODO: Implement the update_stacks function
     ...
 
-def game_loop(surface: pygame.Surface):
+def game_loop(surface: pygame.Surface, stacks_layout: StacksLayout, cards: Cards):
     
     # clock = pygame.time.Clock()
 
-    blit_card = cards.card_faces["HQ"]
+    blit_card = cards.faces["HQ"]
     # blit_card_width = card_faces["HQ"].get_width()
     # blit_card_height = card_faces["HQ"].get_height()
     # blit_card_angle = 0
@@ -446,13 +467,16 @@ def game_loop(surface: pygame.Surface):
             elif event.type == pygame.MOUSEMOTION and moving:
                 # print(f"Mouse Move: {rect.x=}, {rect.y=}")
                 rect.move_ip(event.rel)
-            elif event.type == pygame.K_q:
+            elif event.type == pygame.K_ESCAPE:
+                print("Key q detected")
                 running = False
                 
             elif  event.type == pygame.VIDEORESIZE:
                 # print(f"Video Resize: {event.size=}")
+                print("redimensioning")
                 surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-                StacksLayout().stacks_reposition_and_resize(event.w, event.h)
+                # stacks_layout.set_screen_dimensions(int(event.w), int(event.h))
+                stacks_layout.stacks_reposition_and_resize(event.w, event.h, cards)
             else:
                 pass
         
@@ -461,7 +485,7 @@ def game_loop(surface: pygame.Surface):
         surface.fill(color)
         
         # place empty cards in the stacks positions
-        place_stacks(surface)
+        place_stacks(surface, stacks_layout, cards)
         
         # Make a circle
         # pygame.draw.circle(surface, (FELT_BLUE), (GAME_WIDTH/2, GAME_HEIGHT/2), 75)
@@ -495,10 +519,11 @@ def game_loop(surface: pygame.Surface):
     pygame.quit()
 
 
-if __name__ in "__main__":
+if __name__ == "__main__":
     pygame_init()
     surface: pygame.Surface = window_init()
     cards: Cards = Cards(GAME_HEIGHT)
+    stacks_layout: StacksLayout = StacksLayout(cards)
     # stacks_cards: dict[str, list[str]] = player_stacks_init(1)
     # load_card_faces()
-    game_loop(surface)
+    game_loop(surface, stacks_layout, cards)
