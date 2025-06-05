@@ -1,11 +1,16 @@
 import pygame
+import os
 
 # dimensions of the game window
 GAME_WIDTH: int = 1024
 GAME_HEIGHT: int = 768
 
 # icon of the game
-GAME_ICON: pygame.Surface = pygame.image.load("img/two_backs_256x256.png")
+IMAGES_DIR: str = os.path.dirname(os.path.abspath(__file__)) + "/img/"
+CARD_FACES_DIR: str = os.path.join(IMAGES_DIR, "card_faces")
+GAME_ICON_FILE: str = os.path.join(IMAGES_DIR, "two_backs_256x256.png")
+GAME_ICON: pygame.Surface = pygame.image.load(GAME_ICON_FILE)
+# GAME_ICON: pygame.Surface = pygame.image.load("img/two_backs_256x256.png")
 
 # Initialising background colours
 FELT_GREEN = (0, 96, 0) # felt dark green 
@@ -13,16 +18,22 @@ FELT_RED = (96, 0, 0) # felt dark red
 FELT_BLUE = (0, 0, 96) # felt dark blue 
 YELLOW = (255, 255, 0) # yellow 
 
-# dimensions of the image files - objective value based on the graphics files used for th game
-card_img_height: int = 333
-card_img_width: int = 234
+# dimensions of the image files
+# objective value based on the graphics files used for th game
+# TODO: this is for the png I am currently using -  eventually might be better to scan all files or store the values in a config file?
+CARD_IMG_HEIGHT: int = 333
+CARD_IMG_WIDTH: int = 234
 
-card_scale_landscape: float = GAME_HEIGHT / 7  # Assuming landscape mode is used - might have to adjust using GAME_WIDTH if portrait mode is used?
-# card_scale_portrait: float = GAME_WIDTH / 7 ## Value not verified or used yet
 
-# desired dimension of the images on the screen
-card_game_height: int = int(card_scale_landscape)
-card_game_width: int = int(card_img_width * card_game_height / card_img_height)
+
+
+    
+# card_scale_landscape: float = GAME_HEIGHT / 7  # Assuming landscape mode is used - might have to adjust using GAME_WIDTH if portrait mode is used?
+# # card_scale_portrait: float = GAME_WIDTH / 7 ## Value not verified or used yet
+
+# # desired dimension of the images on the screen
+# card_game_height: int = int(card_scale_landscape)
+# card_game_width: int = int(CARD_IMG_WIDTH * card_game_height / CARD_IMG_HEIGHT)
 
 
 # Stores a copy of the game state from the server
@@ -46,15 +57,158 @@ class GameState:
         }
         
 
+class Cards:
+    _cards_faces: dict[str, pygame.Surface]
+    _originally_loaded_cards_faces: dict[str, pygame.Surface]
+    _card_width: int
+    _card_height: int
+    
+    def __init__(self, screen_height: int = GAME_HEIGHT) -> None:
+        self._cards_faces = {}
+        self._load_cards_faces()
+        self._cards_faces = self._originally_loaded_cards_faces.copy()
+        self.scale_cards_faces(screen_height)
+        
+    @property
+    def card_faces(self) -> dict[str, pygame.Surface]:
+        return self._cards_faces
+    
+    @property
+    def card_width(self) -> int:
+        return self._card_width
+    
+    @property
+    def card_height(self) -> int:
+        return self._card_height
+    
+    def _load_cards_faces(self) -> None:
+        """
+        Load the card faces into the cards_faces dictionary
+        The cards_faces dictionary is used to store the card faces as self._originally_loaded_cards_faces
+        The rescaling will always come from this dictionary to ensure consistent quality
+
+        Raises:
+            ValueError: If a svg file (card face) is missing
+            ValueError: If a png file (card back or blank) is missing
+            ValueError: If a svg file was not loaded correctly
+            ValueError: If a png file was not loaded correctlty
+            ValueError: If the dictonary ends up with the incorrect number of card faces
+        """
+        
+        # dictionary to store the card faces
+        cards_faces: dict[str, pygame.Surface] = {}
+        
+        # list of the card faces to load
+        play_cards_list: list[str] = ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "CJ", "CQ", "CK",
+                                      "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "DJ", "DQ", "DK",
+                                      "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "HJ", "HQ", "HK",
+                                      "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "SJ", "SQ", "SK"]
+        other_cards_list: list[str] = ["BB", "BR", "EC"]
+        # Get the directory of the script
+        # card_faces_images_dir = os.path.dirname(os.path.abspath(__file__)) + "/img/card_faces"
+        
+        # Get the list of all SVG files in the directory
+        # Currently the card faces only are in SVG format
+        svg_files: list[str] = [f for f in os.listdir(CARD_FACES_DIR) if f.endswith('.svg')]
+        
+        # check that all the card faces files can be found.  (at least as filenames)
+        for card in play_cards_list:
+            if card + ".svg" not in svg_files:
+                raise ValueError(f"Card {card} not found in {CARD_FACES_DIR}")
+        
+        # Get the list of all PNG files in the directory
+        # Currently the card backs and empty card only are in PNG format
+        png_files: list[str] = [f for f in os.listdir(CARD_FACES_DIR) if f.endswith('.png')]
+        for card in other_cards_list:
+            if card + ".png" not in png_files:
+                raise ValueError(f"Card {card} not found in {CARD_FACES_DIR}")
+        
+        # svg_files = [f for f in os.listdir(card_faces_images_dir) if f.endswith('.svg')]
+        # card_name: str
+        for card in play_cards_list:
+            # card_name = card.split(".")[0]            
+            # print(f"Loading card: {card}")
+            # if the card file does not correspond to a card that we want, skip it
+            # if card_name not in play_cards_list:
+            #     print(f"Skipping card: {card_name}")
+            #     continue
+            
+            # Load the card face into the card_faces dictionary
+            try: 
+                # card_faces[card[0] + card[1]] = pygame.image.load(card_faces_images_dir + "/" + card)
+                cards_faces[card] = pygame.image.load(os.path.join(CARD_FACES_DIR, f"{card}.svg"))
+            # except FileNotFoundError:
+            #     raise ValueError(f"Card {card} not found in {CARD_FACES_DIR}")
+            except pygame.error as e:
+                raise ValueError(f"Card {card} not loaded: {e}")
+
+        # add back_blue, back_red, empty_card
+        for card in other_cards_list:
+            try:
+                # for card in other_cards_list:
+                cards_faces[card] = pygame.image.load(os.path.join(CARD_FACES_DIR, f"{card}.png"))
+                # self._cards_faces["BB"] = pygame.image.load(os.path.join(CARD_FACES_DIR, "BB.png"))
+                # self._cards_faces["BR"] = pygame.image.load(os.path.join(CARD_FACES_DIR, "BR.png"))
+                # self._cards_faces["EC"] = pygame.image.load(os.path.join(CARD_FACES_DIR,  "EC.png"))
+                # except FileNotFoundError:
+                #     raise ValueError(f"Card BB, BR  or EC not found in {CARD_FACES_DIR}")
+            except pygame.error as e:
+                raise ValueError(f"Card BB, BR or EC not loaded: {e}")
+        
+        # card_faces["BB"] = pygame.image.load(card_faces_images_dir + "/BB.png")
+        # card_faces["BR"] = pygame.image.load(card_faces_images_dir + "/BR.png")
+        # card_faces["EC"] = pygame.image.load(card_faces_images_dir + "/EC.png")
+            
+        if len(cards_faces) != len(play_cards_list) + len(other_cards_list):
+            raise ValueError(f"card images problem: only {len(cards_faces)} cards loaded, expected {len(play_cards_list) + len(other_cards_list)}")
+
+        # Convert each card faces to a surface
+        for card in cards_faces:
+            cards_faces[card].convert()
+
+        self._originally_loaded_cards_faces = cards_faces.copy()
+    
+    def _scale_cards_dimensions(self, screen_height: int) -> None:
+        """
+        Calculate the scaled dimensions of the cards
+        
+        Returns:
+            Nothing
+        """
+        self._card_height = screen_height // 7
+        self._card_width = self._card_height * CARD_IMG_WIDTH // CARD_IMG_HEIGHT
+
+    def scale_cards_faces(self, screen_height: int) -> None:
+        """
+        Scale the card faces to the game size
+        
+        Returns:
+            Nothing
+        """
+        self._scale_cards_dimensions(screen_height)
+        
+        for card in self._cards_faces:
+            # Convert the card faces to a surface
+            # self._cards_faces[card].convert()
+            
+            # Scale the card faces to the game size
+            self._cards_faces[card] = pygame.transform.smoothscale( \
+                                        # self._cards_faces[card], 
+                                        self._originally_loaded_cards_faces[card], 
+                                        (self.card_width, self.card_height))
+
+        # Make the EC card transparent
+        self._cards_faces["EC"].set_colorkey(self._originally_loaded_cards_faces["EC"].get_at((50,50)))
+    
 class StacksLayout:
     _screen_width: int
     _screen_height: int
+    _center_x: int
+    _center_y: int
     _card_width: int
     _card_height: int
     _margin_x: int
     _margin_y: int
-    _center_x: int
-    _center_y: int
     
     def __init__(self) -> None:
         """
@@ -64,8 +218,9 @@ class StacksLayout:
         """
         self._screen_width = GAME_WIDTH
         self._screen_height = GAME_HEIGHT
-        self._card_width = card_game_width
-        self._card_height = card_game_height
+        self._card_width = cards.card_width
+        self._card_height = cards.card_height
+        # , self._card_height = scaled_cards_dimensions(GAME_HEIGHT)
         
         self._margin_x = self._card_width // 7
         self._margin_y = self._card_height // 7
@@ -167,13 +322,28 @@ class StacksLayout:
         stacks_positions = opponent_base_stacks_positions |center_stacks_positions | player_base_stacks_positions    
         return stacks_positions
     
-    def screen_resize(self, width: int, height: int):
+    
+    def stacks_reposition_and_resize(self, width: int, height: int):
         """
         Resize the screen
         Recalculate the positions of the stacks
         """
+        print(f"Screen Resize: {width=}, {height=}")
+        # update the screen dimensions
         self._screen_width = width
         self._screen_height = height
+        self._center_x = self._screen_width // 2
+        self._center_y = self._screen_height // 2
+        
+        # update the card dimensions
+        # self._card_scale = self._screen_height / 7
+        # self._card_width = int(self._card_scale * CARD_IMG_WIDTH)
+        # self._card_height = int(self._card_scale * CARD_IMG_HEIGHT)
+        # self._card_width, self._card_height = scaled_cards_dimensions(self._screen_height)
+        self._card_width = cards.card_width
+        self._card_height = cards.card_height
+        self._margin_x = self._card_width // 7
+        self._margin_y = self._card_height // 7
         self._calculate_positions()
 
 
@@ -225,38 +395,15 @@ def player_stacks_init(player: int):
     return stacks_cards
 
 
-def load_card_faces():
-    import os
-    # Get the directory of the script
-    card_faces_images_dir = os.path.dirname(os.path.abspath(__file__)) + "/img/card_faces"
-    
-    # Get all SVG files in the directory
-    svg_files = [f for f in os.listdir(card_faces_images_dir) if f.endswith('.svg')]
-    for card in svg_files:
-        # Load the card face into the card_faces dictionary
-        card_faces[card[0] + card[1]] = pygame.image.load(card_faces_images_dir + "/" + card)
 
-    # add back_blue, back_red, empty_card
-    card_faces["BB"] = pygame.image.load(card_faces_images_dir + "/BB.png")
-    card_faces["BR"] = pygame.image.load(card_faces_images_dir + "/BR.png")
-    card_faces["EC"] = pygame.image.load(card_faces_images_dir + "/EC.png")
-
-    for card in card_faces:
-        # Convert the card faces to a surface
-        card_faces[card].convert()
-        # Scale the card faces to the game size
-        card_faces[card] = pygame.transform.smoothscale(card_faces[card], (card_game_width, card_game_height))
-
-    # Make the EC card transparent
-    card_faces["EC"].set_colorkey(card_faces["EC"].get_at((50,50)))
 
 
 def place_stacks(surface: pygame.Surface):
     stacks_positions = StacksLayout().stacks_positions
     
     for stack in stacks_positions:
-        blit_blank = card_faces["EC"] if stacks_positions[stack][2] \
-            else pygame.transform.rotate(card_faces["EC"].copy(), 90)
+        blit_blank = cards.card_faces["EC"] if stacks_positions[stack][2] \
+            else pygame.transform.rotate(cards.card_faces["EC"].copy(), 90)
 
         surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
 
@@ -265,9 +412,10 @@ def update_stacks(surface: pygame.Surface):
     ...
 
 def game_loop(surface: pygame.Surface):
+    
     # clock = pygame.time.Clock()
 
-    blit_card = card_faces["HQ"]
+    blit_card = cards.card_faces["HQ"]
     # blit_card_width = card_faces["HQ"].get_width()
     # blit_card_height = card_faces["HQ"].get_height()
     # blit_card_angle = 0
@@ -298,16 +446,23 @@ def game_loop(surface: pygame.Surface):
             elif event.type == pygame.MOUSEMOTION and moving:
                 # print(f"Mouse Move: {rect.x=}, {rect.y=}")
                 rect.move_ip(event.rel)
+            elif event.type == pygame.K_q:
+                running = False
+                
             elif  event.type == pygame.VIDEORESIZE:
                 # print(f"Video Resize: {event.size=}")
-                StacksLayout().screen_resize(event.w, event.h)
+                surface = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+                StacksLayout().stacks_reposition_and_resize(event.w, event.h)
             else:
                 pass
         
         # set background colour
-        surface.fill(color)
         # color = FELT_RED if color == FELT_GREEN else FELT_GREEN
+        surface.fill(color)
+        
+        # place empty cards in the stacks positions
         place_stacks(surface)
+        
         # Make a circle
         # pygame.draw.circle(surface, (FELT_BLUE), (GAME_WIDTH/2, GAME_HEIGHT/2), 75)
 
@@ -343,5 +498,7 @@ def game_loop(surface: pygame.Surface):
 if __name__ in "__main__":
     pygame_init()
     surface: pygame.Surface = window_init()
-    load_card_faces()
+    cards: Cards = Cards(GAME_HEIGHT)
+    # stacks_cards: dict[str, list[str]] = player_stacks_init(1)
+    # load_card_faces()
     game_loop(surface)
