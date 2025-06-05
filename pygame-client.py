@@ -138,7 +138,7 @@ def server_get_stacks_cards():
 def player_stacks_init(player: int):
 
     # create the stacks dictionary
-    stacks_cards = {
+    stacks_cards: dict[str, list[str]] = {
         "player_crapette":      [],
         "player_remainder":     [],
         "player_bin":           [],
