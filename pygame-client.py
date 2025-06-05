@@ -164,7 +164,7 @@ class Cards:
 
         # Convert each card faces to a surface
         for card in cards_faces:
-            cards_faces[card].convert()
+            cards_faces[card] = cards_faces[card].convert()
 
         self._originally_loaded_cards_faces = cards_faces.copy()
     
@@ -199,7 +199,7 @@ class Cards:
                                         (self.width, self.height))
 
         # Make the EC card transparent
-        self._cards_faces["EC"].set_colorkey(self._originally_loaded_cards_faces["EC"].get_at((50,50)))
+        self._cards_faces["EC"].set_colorkey(self._cards_faces["EC"].get_at((50,50)))
     
 class StacksLayout:
     _screen_width: int
@@ -220,6 +220,7 @@ class StacksLayout:
         self._screen_height = GAME_HEIGHT
         
         self._cards = cards
+        
         # self._card_width = cards.card_width
         # self._card_height = cards.card_height
         # , self._card_height = scaled_cards_dimensions(GAME_HEIGHT)
@@ -332,7 +333,6 @@ class StacksLayout:
         stacks_positions = opponent_base_stacks_positions |center_stacks_positions | player_base_stacks_positions    
         return stacks_positions
     
-    
     def stacks_reposition_and_resize(self, width: int, height: int, cards: Cards) -> None:
         """
         Resize the screen
@@ -358,9 +358,32 @@ class StacksLayout:
         self._margin_y = self._cards.height // 7
         self._positions = self._calculate_positions()
 
+    def render_empty_stacks(self, surface: pygame.Surface, cards: Cards):
+        stacks_positions = stacks_layout.stacks_positions
+        # stacks_positions = StacksLayout().stacks_positions
+        
+        # for stack in stacks_positions:
+        #     blit_blank = cards.card_faces["EC"] if stacks_positions[stack][2] \
+        #         else pygame.transform.rotate(cards.card_faces["EC"].copy(), 90)
 
-card_faces: dict[str, pygame.Surface] = {}
-clock: pygame.time.Clock = pygame.time.Clock()
+        #     surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
+        
+        # stacks_positions = StacksLayout().stacks_positions
+        
+        card_face: str = "EC"
+        # card_face = "HQ"
+        
+        for stack in stacks_positions:
+            blit_blank = self._cards.faces[card_face] if stacks_positions[stack][2] \
+                                        else pygame.transform.rotate(self._cards.faces[card_face].copy(), 90)
+
+            # blit_blank.set_colorkey(blit_blank.get_at((50,50)))
+            
+            surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
+
+
+# card_faces: dict[str, pygame.Surface] = {}
+# clock: pygame.time.Clock = pygame.time.Clock()
 
 def pygame_init():
     # Initialise pygame
@@ -410,23 +433,7 @@ def player_stacks_init(player: int):
 
 
 
-def place_stacks(surface: pygame.Surface, stacks_layout: StacksLayout, cards: Cards):
-    stacks_positions = stacks_layout.stacks_positions
-    # stacks_positions = StacksLayout().stacks_positions
-    
-    # for stack in stacks_positions:
-    #     blit_blank = cards.card_faces["EC"] if stacks_positions[stack][2] \
-    #         else pygame.transform.rotate(cards.card_faces["EC"].copy(), 90)
 
-    #     surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
-    
-    # stacks_positions = StacksLayout().stacks_positions
-    
-    for stack in stacks_positions:
-        blit_blank = cards.faces["EC"] if stacks_positions[stack][2] \
-            else pygame.transform.rotate(cards.faces["EC"].copy(), 90)
-
-        surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
 
 def update_stacks(surface: pygame.Surface):
     #TODO: Implement the update_stacks function
@@ -485,7 +492,7 @@ def game_loop(surface: pygame.Surface, stacks_layout: StacksLayout, cards: Cards
         surface.fill(color)
         
         # place empty cards in the stacks positions
-        place_stacks(surface, stacks_layout, cards)
+        stacks_layout.render_empty_stacks(surface, cards)
         
         # Make a circle
         # pygame.draw.circle(surface, (FELT_BLUE), (GAME_WIDTH/2, GAME_HEIGHT/2), 75)
