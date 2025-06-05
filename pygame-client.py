@@ -1,5 +1,6 @@
 import pygame
 import os
+from client_network import ClientConnection
 
 # dimensions of the game window
 GAME_WIDTH: int = 1024
@@ -352,6 +353,13 @@ class StacksLayout:
                                         else pygame.transform.rotate(self._cards.faces[card_face].copy(), 90)
             
             surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
+
+
+class Communication:
+    _conn: ClientConnection
+    def __init__(self):
+        self._cc= ClientConnection()
+        self._cc.connect()
 
 
 class Game:
