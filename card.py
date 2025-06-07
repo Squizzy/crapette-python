@@ -1,6 +1,6 @@
 from enum import Enum
 from stacks import Stacks
-from player import Players
+from constants import Players
 
 # the enum representing the card suits
 class Suit(Enum):
@@ -14,6 +14,10 @@ class Suit(Enum):
         if self in (Suit.HEARTS, Suit.DIAMONDS):
             return "red"
         return "black"
+    
+    @property
+    def short(self) -> str:
+        return self.value[0]
     
 # the enum representing the card values
 class Rank(Enum):
@@ -44,6 +48,10 @@ class Rank(Enum):
         elif self == Rank.KING:
             return "King"
         return str(self.value)
+    
+    @property
+    def short(self) -> str:
+        return str(self.value if self.value  <= 10 else "J" if self.value == 11 else "Q" if self.value == 12 else "K")
 
 
 # The class representing the card object
@@ -52,9 +60,9 @@ class Card:
     _suit: Suit
     _player_num: Players
     _face_up: bool
-    #TODO: Work out how to do images
-    _face_img: str
-    _back_img: str
+    # #TODO: Work out how to do images
+    # _face_img: str
+    # _back_img: str
 
 
     def __init__(self, rank:Rank, suit:Suit, player_num:Players, face_img:str = "", back_img:str = "", face_up:bool = False):
@@ -69,6 +77,13 @@ class Card:
         face_status:str = "face up" if self.face_up else "face down"
         return f"{self.rank} of {self.suit} - {face_status}"
 
+    def to_dict(self) -> dict:
+        # return the card detail in dictionary format to be JSON serialisable
+        return self._rank.short + self._suit.short + ('u' if self._face_up else 'd')
+    # {
+    #         "value": self._rank.short + self._suit.short + ('u' if self._face_up else 'd'),
+    #     }
+        
     @property
     def rank(self) -> str:
         return self._rank.display_name
@@ -88,6 +103,10 @@ class Card:
     @property
     def face_up(self) -> bool:
         return self._face_up
+
+    @property
+    def card_short(self) -> str:
+        return str(self.suit[0] + str(self.rank)+ ('u' if self.face_up else 'd'))
 
     def flip_card(self):
         self._face_up = not self._face_up
