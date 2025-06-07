@@ -1,6 +1,6 @@
 from stacks import Stacks
 from card import Card, TransferredCard
-from player import Players
+from constants import Players
 from gamestates import GameStates, PlayersGameState
 
 # Generic stack class from which all the stacks that hold cards inherit.
@@ -19,6 +19,14 @@ class CardStack:
             list[Card]: the list of cards
         """
         return self._cards
+    
+    def to_dict(self) -> dict:
+        """Return the stack as a dictionary."""
+        return [card.to_dict() for card in self._cards]
+    # {
+    #         "stack_name": self._stack_name.value,
+    #         "cards": [card.to_dict() for card in self._cards]
+    #     }
     
     @property
     def size(self) -> int:

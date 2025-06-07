@@ -1,6 +1,6 @@
 from cardstack import CardStack
 from stacks import Stacks, StacksInitSizes
-from player import Players
+from constants import Players
 from card import Card, TransferredCard, TransferredNCards
 from deck import Deck
 from gamestates import GameStates, PlayersGameState

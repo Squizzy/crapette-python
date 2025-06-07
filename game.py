@@ -1,4 +1,5 @@
-from player import Players, Player
+from player import Player
+from constants import Players
 from gamestates import GameStates
 
 class Game:

@@ -2,7 +2,7 @@ from cardstack import CardStack
 from stacks import Stacks, StacksInitSizes
 from deck import Deck
 from card import Card, TransferredCard
-from player import Players
+from constants import Players
 
 # The class representing the player's crapette stack object
 class CrapetteStack(CardStack):

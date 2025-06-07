@@ -1,7 +1,7 @@
 from card import Card, TransferredCard, TransferredNCards
 from cardstack import CardStack
 from stacks import Stacks, StacksInitSizes
-from player import Players
+from constants import Players
 from gamestates import PlayersGameState, GameStates
 
 # The class representing the player's bin object

@@ -1,6 +1,6 @@
 from random import shuffle
 from card import Card, Suit, Rank
-from player import Players
+from constants import Players
 
 
 # The class presenting the full deck of card object

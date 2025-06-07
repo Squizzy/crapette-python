@@ -2,7 +2,7 @@ from cardstack import CardStack
 from stacks import Stacks, StacksInitSizes
 from deck import Deck
 from card import Card, TransferredNCards, TransferredCard
-from player import Players
+from constants import Players
 
 # the class representing one tableau stack object in the game
 

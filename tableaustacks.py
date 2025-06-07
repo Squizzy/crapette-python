@@ -1,6 +1,6 @@
 from deck import Deck
 from tableaustack import TableauStack
-from player import Players
+from constants import Players
 from stacks import Stacks, StacksInitSizes
 
 # the class representing the player's tableau area with its stacks

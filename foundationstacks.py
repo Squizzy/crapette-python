@@ -1,6 +1,6 @@
 from deck import Deck
 from foundationstack import FoundationStack
-from player import Players
+from constants import Players
 from stacks import Stacks, StacksInitSizes
 
 # the class representing the player's Foundation area with its stacks
