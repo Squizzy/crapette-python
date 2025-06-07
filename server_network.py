@@ -1,5 +1,6 @@
 import socket
-import time
+from constants import Players
+from json import loads, dumps
 from icecream import ic # type: ignore
 
 class ServerConnection:
@@ -22,7 +23,7 @@ class ServerConnection:
 
     def __del__(self):
         self._server_socket.close()
-        ic("socket closed")
+        # ic("socket closed")
 
     def start_server(self):
         self._server_socket.listen()
@@ -33,53 +34,103 @@ class ServerConnection:
         self._client_socket = conn
         self._client_addr = addr
         self._server_connected = True
-        time.sleep(1)
-        self._acknowledge("connection accepted")
+        # time.sleep(1)
+        # self._acknowledge("connection accepted")
         ic(f"connected by {self._client_addr}")
 
-    def _acknowledge(self, message: str):
-        ic(f"acknowledging {message}")
-        self._client_socket.sendall(message.encode())
+    # def _acknowledge(self, message: str):
+    #     ic(f"acknowledging {message}")
+    #     self._client_socket.sendall(message.encode())
         
     def close_connection(self):
         self._server_connected = False
         self._client_socket.close()
         print("Client disconnected")
         
-    def _recv_data(self)  -> bytes:
+    def _recv(self)  -> str:
+        
         # with self._client_socket:
-        while True:
-            data = self._client_socket.recv(1024)
-            if not data:
-                break
-            print(f"Server received {data!r}")
+        data: bytes = b""
+        received_message: str = ""
+        
+        data = self._client_socket.recv(1024)
+        received_message =  data.decode()
+        # while True:
+        #     data = self._client_socket.recv(1024)
+        #     if data == b"":
+        #         if received_message == "":
+        #             continue
+        #         else:
+        #             break
+        #     else:
+                # received_message +=  data.decode()
+                
+        # ic(f"Received: {received_message}")
+        # print(".", end="")
+            # print(f"Server received {data!r}")
             # self._client_socket.sendall(data)
-            return data
-        return b""
+        return received_message
+        # return b""
+
+    def _send(self, message: str) -> None:
+        self._client_socket.sendall(message.encode())
+
 
     def listen_for_requests(self):
         ic("listening for requests")
         while self._server_connected:
-            data = self._recv_data()
-            if data == b"get_player_id":
-                self._send_player_id()
-            elif data == b"get_stacks_cards 1":
-                self._send_stacks_cards()
-            elif data == b"quit":
-                self._acknowledge("quit accepted")
-                self.close_connection()
+            received_message = ""
+            received_message = self._recv()
+            # received_message = data.decode()
+            
+            if received_message == "send_player_id":
+                self._send_player_id(Players.PLAYER1)
                 
-    def _send_player_id(self):
+            elif received_message == "get_stacks_cards":
+                # self._send_stacks_cards()
+                return "send_stacks_cards"
+            
+            elif received_message == "quit":
+                # self._acknowledge("quit accepted")
+                self.close_connection()
+            
+            else:
+                continue
+                
+    def _send_player_id(self, player_num:  Players):
+        """
+        Sending the player ID to the requesting client
+        """
         ic("sending player id")
-        self._client_socket.sendall(b"1")
-
+        
+        player_id = str(0 if player_num == Players.PLAYER1 else 1)
+        ic(player_id)
+        msg = dumps(player_id)
+        
+        # time.sleep(5)
+        # self._client_socket.sendall(msg.encode())
+        self._send(msg)
+        
+        ic("player_id sent")
+        
     def _send_stacks_cards(self):
         ic("sending stacks cards")
         self._client_socket.sendall(b"stacks_cards")
 
-if __name__ in "__main__":
+
+    def encoded_msg(self, message) -> str:
+        return dumps(message)
+    
+    def decoded_msg(self, message: str):
+        return loads(message)
+
+    def send_players_stacks(self, msg):
+        ic("sending all players stacks cards")
+        self._client_socket.sendall(msg.encode())
+
+
+if __name__ == "__main__":
     nc = ServerConnection()
     nc.start_server()
     nc.accept_connection()
     nc.listen_for_requests()
-    print("123")
