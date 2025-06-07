@@ -1,5 +1,5 @@
 from enum import Flag, auto
-from player import Players
+from constants import Players
 
 # The flags representing the game states
 
@@ -47,8 +47,8 @@ class PlayersGameState:
     # Returns:
     #     _type_: _description_
     """
-    _player1: GameStates.Player
-    _player2: GameStates.Player
+    _player1: GameStates.Player = GameStates.Player(0)
+    _player2: GameStates.Player = GameStates.Player(0)
 
     @classmethod
     def set_player_flag(cls, player_num: Players, flag: GameStates.Player):
@@ -82,3 +82,8 @@ class PlayersGameState:
             return bool(cls._player1 & flag)
         else:
             return bool(cls._player2 & flag)
+        
+    @classmethod
+    def reset_all_flags(cls):
+        cls._player1 = GameStates.Player(0)
+        cls._player2 = GameStates.Player(0)
