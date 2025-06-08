@@ -3,7 +3,7 @@ import os
 from client_network import ClientConnection
 from constants import Players
 
-from icecream import ic
+from icecream import ic # type: ignore
 ic.configureOutput(prefix='pygame_client: ')
 def log_message(msg:str) -> None:
     DEBUG = True
