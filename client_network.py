@@ -1,18 +1,18 @@
 import socket
-# import time
 from constants import Players
 from json import loads
+
+from network_messages import client_message_decoder, ClientNetworkMessage
+
+
 from icecream import ic # type: ignore
-
-# enable debug messages
-DEBUG = True
-
 ic.configureOutput(prefix="client_network: ")
-
 def log_message(message: str):
+    # enable debug messages
+    DEBUG = True
     if DEBUG:
         ic(message)
-        # ic(f"client_network: {message}")
+
 
 class ClientConnection:
     # _client_ip: str
@@ -86,6 +86,16 @@ class ClientConnection:
         self._client_socket.sendall(data.encode())
         log_message("_send: data sent")
 
+    def _send_request(self, message: ClientNetworkMessage) -> None:
+        """
+        Send a request to the server.
+        Data is a ClientNetworkMessage object
+        """
+        
+        log_message(f"_send_request {message}: {message.name.encode()}")
+        self._client_socket.sendall(message.name.encode())
+        log_message("_send_request sent")
+
     def _recv(self, max_buffer_size: int) -> str:
         """
         Receives data from the server and returns it as a string (maybe json encoded?).
@@ -125,69 +135,62 @@ class ClientConnection:
         """
         log_message("request_player_id_from_server: sending request")
         
-        message = "send_player_id"
-        self._send(message)
+        # message = "send_player_id"
+        message = ClientNetworkMessage.SEND_PLAYER_ID
+        self._send_request(message)
         
         data: str = self._recv(1024)
-        message =  loads(data)
+        # message =  loads(data)
         
-        # if data == b"":
-        #     log_message("no client player id received")
-        #     return None
-        # else:
+        # # if data == b"":
+        # #     log_message("no client player id received")
+        # #     return None
+        # # else:
         
-        #TODO: Convert to Playsers - maybe even using a dedicated method
-        print(type(data))
-        self._player_id = int(message)
-        log_message(f"client player id received: {self._player_id}")
-        return self._player_id
-
+        # #TODO: Convert to Playsers - maybe even using a dedicated method
+        # print(type(data))
+        # self._player_id = int(message)
+        # log_message(f"client player id received: {self._player_id}")
+        
+        # answer = client_message_decoder.player_id(message)
+        
+        player = client_message_decoder.player_id(data)
+        
+        # return self._player_id
+        return player
 
     def server_get_stacks_cards(self):
+        
         log_message("server_get_stacks_cards: client requesting stacks cards")
-        # empty the current stacks
-        self._stacks_cards = []
-        # set the message encoded
-        # message = f"get_stacks_cards {self._player_id}"
-        message = "get_stacks_cards"
-        # self._send(message.encode())
-        self._client_socket.sendall(message.encode())
-        log_message(f"requested {message} from server")
-        # receive the stacks information until the server sends an empty message
+        
+        # # empty the current stacks
+        # self._stacks_cards = []
+        
+        # set the request
+        self._send_request(ClientNetworkMessage.SEND_STACKS_CARDS)
+        
+        # receive the stacks cards
+        # TODO: adjust max size sometimes - this is a little bit of an overkill...
         data = self._recv(10000)
-        message = loads(data)
-        # data_recieved = False
-        # while True:
-        #     data = self._client_socket.recv(1024)
-        #     # data = self._recv(1024)
-        #     if data == b"":
-        #         if data_recieved:
-        #             break
-        #         else:
-        #             continue
-        #     else:
-        #         data_recieved = True
-        # print(message)
-        # self._stacks_cards.append(data.decode())
-            
-            # print(data.decode())
-            # self._stacks_cards.append(data.decode())
-            
+        
+        # message = loads(data)
+
         # if the stacks cards are not empty, print the stacks cards
         # if len(self._stacks_cards) > 0:
-        if len(message) >0:
+        if len(data) >0:
             info = loads(data)
             log_message(f"client stacks cards received: {info}")
         else:
             log_message("no client stacks cards received")
+            
 
-    
     def server_quit(self) -> None:
         log_message("server_quit: client quitting")
-        message = "quit"
-        self._send(message)
+        message = ClientNetworkMessage.QUIT
+        self._send_request(message)
        
         self.disconnect()
+
 
 if __name__ in "__main__":
     i = 0
