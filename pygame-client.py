@@ -1,6 +1,14 @@
 import pygame
 import os
 from client_network import ClientConnection
+from constants import Players
+
+from icecream import ic
+ic.configureOutput(prefix='pygame_client: ')
+def log_message(msg:str) -> None:
+    DEBUG = True
+    if DEBUG:
+        ic(msg)
 
 # dimensions of the game window
 GAME_WIDTH: int = 1024
@@ -30,6 +38,7 @@ CARD_IMG_WIDTH: int = 234
 # Stores a copy of the game state from the server
 # Updates from the server
 class GameState:
+    _player_id: Players
     _stacks: dict[str, list[str]]
     _turn_player: int
     
@@ -46,6 +55,14 @@ class GameState:
             "opponent_tableau":     [],
             "opponent_foundation":  [],
         }
+        
+    @property
+    def player_id(self) -> Players:
+        return self._player_id
+    
+    @player_id.setter
+    def player_id(self, player: Players) -> None:
+        self._player_id = player
         
 
 class Cards:
@@ -355,11 +372,12 @@ class StacksLayout:
             surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
 
 
-class Communication:
-    _conn: ClientConnection
-    def __init__(self):
-        self._cc= ClientConnection()
-        self._cc.connect()
+# class Communication:
+#     _conn: ClientConnection
+#     def __init__(self):
+#         self._cc= ClientConnection()
+#         self._cc.connect()
+        
 
 
 class Game:
@@ -367,6 +385,8 @@ class Game:
     _table_colour: tuple[int, int, int]
     _cards: Cards
     _stacks_layout: StacksLayout
+    _comm: ClientConnection
+    _game_state: GameState
     
     def __init__(self) -> None:
         self._table_colour = FELT_GREEN
@@ -374,6 +394,26 @@ class Game:
         self._surface = self._window_init()
         self._cards = Cards(GAME_HEIGHT)
         self._stacks_layout = StacksLayout(self._cards)
+        self._game_state = GameState()
+        
+        # connect to the server
+        self._comm = ClientConnection()
+        self._comm.connect()
+        
+        # initialise the player id for this client
+        self._game_state.player_id = self._comm.request_player_id_from_server()
+        log_message(self._game_state.player_id)    
+        
+        # get the cards from the server and assign them to the game state
+        stacks_cards_from_server = self._comm.server_get_stacks_cards()
+        
+            
+        # stacks_cards =  self._comm.server_get_stacks_cards()
+        # # self._message_decoder = client_message_decoder()
+        # crapette_stack = client_message_decoder.crapette_stack(message=stacks_cards)
+        # # crapette_stack = self._message_decoder(stacks_cards)
+        # print(crapette_stack)
+        
 
     @property
     def surface(self) -> pygame.Surface:
@@ -437,7 +477,7 @@ class Game:
         self._surface.fill(self.table_colour)
         self.stacks_layout.update_stacks_positions_and_sizes(width, height, self.cards)
 
-    def _window_redraw_screen(self):
+    def _window_redraw(self):
         """
         Redraw the game screen
         """
@@ -506,8 +546,11 @@ class Game:
                     self._window_resize(event.w, event.h, pygame.RESIZABLE)
                 else:
                     pass
-            
-            self._redraw_screen()
+                
+                
+            # self.get_stacks_cards()
+            # self.get_stacks_cards_from_server()
+            self._window_redraw()
             
             # # place empty cards in the stacks positions
             # self.stacks_layout.render_empty_stacks(self.surface, self.cards)
@@ -544,7 +587,7 @@ class Game:
 
             # clock.tick(3000)
 
-
+        self._comm.server_quit()
         pygame.quit()
 
 def server_get_stacks_cards():
