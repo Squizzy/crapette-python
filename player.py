@@ -1,10 +1,10 @@
 # from enum import Enum
 from deck import Deck
-from crapettestack import CrapetteStack
-from remainderstack import RemainderStack
-from binstack import BinStack
-from tableaustacks import TableauStacks
-from foundationstacks import FoundationStacks
+from stack_crapette import CrapetteStack
+from stack_remainder import RemainderStack
+from stack_bin import BinStack
+from stacks_tableau import TableauStacks
+from stacks_foundation import FoundationStacks
 from constants import Players
 
 from icecream import ic # type: ignore
@@ -37,6 +37,7 @@ class Player:
         
         deck = Deck(player_num)
         log_message(f"{deck.size=}")
+        #deck.shuffle()
         
         self._crapette = CrapetteStack(deck, player_num)
         log_message(f"{self._crapette.size=}")
@@ -46,7 +47,6 @@ class Player:
         log_message(f"{self._tableau._TableauStacks[0].size=}")
         log_message(f"{deck.size=}")
 
-        
         self._remainder = RemainderStack(deck, player_num)
         log_message(f"{self._remainder.size=}")
         log_message(f"{deck.size=}")
