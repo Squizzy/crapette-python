@@ -402,7 +402,7 @@ class Game:
         
         # initialise the player id for this client
         self._game_state.player_id = self._comm.request_player_id_from_server()
-        log_message(self._game_state.player_id)    
+        log_message(self._game_state.player_id.name)    
         
         # get the cards from the server and assign them to the game state
         stacks_cards_from_server = self._comm.server_get_stacks_cards()
@@ -462,7 +462,7 @@ class Game:
         
         return surface
     
-    def _window_resize(self, width: int, height: int, other: int | None) -> None:   
+    def _window_resize(self, width: int, height: int, other: int) -> None:   
         """
         Resize the game surface and reset its background colour
         Done here so that any game table element can be reset immediately.
