@@ -33,49 +33,52 @@ class ServerNetworkMessage(Enum):
     SENDING_PLAYER_ID = 'sending_player_id'
     SEND_STACKS_CARDS = 'sending_stacks_cards'
 
-class server_message_encoder:
-    def player_id(self, player: Players) -> str:
+# class server_message_encoder:
+    # def player_id(self, player: Players) -> str:
         
-        log_message("encoding player_id")
-        msg = {
-            "type": ServerNetworkMessage.SENDING_PLAYER_ID.value,
-            #TODO: Implement a message target
-            "target": "",
-            "value": player.name,
-            }
-        log_message(f"{msg}")
-        # log_message(player.value)
-        # log_message(player.name)
+    #     log_message("encoding player_id")
+    #     msg = {
+    #         "type": ServerNetworkMessage.SENDING_PLAYER_ID.value,
+    #         #TODO: Implement a message target
+    #         "target": "",
+    #         "value": player.name,
+    #         }
+    #     log_message(f"{msg}")
+    #     # log_message(player.value)
+    #     # log_message(player.name)
         
-        return dumps(msg)
+    #     return dumps(msg)
         
     
     
-class client_message_decoder:
-    def player_id(message: str) -> Players:
-        log_message("decoding player_id")
-        msg = loads(message)
-        log_message(msg)
-        if msg["type"] == ServerNetworkMessage.SENDING_PLAYER_ID.value:
-            if msg["target"] == "":
-                return Players[msg["value"]]
+# class client_message_decoder:
+    
+    # @staticmethod
+    # def player_id(message: str) -> Players:
+    #     log_message("decoding player_id")
+    #     msg = loads(message)
+    #     log_message(msg)
+    #     if msg["type"] == ServerNetworkMessage.SENDING_PLAYER_ID.value:
+    #         if msg["target"] == "":
+    #             return Players[msg["value"]]
 
-        else:
-            raise ValueError("Incorrect message, no player ID included, or the message was not intended for this player")
+    #     else:
+    #         raise ValueError("Incorrect message, no player ID included, or the message was not intended for this player")
+    #         return Players.ERROR
     
     
-    
-    def crapette_stack(message: str)  -> CrapetteStack:
-        """
-        find out in a string received from the server where the crapette stack info is
-        Returns:
-            The CrapetteStack content
-        """
-        deck: Deck = Deck()
-        deck.shuffle()
+    # @staticmethod
+    # def crapette_stack(message: str) -> CrapetteStack:
+    #     """
+    #     find out in a string received from the server where the crapette stack info is
+    #     Returns:
+    #         The CrapetteStack content
+    #     """
+    #     deck: Deck = Deck()
+    #     deck.shuffle()
         
-        temp_crapette_stack = CrapetteStack()
+    #     temp_crapette_stack = CrapetteStack()
         
-        print(message)
+    #     print(message)
         
-        return temp_crapette_stack
+    #     return temp_crapette_stack

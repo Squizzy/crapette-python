@@ -1,0 +1,24 @@
+from constants import Players
+from network_messages import ServerNetworkMessage
+from json import dumps
+
+from icecream import ic # type: ignore
+ic.configureOutput(prefix="message_encoder: ")
+def log_message(message: str):
+    DEBUG = True
+    if DEBUG:
+        ic(message)
+        
+        
+def encode_player_id(player: Players) -> str:
+    
+    log_message("encoding player_id")
+    msg = {
+        "type": ServerNetworkMessage.SENDING_PLAYER_ID.value,
+        #TODO: Implement a message target
+        "target": "",
+        "value": player.name,
+        }
+    log_message(f"{msg}")
+    
+    return dumps(msg)
