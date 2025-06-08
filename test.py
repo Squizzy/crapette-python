@@ -1,7 +1,7 @@
 # from card import Card, Rank, Suit
 from deck import Deck
 # from crapettestack import CrapetteStack
-from stacks_tableau import TableauStacks
+# from stacks_tableau import TableauStacks
 from player import Players
 # from samples import deck
 
