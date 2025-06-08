@@ -1,7 +1,7 @@
 from card import Card, Rank, Suit, TransferredCard, TransferredNCards
 from stacks import Stacks
 from deck import Deck
-from tableaustack import TableauStack
+from stack_tableau import TableauStack
 from player import Players
 
 # A set of sample cards

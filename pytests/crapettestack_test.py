@@ -8,7 +8,7 @@ from icecream import ic #type:ignore
 from deck import Deck
 from player import Players
 from stacks import Stacks
-from crapettestack import CrapetteStack
+from stack_crapette import CrapetteStack
 
 from samples import card_7H, card_8H #, card_9H, card_10H
 # from samples import card_7D

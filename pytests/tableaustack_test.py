@@ -18,7 +18,7 @@ from samples import card_7S_transferred_1c1, card_8S_transferred_1c1, card_QS_tr
 from samples import transferredNCards_9S_8H_7S
 
 
-from tableaustack import TableauStack
+from stack_tableau import TableauStack
 # player_num: int = 1
 
 # # A set of sample cards

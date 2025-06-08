@@ -9,7 +9,7 @@ from samples import random_stacked_cards
 from player import Players
 from icecream import ic #type:ignore
 
-from remainderstack import RemainderStack
+from stack_remainder import RemainderStack
 
 # One deck
 deck: Deck = Deck(Players.PLAYER1)

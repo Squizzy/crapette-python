@@ -37,8 +37,10 @@ def test_suit():
 
 
 def test_repr():
-    assert str(card_QS) == 'Queen of Spades - face down'
+    assert repr(card_QS) == 'Queen of Spades - face down'
 
+def test_str():
+    assert str(card_QS) == 'QSd'
 
 def test_face_up():
     assert not card_8H.face_up
