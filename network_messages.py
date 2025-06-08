@@ -34,7 +34,7 @@ class ServerNetworkMessage(Enum):
     SEND_STACKS_CARDS = 'sending_stacks_cards'
 
 class server_message_encoder:
-    def player_id(player: Players) -> str:
+    def player_id(self, player: Players) -> str:
         
         log_message("encoding player_id")
         msg = {
@@ -43,7 +43,7 @@ class server_message_encoder:
             "target": "",
             "value": player.name,
             }
-        log_message(msg)
+        log_message(f"{msg}")
         # log_message(player.value)
         # log_message(player.name)
         
