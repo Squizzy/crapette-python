@@ -2,7 +2,8 @@ import socket
 from constants import Players
 from json import loads
 
-from network_messages import client_message_decoder, ClientNetworkMessage
+from network_messages import ClientNetworkMessage
+from message_decoder import decode_player_id
 
 
 from icecream import ic # type: ignore
@@ -61,8 +62,7 @@ class ClientConnection:
                 raise ConnectionError(f"Failed to connect to server: {e}")
         
         self._connected = True
-        log_message("Connected to server")
-        
+        log_message("Connected to server")        
     def disconnect(self):
         """
         Disconnect from the server
@@ -71,7 +71,6 @@ class ClientConnection:
         self.__del__()
         self._connected = False
         log_message("_disconnect: client disconnected")
-
 
     def _send(self, data: str):
         """
@@ -154,7 +153,7 @@ class ClientConnection:
         
         # answer = client_message_decoder.player_id(message)
         
-        player = client_message_decoder.player_id(data)
+        player = decode_player_id(data)
         
         # return self._player_id
         return player

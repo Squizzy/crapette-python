@@ -2,7 +2,8 @@ import socket
 from json import loads, dumps
 
 from constants import Players
-from network_messages import server_message_encoder, ServerNetworkMessage, ClientNetworkMessage
+from network_messages import ClientNetworkMessage
+from message_encoder import encode_player_id
 
 
 from icecream import ic # type: ignore
@@ -119,7 +120,7 @@ class ServerConnection:
         # time.sleep(5)
         # self._client_socket.sendall(msg.encode())
         
-        msg = server_message_encoder.player_id(player_num)
+        msg = encode_player_id(player_num)
         
         self._send(msg)
         
