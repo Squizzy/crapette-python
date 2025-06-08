@@ -92,7 +92,7 @@ class ClientConnection:
         Data is a ClientNetworkMessage object
         """
         
-        log_message(f"_send_request {message}: {message.name.encode()}")
+        log_message(f"_send_request {message}: {message.name}")
         self._client_socket.sendall(message.name.encode())
         log_message("_send_request sent")
 
