@@ -3,17 +3,13 @@ from deck import Deck
 from stack_crapette import CrapetteStack
 from stack_remainder import RemainderStack
 from stack_bin import BinStack
-from stacks_tableau import TableauStacks
-from stacks_foundation import FoundationStacks
+# from stacks_tableau import TableauStacks
+from stacks_tableau import TableauStack
+# from stacks_foundation import FoundationStacks
+from stack_foundation import FoundationStack
 from constants import Players
 
 from icecream import ic # type: ignore
-
-# # The enum representing the players
-# class Players(Enum):
-#     PLAYER1 = 0,
-#     PLAYER2 = 1,
-#     CARDSTACK = 2 # mostly for debugging purposes for the moment
 
 
 DEBUG: bool = False
@@ -26,8 +22,14 @@ class Player:
     _crapette: CrapetteStack
     _remainder: RemainderStack
     _bin: BinStack
-    _tableau: TableauStacks
-    _foundation: FoundationStacks
+    _tableau0: TableauStack
+    _tableau1: TableauStack
+    _tableau2: TableauStack
+    _tableau3: TableauStack
+    _foundation0: FoundationStack
+    _foundation1: FoundationStack
+    _foundation2: FoundationStack
+    _foundation3: FoundationStack
     
     
     def __init__(self, player_num: Players):
@@ -43,8 +45,14 @@ class Player:
         log_message(f"{self._crapette.size=}")
         log_message(f"{deck.size=}")
 
-        self._tableau = TableauStacks(deck, player_num)        
-        log_message(f"{self._tableau._TableauStacks[0].size=}")
+        self._tableau0 = TableauStack(deck, player_num)        
+        self._tableau1 = TableauStack(deck, player_num)        
+        self._tableau2 = TableauStack(deck, player_num)        
+        self._tableau3 = TableauStack(deck, player_num)        
+        log_message(f"{self._tableau0.size=}")
+        log_message(f"{self._tableau1.size=}")
+        log_message(f"{self._tableau2.size=}")
+        log_message(f"{self._tableau3.size=}")
         log_message(f"{deck.size=}")
 
         self._remainder = RemainderStack(deck, player_num)
@@ -55,7 +63,13 @@ class Player:
         log_message(f"{self._bin.size=}")
         log_message(f"{deck.size=}")
 
-        self._foundation = FoundationStacks(deck, player_num)
-        log_message(f"{self._foundation._FoundationStacks[0].size=}")
+        self._foundation0 = FoundationStack(deck, player_num)
+        self._foundation1 = FoundationStack(deck, player_num)
+        self._foundation2 = FoundationStack(deck, player_num)
+        self._foundation3 = FoundationStack(deck, player_num)
+        log_message(f"{self._foundation0.size=}")
+        log_message(f"{self._foundation1.size=}")
+        log_message(f"{self._foundation2.size=}")
+        log_message(f"{self._foundation3.size=}")
         log_message(f"{deck.size=}")
         
