@@ -2,21 +2,21 @@ from player import Player
 from constants import Players
 from server_network import ServerConnection
 from json import dumps
+
+
+
 from icecream import ic # type: ignore
-
-
-# from gamestates import GameStates
-
-ic.configureOutput(prefix = "pygame-server: ")
+ic.configureOutput(prefix="server_pygame: ")
 def log_message(message: str):
-    DEBUG: bool = True
+    # enable debug messages
+    DEBUG = True
     if DEBUG:
         ic(message)
 
 
 class GameState:
-    _instance = None
-    _initialised = False
+    _instance: 'GameState | None' = None
+    _initialised: bool = False
     
     _player_1_socket: int
     _player_2_socket: int
@@ -64,30 +64,30 @@ class GameState:
         
     def update_stacks_cards(self, player1_card_stacks: Player, player2_card_stacks: Player):
 
-            self._stacks_cards["player1_crapette"] = player1_card_stacks._crapette.to_dict()
-            self._stacks_cards["player1_remainder"] = player1_card_stacks._remainder.to_dict()
-            self._stacks_cards["player1_bin"] = player1_card_stacks._bin.to_dict()
-            self._stacks_cards["player1_tableau0"] = player1_card_stacks._tableau._TableauStacks[0].to_dict()
-            self._stacks_cards["player1_tableau1"] = player1_card_stacks._tableau._TableauStacks[1].to_dict()
-            self._stacks_cards["player1_tableau2"] = player1_card_stacks._tableau._TableauStacks[2].to_dict()
-            self._stacks_cards["player1_tableau3"] = player1_card_stacks._tableau._TableauStacks[3].to_dict()
-            self._stacks_cards["player1_foundation0"] = player1_card_stacks._foundation._FoundationStacks[0].to_dict()
-            self._stacks_cards["player1_foundation1"] = player1_card_stacks._foundation._FoundationStacks[1].to_dict()
-            self._stacks_cards["player1_foundation2"] = player1_card_stacks._foundation._FoundationStacks[2].to_dict()
-            self._stacks_cards["player1_foundation3"] = player1_card_stacks._foundation._FoundationStacks[3].to_dict()
+            self._stacks_cards["player1_crapette"] = player1_card_stacks._crapette.to_list()
+            self._stacks_cards["player1_remainder"] = player1_card_stacks._remainder.to_list()
+            self._stacks_cards["player1_bin"] = player1_card_stacks._bin.to_list()
+            self._stacks_cards["player1_tableau0"] = player1_card_stacks._tableau0.to_list()
+            self._stacks_cards["player1_tableau1"] = player1_card_stacks._tableau1.to_list()
+            self._stacks_cards["player1_tableau2"] = player1_card_stacks._tableau2.to_list()
+            self._stacks_cards["player1_tableau3"] = player1_card_stacks._tableau3.to_list()
+            self._stacks_cards["player1_foundation0"] = player1_card_stacks._foundation0.to_list()
+            self._stacks_cards["player1_foundation1"] = player1_card_stacks._foundation1.to_list()
+            self._stacks_cards["player1_foundation2"] = player1_card_stacks._foundation2.to_list()
+            self._stacks_cards["player1_foundation3"] = player1_card_stacks._foundation3.to_list()
             log_message(f"player1_crapette updated: {self._stacks_cards['player1_crapette']}")
             
-            self._stacks_cards["player2_crapette"] = player2_card_stacks._crapette.to_dict()
-            self._stacks_cards["player2_remainder"] = player2_card_stacks._remainder.to_dict()
-            self._stacks_cards["player2_bin"] = player2_card_stacks._bin.to_dict()
-            self._stacks_cards["player2_tableau0"] = player2_card_stacks._tableau._TableauStacks[0].to_dict()
-            self._stacks_cards["player2_tableau1"] = player2_card_stacks._tableau._TableauStacks[1].to_dict()
-            self._stacks_cards["player2_tableau2"] = player2_card_stacks._tableau._TableauStacks[2].to_dict()
-            self._stacks_cards["player2_tableau3"] = player2_card_stacks._tableau._TableauStacks[3].to_dict()
-            self._stacks_cards["player2_foundation0"] = player2_card_stacks._foundation._FoundationStacks[0].to_dict()
-            self._stacks_cards["player2_foundation1"] = player2_card_stacks._foundation._FoundationStacks[1].to_dict()
-            self._stacks_cards["player2_foundation2"] = player2_card_stacks._foundation._FoundationStacks[2].to_dict()
-            self._stacks_cards["player2_foundation3"] = player2_card_stacks._foundation._FoundationStacks[3].to_dict()
+            self._stacks_cards["player2_crapette"] = player2_card_stacks._crapette.to_list()
+            self._stacks_cards["player2_remainder"] = player2_card_stacks._remainder.to_list()
+            self._stacks_cards["player2_bin"] = player2_card_stacks._bin.to_list()
+            self._stacks_cards["player2_tableau0"] = player2_card_stacks._tableau0.to_list()
+            self._stacks_cards["player2_tableau1"] = player2_card_stacks._tableau1.to_list()
+            self._stacks_cards["player2_tableau2"] = player2_card_stacks._tableau2.to_list()
+            self._stacks_cards["player2_tableau3"] = player2_card_stacks._tableau3.to_list()
+            self._stacks_cards["player2_foundation0"] = player2_card_stacks._foundation0.to_list()
+            self._stacks_cards["player2_foundation1"] = player2_card_stacks._foundation1.to_list()
+            self._stacks_cards["player2_foundation2"] = player2_card_stacks._foundation2.to_list()
+            self._stacks_cards["player2_foundation3"] = player2_card_stacks._foundation3.to_list()
             log_message(f"player2_crapette updated: {self._stacks_cards['player2_crapette']}")
         
 
@@ -131,7 +131,7 @@ class Game:
     def get_players_cards(self) ->  dict[str, list[str]]:
 
         self._game_state.update_stacks_cards(self._player1, self._player2)
-        log_message(self._game_state._stacks_cards)
+        log_message(f"{self._game_state._stacks_cards}")
 
         return self._game_state._stacks_cards
 
