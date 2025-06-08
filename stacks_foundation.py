@@ -1,5 +1,5 @@
 from deck import Deck
-from foundationstack import FoundationStack
+from stack_foundation import FoundationStack
 from constants import Players
 from stacks import Stacks, StacksInitSizes
 

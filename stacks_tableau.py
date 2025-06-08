@@ -1,5 +1,5 @@
 from deck import Deck
-from tableaustack import TableauStack
+from stack_tableau import TableauStack
 from constants import Players
 from stacks import Stacks, StacksInitSizes
 

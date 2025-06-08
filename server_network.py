@@ -1,7 +1,17 @@
 import socket
-from constants import Players
 from json import loads, dumps
+
+from constants import Players
+from network_messages import server_message_encoder, ServerNetworkMessage, ClientNetworkMessage
+
+
 from icecream import ic # type: ignore
+ic.configureOutput(prefix="server_network: ")
+def log_message(message: str):
+    # enable debug messages
+    DEBUG = True
+    if DEBUG:
+        ic(message)
 
 class ServerConnection:
     _server_ip: str
@@ -27,7 +37,7 @@ class ServerConnection:
 
     def start_server(self):
         self._server_socket.listen()
-        ic("server socket listening")
+        log_message("server socket listening")
 
     def accept_connection(self):
         conn, addr = self._server_socket.accept()
@@ -36,7 +46,7 @@ class ServerConnection:
         self._server_connected = True
         # time.sleep(1)
         # self._acknowledge("connection accepted")
-        ic(f"connected by {self._client_addr}")
+        log_message(f"connected by {self._client_addr}")
 
     # def _acknowledge(self, message: str):
     #     ic(f"acknowledging {message}")
@@ -45,7 +55,7 @@ class ServerConnection:
     def close_connection(self):
         self._server_connected = False
         self._client_socket.close()
-        print("Client disconnected")
+        log_message("Client disconnected")
         
     def _recv(self)  -> str:
         
@@ -77,20 +87,19 @@ class ServerConnection:
 
 
     def listen_for_requests(self):
-        ic("listening for requests")
+        log_message("listening for requests")
         while self._server_connected:
             received_message = ""
             received_message = self._recv()
-            # received_message = data.decode()
-            
-            if received_message == "send_player_id":
+
+            if received_message == ClientNetworkMessage.SEND_PLAYER_ID.name:
                 self._send_player_id(Players.PLAYER1)
                 
-            elif received_message == "get_stacks_cards":
+            elif received_message == ClientNetworkMessage.SEND_STACKS_CARDS.name:
                 # self._send_stacks_cards()
                 return "send_stacks_cards"
             
-            elif received_message == "quit":
+            elif received_message == ClientNetworkMessage.QUIT.name:
                 # self._acknowledge("quit accepted")
                 self.close_connection()
             
@@ -101,20 +110,23 @@ class ServerConnection:
         """
         Sending the player ID to the requesting client
         """
-        ic("sending player id")
+        log_message("sending player id")
         
-        player_id = str(0 if player_num == Players.PLAYER1 else 1)
-        ic(player_id)
-        msg = dumps(player_id)
+        # player_id = str(0 if player_num == Players.PLAYER1 else 1)
+        # ic(player_id)
+        # msg = dumps(player_id)
         
         # time.sleep(5)
         # self._client_socket.sendall(msg.encode())
+        
+        msg = server_message_encoder.player_id(player_num)
+        
         self._send(msg)
         
-        ic("player_id sent")
+        log_message("player_id sent")
         
     def _send_stacks_cards(self):
-        ic("sending stacks cards")
+        log_message("sending stacks cards")
         self._client_socket.sendall(b"stacks_cards")
 
 
@@ -125,8 +137,9 @@ class ServerConnection:
         return loads(message)
 
     def send_players_stacks(self, msg):
-        ic("sending all players stacks cards")
-        self._client_socket.sendall(msg.encode())
+        log_message("sending all players stacks cards")
+        self._send(msg)
+        # self._client_socket.sendall(msg.encode())
 
 
 if __name__ == "__main__":
