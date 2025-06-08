@@ -77,12 +77,16 @@ class Card:
         face_status:str = "face up" if self.face_up else "face down"
         return f"{self.rank} of {self.suit} - {face_status}"
 
-    def to_dict(self) -> str:
-        # return the card detail in dictionary format to be JSON serialisable
+    def __str__(self) -> str:
         return self._rank.short + self._suit.short + ('u' if self._face_up else 'd')
-    # {
-    #         "value": self._rank.short + self._suit.short + ('u' if self._face_up else 'd'),
-    #     }
+
+    def to_dict(self) -> dict:
+        # TODO: Check if still needed
+        # return the card detail in dictionary format to be JSON serialisable
+        # return self._rank.short + self._suit.short + ('u' if self._face_up else 'd')
+        return {
+            "value": self._rank.short + self._suit.short + ('u' if self._face_up else 'd'),
+        }
         
     @property
     def rank(self) -> str:
