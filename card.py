@@ -77,7 +77,7 @@ class Card:
         face_status:str = "face up" if self.face_up else "face down"
         return f"{self.rank} of {self.suit} - {face_status}"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> str:
         # return the card detail in dictionary format to be JSON serialisable
         return self._rank.short + self._suit.short + ('u' if self._face_up else 'd')
     # {
