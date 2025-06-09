@@ -2,10 +2,11 @@ from stacks import Stacks
 from card import Card, TransferredCard
 from constants import Players
 from gamestates import GameStates, PlayersGameState
+from abc import ABC, abstractmethod
 
 # Generic stack class from which all the stacks that hold cards inherit.
 
-class CardStack:
+class CardStack(ABC):
     _cards: list[Card]
     _stack_name: Stacks
     _player_num: Players
@@ -57,6 +58,7 @@ class CardStack:
 
     # The "can_be_added" method contains the specific stack's rules for adding a card
     # So needs to be overridden
+    @abstractmethod
     def can_be_added(self, transferred_card: TransferredCard) -> bool:
         print("The method 'can_be_added' has not yet been overridden, but it must be.")
         print(f"{transferred_card.card=}, {transferred_card.from_player=}, {transferred_card.from_stack_name=}, {transferred_card.from_stack_owner=}")
