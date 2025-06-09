@@ -4,7 +4,7 @@ from server_network import ServerInterface
 # import socket
 
 from constants import Players
-from message_encoder import encode_player_id
+from message_encoder import encode_player_id, encode_stacks_cards
 
 
 from icecream import ic # type: ignore
@@ -49,10 +49,12 @@ class ServerGameComms(ServerGameCommsInterface):
         log_message("player_id sent")
         
         
-    def send_stacks_cards(self):
+    def send_stacks_cards(self, client: Players, stacks_cards):
         log_message("sending stacks cards")
-        
-        self._client_socket.sendall(b"stacks_cards")
+        cards = encode_stacks_cards(stacks_cards)
+        # self._client_socket.sendall(b"stacks_cards")
+        self._connection.send_message_to_client(client, cards)
+        log_message("stacks cards sent")
 
 
     def send_players_stacks(self, msg):
