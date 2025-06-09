@@ -22,3 +22,14 @@ def encode_player_id(player: Players) -> str:
     log_message(f"{msg}")
     
     return dumps(msg)
+
+def encode_stacks_cards(stacks_cards: dict[str, list[str]]) -> str:
+    log_message("encoding stacks_cards")
+    msg = {
+        "type": ServerNetworkMessage.SENDING_STACKS_CARDS.value,
+        "target": "",
+        "value": stacks_cards,
+        }
+    log_message(f"{msg}")
+
+    return dumps(msg)
