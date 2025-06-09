@@ -31,7 +31,7 @@ class ServerNetworkMessage(Enum):
 
     # game messages
     SENDING_PLAYER_ID = 'sending_player_id'
-    SEND_STACKS_CARDS = 'sending_stacks_cards'
+    SENDING_STACKS_CARDS = 'sending_stacks_cards'
 
 # class server_message_encoder:
     # def player_id(self, player: Players) -> str:
