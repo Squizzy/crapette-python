@@ -1,7 +1,8 @@
 from player import Player
 from constants import Players
-from server_network import ServerConnection
-from json import dumps
+from server_network import  ServerConnection
+from server_game_comms import ServerGameComms
+from network_messages import ClientNetworkMessage
 
 
 
@@ -22,6 +23,8 @@ class GameState:
     _player_2_socket: int
     _stacks_cards: dict[str, list[str]]
     _is_player1_turn: bool
+    
+    _is_running: bool
 
     # Create a singleton to ensure only one instance of GameState exists
     def __new__(cls):
@@ -33,6 +36,7 @@ class GameState:
         if not self._initialised:
             self._init_stacks_cards()
             self._initialised  = True
+            self._is_running = False
         
     def _init_stacks_cards(self) -> None:
         self._stacks_cards = {
@@ -97,6 +101,7 @@ class Game:
     _player1: Player
     _player2: Player
     _conn:    ServerConnection
+    _game_comms: ServerGameComms
     
     def __init__(self):
         # initiate the players and their game packs and stacks
@@ -108,32 +113,96 @@ class Game:
         log_message("server game state initialised")
         
         # load the player cards into the game state
-        self._stacks_data = self.get_players_cards()
+        self._stacks_data = self._get_players_cards()
 
-        log_message("establishing network server")
+        # log_message("establishing network server")
+        # self._conn = ServerConnection()
+        
+        # log_message("starting network server")
+        # self._conn.start_server()
+        
+        # log_message("accepting connection")
+        # self._conn.accept_connection()
+        
+        # log_message("listening waiting for client requests")
+        # try:
+        #     data_request = self._conn.listen_for_requests()
+        # except Exception as e:
+        #     log_message(f"Error in listening for requests: {e}")
+        #     self._conn.close_connection()
+        #     raise
+        
         self._conn = ServerConnection()
+        log_message("Instantiating network server")
         
-        log_message("starting network server")
-        self._conn.start_server()
+        self._conn.start()
+        log_message("network server started")
         
-        log_message("accepting connection")
+        self._game_comms = ServerGameComms(self._conn)
+        log_message("server game comms initialised")
+        
         self._conn.accept_connection()
-        
-        log_message("listening waiting for client requests")
-        try:
-            data_request = self._conn.listen_for_requests()
-        except Exception as e:
-            log_message(f"Error in listening for requests: {e}")
-            self._conn.close_connection()
-            raise
-        
-        
-    def get_players_cards(self) ->  dict[str, list[str]]:
+        log_message("connected to client")
+
+        self._game_loop()
+        log_message("game loop ended")
+    
+    
+    def _get_players_cards(self) ->  dict[str, list[str]]:
 
         self._game_state.update_stacks_cards(self._player1, self._player2)
         log_message(f"{self._game_state._stacks_cards}")
 
         return self._game_state._stacks_cards
+
+    def _process_messages_received(self, message: ClientNetworkMessage, client: Players):
+        if message == ClientNetworkMessage.SEND_PLAYER_ID.name:
+            self._game_comms.send_player_id(client)
+                
+        elif message == ClientNetworkMessage.SEND_STACKS_CARDS.name:
+            self._game_comms.send_stacks_cards(client)
+            # return "send_stacks_cards"
+            
+        elif message == ClientNetworkMessage.QUIT.name:
+            # self._acknowledge("quit accepted")
+            self._game_state.is_running = False
+        ...
+
+
+    def _quit(self) -> None:
+        self._game_state._is_running = False
+        self._conn.stop()
+        log_message("server stopped")
+
+
+    def _game_loop(self):
+        while self._game_state._is_running:
+            
+            self._game_state._is_running =  True
+            
+            for client in self._conn.connected_clients:
+                received_message = ""
+                received_message = self._conn.receive_message()
+                if received_message:
+                    self._process_messages_received(received_message, client)
+
+            # if received_message == ClientNetworkMessage.SEND_PLAYER_ID.name:
+            #     self._game_comms.send_player_id(Players.PLAYER1)
+                
+            # elif received_message == ClientNetworkMessage.SEND_STACKS_CARDS.name:
+            #     self._send_stacks_cards()
+            #     # return "send_stacks_cards"
+            
+            # elif received_message == ClientNetworkMessage.QUIT.name:
+            #     # self._acknowledge("quit accepted")
+            #     self.close_connection()
+            
+            # else:
+            #     continue
+            
+        self._quit()
+        log_message("server game loop ended")
+
 
 
 if __name__ == "__main__":
