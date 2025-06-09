@@ -6,6 +6,7 @@ from network_messages import ClientNetworkMessage
 
 
 
+
 from icecream import ic # type: ignore
 ic.configureOutput(prefix="server_pygame: ")
 def log_message(message: str):
@@ -160,12 +161,12 @@ class Game:
             self._game_comms.send_player_id(client)
                 
         elif message == ClientNetworkMessage.SEND_STACKS_CARDS.name:
-            self._game_comms.send_stacks_cards(client)
+            self._game_comms.send_stacks_cards(client, self._game_state._stacks_cards)
             # return "send_stacks_cards"
             
         elif message == ClientNetworkMessage.QUIT.name:
             # self._acknowledge("quit accepted")
-            self._game_state.is_running = False
+            self._game_state._is_running = False
         ...
 
 
@@ -176,14 +177,16 @@ class Game:
 
 
     def _game_loop(self):
+        self._game_state._is_running =  True
+        
         while self._game_state._is_running:
             
-            self._game_state._is_running =  True
-            
             for client in self._conn.connected_clients:
-                received_message = ""
-                received_message = self._conn.receive_message()
-                if received_message:
+                # received_message = ""
+                while True:
+                    received_message = self._conn.receive_message_from_client(client)
+                    if not received_message:
+                        break
                     self._process_messages_received(received_message, client)
 
             # if received_message == ClientNetworkMessage.SEND_PLAYER_ID.name:
