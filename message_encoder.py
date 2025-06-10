@@ -1,5 +1,5 @@
 from constants import Players
-from network_messages import ServerNetworkMessage
+from network_messages import ServerNetworkMessage, ClientNetworkMessage
 from json import dumps
 
 from icecream import ic # type: ignore
@@ -9,7 +9,18 @@ def log_message(message: str):
     if DEBUG:
         ic(message)
         
-        
+
+def encode_request(message: ClientNetworkMessage) -> str:
+    msg = {
+        "type": message.value,
+        "target": "",
+        "value": "",
+        }
+    
+    return dumps(msg)
+
+
+
 def encode_player_id(player: Players) -> str:
     
     log_message("encoding player_id")
