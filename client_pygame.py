@@ -5,13 +5,15 @@ from constants import Players
 from client_network import ClientConnection
 from client_game_comms import ClientGameComms
 from client_ui import GameUI,  CardsUI, StacksLayoutUI
+from game_logger import GameLogger
 
 from icecream import ic # type: ignore
 ic.configureOutput(prefix='client_pygame: ')
 def log_message(msg:str) -> None:
     DEBUG = True
     if DEBUG:
-        ic(msg)
+        # ic(msg)
+        client_logger.debug(msg)
 
 # dimensions of the game window
 GAME_WIDTH: int = 1024
@@ -410,9 +412,8 @@ class Game:
         self._game_ui = GameUI()
         
         # connect to the server
-        self._connection = ClientConnection()
+        self._connection = ClientConnection(client_logger)
         self._connection.connect()
-        
         # initialise the player id for this client
         # No this needs to happen in the game loop?
         # self._game_state.player_id = self._comm.request_player_id_from_server()
@@ -662,6 +663,9 @@ def update_stacks(surface: pygame.Surface):
 
 
 if __name__ == "__main__":
+    
+    client_logger =  GameLogger("client_logger")
+    
     game: Game = Game()
     # pygame_init()
     # surface: pygame.Surface = window_init()

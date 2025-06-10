@@ -1,20 +1,24 @@
 import socket
-from json import loads
 from abc import ABC, abstractmethod
+# from json import loads
 
-
-from constants import Players
 from network_messages import ClientNetworkMessage
-from message_decoder import decode_player_id
+from game_logger import GameLogger
+# from constants import Players
+# from message_decoder import decode_player_id
 
 
 from icecream import ic # type: ignore
+client_logger: GameLogger
+
 ic.configureOutput(prefix="client_network: ")
 def log_message(message: str):
     # enable debug messages
     DEBUG = True
     if DEBUG:
         ic(message)
+        client_logger.debug(message)
+
 
 class ClientInterface(ABC):
     @abstractmethod
@@ -52,7 +56,12 @@ class ClientConnection(ClientInterface):
     _player_id: int
     _stacks_cards: list[bytes]
     
-    def __init__(self, server_ip:str = "127.0.0.1", server_port: int=65432) -> None:
+    
+    
+    def __init__(self, logger: GameLogger, server_ip:str = "127.0.0.1", server_port: int=65432) -> None:
+        global client_logger 
+        client_logger = logger
+        
         self._server_ip = server_ip
         self._server_port = server_port
         self._is_connected = False
@@ -110,7 +119,7 @@ class ClientConnection(ClientInterface):
         Send a message to the server
         """
 
-        log_message(f"client sending message to server")
+        log_message("client sending message to server")
         # log_message(f"{client.name} sending message to server")
 
         try:
@@ -131,7 +140,7 @@ class ClientConnection(ClientInterface):
         try:
             data = self._client_socket.recv(1024)
             if not data:
-                raise ConnectionError(f"client received no data")
+                raise ConnectionError("client received no data")
             received_message: str = data.decode()
         except ConnectionError as e:
             raise ConnectionError(f"Failed to receive message from server: {e}")
@@ -271,7 +280,7 @@ class ClientConnection(ClientInterface):
 
 if __name__ in "__main__":
     i = 0
-    cc = ClientConnection()
+    cc = ClientConnection(client_logger)
     cc.connect()
     # for i in range(1):
     #     print('.', end='', flush=True)
