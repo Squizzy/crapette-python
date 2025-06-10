@@ -84,13 +84,17 @@ class Game:
         
         # Instantiate the game state
         self._game_state = GameState()
+        client_logger.info("client gamestate instantiated")
         
         # Instantiate the game UI
-        self._game_ui = GameUI()
+        self._game_ui = GameUI(client_logger)
+        client_logger.info("client gameui instantiated")
         
         # connect to the server
         self._connection = ClientConnection(client_logger)
         self._connection.connect()
+        client_logger.info("client connection established")
+        
         # initialise the player id for this client
         # No this needs to happen in the game loop?
         # self._game_state.player_id = self._comm.request_player_id_from_server()
@@ -106,6 +110,7 @@ class Game:
         # stacks_cards = self._game_comms.
         
         self._game_state.player_id = self._game_comms.get_player_id()
+        client_logger.debug(f"client player id acquired: {self._game_state.player_id.name}")
         
             
         # stacks_cards =  self._comm.server_get_stacks_cards()
