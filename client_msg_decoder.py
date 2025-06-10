@@ -20,9 +20,9 @@ class ClientMessageDecoder:
         client_logger = logger
 
     def decode_player_id(self, message: str) -> Players:
-        client_logger.debug("decoding player_id")
+        client_logger.info("decoding player_id")
         msg = loads(message)
-        client_logger.debug(msg)
+        client_logger.debug(f"decoded message: {msg}")
         if msg["type"] == ServerNetworkMessage.SENDING_PLAYER_ID.value:
             if msg["target"] == "":
                 return Players[msg["value"]]
@@ -40,5 +40,5 @@ class ClientMessageDecoder:
         else:
             client_logger.warning("decode_stacks_cards: problem getting the data")
             
-        client_logger.debug(f"decoding_stacks_cards: {stacks=}")
+        client_logger.info(f"Cards received: {stacks=}")
         return {}

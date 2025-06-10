@@ -32,13 +32,13 @@ class ClientGameCommsInterface(ABC):
 
 class ClientGameComms(ClientGameCommsInterface):
     _connection: ClientInterface
-    _client_message_encoder: ClientMessageEncoder
+    _message_encoder: ClientMessageEncoder
     
     def __init__(self, logger: GameLogger, connection: ClientInterface) -> None:
         global client_logger
         client_logger = logger
         self._connection = connection
-        self._client_message_encoder = ClientMessageEncoder(logger)
+        self._message_encoder = ClientMessageEncoder(logger)
 
     def get_player_id(self) -> Players:
         """
@@ -47,9 +47,9 @@ class ClientGameComms(ClientGameCommsInterface):
         Returns:
             bool: True if sending request succeeded
         """
-        client_logger.debug("sending player_id request")
+        client_logger.info("sending player_id request")
         
-        message = self._client_message_encoder.encode_request(ClientNetworkMessage.SEND_PLAYER_ID)
+        message = self._message_encoder.encode_request(ClientNetworkMessage.SEND_PLAYER_ID)
         
         # try:
         self._connection.send_message(message)
@@ -82,13 +82,13 @@ class ClientGameComms(ClientGameCommsInterface):
             bool: True if sending request succeeded
         """
         
-        client_logger.debug("client requesting stacks cards")
+        client_logger.info("client requesting stacks cards")
         
         # # empty the current stacks
         # self._stacks_cards = []
         
         # set the request
-        message = self._client_message_encoder.encode_request(ClientNetworkMessage.SEND_STACKS_CARDS)
+        message = self._message_encoder.encode_request(ClientNetworkMessage.SEND_STACKS_CARDS)
         
         try:
             self._connection.send_message(message)
@@ -114,9 +114,9 @@ class ClientGameComms(ClientGameCommsInterface):
         #     log_message("no client stacks cards received")
             
     def server_quit(self) -> None:
-        client_logger.debug("client sending server notification of quuitting")
+        client_logger.info("client sending server notification of quuitting")
         
-        message = self._client_message_encoder.encode_request(ClientNetworkMessage.QUIT)
+        message = self._message_encoder.encode_request(ClientNetworkMessage.QUIT)
         self._connection.send_message(message)
         # self._send_request(message)
        

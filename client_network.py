@@ -67,7 +67,7 @@ class ClientConnection(ClientInterface):
         self._is_connected = False
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        client_logger.debug("client socket initialised")
+        client_logger.info("client socket initialised")
 
     # def __del__(self):
     #     # shut down the sockets so all connections are closed
@@ -85,10 +85,10 @@ class ClientConnection(ClientInterface):
             Nothing
         """
         
-        client_logger.debug("client connecting to server")
+        client_logger.info("client connecting to server")
         
         if self._is_connected:
-            client_logger.debug("client already connected")
+            client_logger.info("client already connected, nothing to do")
             return
 
         else:        
@@ -99,7 +99,7 @@ class ClientConnection(ClientInterface):
                 raise ConnectionError(f"Failed to connect to server: {e}")
         
         self._is_connected = True
-        client_logger.debug("Connected to server")        
+        client_logger.info("Connected to server")        
 
     def disconnect(self):
         """
@@ -111,7 +111,7 @@ class ClientConnection(ClientInterface):
         self._client_socket.shutdown()
         self._client_socket.close()
         self._is_connected = False
-        client_logger.debug("client disconnected")
+        client_logger.info("client disconnected")
 
     def send_message(self, message: str) -> None:
     # def send_message(self, client: Players, message: str) -> None:
@@ -119,7 +119,7 @@ class ClientConnection(ClientInterface):
         Send a message to the server
         """
 
-        client_logger.debug("client sending message to server")
+        client_logger.info("client sending message to server")
         # log_message(f"{client.name} sending message to server")
 
         try:
@@ -127,13 +127,13 @@ class ClientConnection(ClientInterface):
         except socket.error as e:
             raise ConnectionError(f"Failed to send message to server: {e}")
         
-        client_logger.debug("message sent")
+        client_logger.info("message sent")
 
     def receive_message(self) -> str:
         """
         Receive a message from the server
         """
-        client_logger.debug("player receiving message from server")
+        client_logger.info("player receiving message from server")
         # log_message(f"{self._player_id} receiving message from server")
         
         data: bytes = b""
@@ -145,7 +145,7 @@ class ClientConnection(ClientInterface):
         except ConnectionError as e:
             raise ConnectionError(f"Failed to receive message from server: {e}")
 
-        client_logger.debug(f"receive_message: player data received: {len(received_message)=}")
+        client_logger.debug(f"player data received length: {len(received_message)}")
         # log_message(f"receive_message: {self._player_id} data received: {len(received_message)=}")
         
         return received_message
