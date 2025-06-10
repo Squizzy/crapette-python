@@ -44,12 +44,12 @@ CARD_IMG_WIDTH: int = 234
 # Updates from the server
 class GameState:
     _player_id: Players
-    _stacks: dict[str, list[str]]
+    _stacks_cards: dict[str, list[str]]
     _turn_player: int
     _is_running: bool
     
     def __init__(self) -> None:
-        self._stacks = {
+        self._stacks_cards = {
             "player_crapette":      [],
             "player_remainder":     [],
             "player_bin":           [],
@@ -71,6 +71,15 @@ class GameState:
     def player_id(self, player: Players) -> None:
         self._player_id = player
         
+    @property
+    def stacks_cards(self) -> dict[str, list[str]]:
+        return self._stacks_cards
+    
+    @stacks_cards.setter
+    def stacks_cards(self, stacks_cards: dict[str, list[str]]) -> None:
+        for stack in stacks_cards:
+            for card in stacks_cards[stack]:
+                self._stacks_cards[stack].append(card)
 
 
 class Game:
@@ -109,7 +118,8 @@ class Game:
         # self._game_comms.request_player_id()
         # stacks_cards = self._game_comms.
         
-        self._game_state.player_id = self._game_comms.get_player_id()
+        self._game_comms.request_player_id()
+        self._game_state.player_id = self._game_comms.retrieve_player_id()
         client_logger.debug(f"client player id acquired: {self._game_state.player_id.name}")
         
             
@@ -118,6 +128,10 @@ class Game:
         # crapette_stack = client_message_decoder.crapette_stack(message=stacks_cards)
         # # crapette_stack = self._message_decoder(stacks_cards)
         # print(crapette_stack)
+        self._game_comms.request_stacks_cards()
+        self._game_state._stacks_cards = self._game_comms.retrieve_stacks_cards()
+        client_logger.info(f"{self._game_state._stacks_cards}")
+        
         
 
     def _handle_events(self, event, rect) -> None:
@@ -252,19 +266,8 @@ def player_stacks_init(player: int):
         "opponent_foundation":  [],
     }
     
-    # server_stacks_cards = server_get_stacks_cards()
-    # TODO: convert the server_stacks_cards to the stacks_cards dictionary
-    # return stacks_cards
+  
 
-
-
-
-
-
-
-def update_stacks(surface: pygame.Surface):
-    #TODO: Implement the update_stacks function
-    ...
 
 
 
