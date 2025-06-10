@@ -6,6 +6,9 @@ from constants import GAME_ICON
 # from constants import IMAGES_DIR, CARD_FACES_DIR, GAME_ICON_FILE
 from client_ui_cards import CardsUI
 from client_ui_stacks_layout import StacksLayoutUI
+from game_logger import GameLogger
+
+client_logger: GameLogger
 
 # from icecream import ic # type: ignore
 # ic.configureOutput(prefix='client_ui: ')
@@ -48,13 +51,23 @@ class GameUI:
     # _cards: CardsUI
     _stacks_layout: StacksLayoutUI
         
-    def __init__(self):
+    def __init__(self, logger: GameLogger):
+        global client_logger
+        client_logger = logger
+        
         self._table_colour = FELT_GREEN
         self._pygame_init()
         self._surface = self._window_init()
+        client_logger.info("SDL surface instantiated")
+        
         self._game_ui_state  = GameUIState()
+        client_logger.info("Game UI state instantiated")
+        
         self._cards_ui = CardsUI(GAME_HEIGHT)
+        client_logger.info("Cards UI instantiated")
+        
         self._stacks_layout = StacksLayoutUI(self._cards_ui)
+        client_logger.info("Stacks UI instantiated")
         self._game_ui_state._is_moving = False
         
 

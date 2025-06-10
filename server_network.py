@@ -4,16 +4,18 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from constants import Players
-from network_messages import ClientNetworkMessage
+# from network_messages import ClientNetworkMessage
+from game_logger import GameLogger
 
+server_logger: GameLogger
 
-from icecream import ic # type: ignore
-ic.configureOutput(prefix="server_network: ")
-def log_message(message: str):
-    # enable debug messages
-    DEBUG = True
-    if DEBUG:
-        ic(message)
+# from icecream import ic # type: ignore
+# ic.configureOutput(prefix="server_network: ")
+# def log_message(message: str):
+#     # enable debug messages
+#     DEBUG = True
+#     if DEBUG:
+#         ic(message)
 
 
 class ServerInterface(ABC):
@@ -75,8 +77,6 @@ class ServerClient:
 
     @socket.setter
     def socket(self, new_socket: Optional[Socket]) -> None:
-    # def socket(self, new_socket: Optional[Socket]) -> None:
-        log_message(f"{type(new_socket)}")
         self._socket = new_socket    
         
     @property
@@ -118,9 +118,9 @@ class ServerClient:
         if self._socket:
             try:
                 self._socket.close()
-                log_message(f"socket {self._address[0]}:{self._address[1]} closed")
+                server_logger.debug(f"socket {self._address[0]}:{self._address[1]} closed")
             except socket.error as e:
-                log_message(f"Error closing socket {self._address[0]}:{self._address[1]}: {e}")
+                server_logger.error(f"Error closing socket {self._address[0]}:{self._address[1]}: {e}")
         self._initialise_state()
 
 
@@ -136,19 +136,22 @@ class ServerConnection(ServerInterface):
     # _client1: ServerClient
     # _client2: ServerClient
 
-    def __init__(self, server_ip: str = "127.0.0.1", server_port: int = 65432):
+    def __init__(self, logger:  GameLogger, server_ip: str = "127.0.0.1", server_port: int = 65432):
+        global server_logger
+        server_logger = logger
+        
         self._server_ip = server_ip
         self._server_port = server_port
         self._server_connected = False
         self._server_socket = Socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._server_socket.bind((self._server_ip, self._server_port))
-        log_message("server socket initialised")
+        server_logger.info("server socket initialised")
         
         self._clients = {}
         self._clients[Players.PLAYER1] = ServerClient()
         self._clients[Players.PLAYER2] = ServerClient()
-        log_message("server client slots initialised")
+        server_logger.info("server client slots initialised")
 
     def __del__(self):
         self._server_socket.close()
@@ -158,9 +161,9 @@ class ServerConnection(ServerInterface):
         try:
             self._server_socket.listen()
             self._server_connected = True
-            log_message("server socket listening")
+            server_logger.info("server socket listening")
         except socket.error as e:
-            log_message(f"Error starting server: {e}")
+            server_logger.error(f"Error starting server: {e}")
             return False
         return True
     
@@ -174,9 +177,9 @@ class ServerConnection(ServerInterface):
             #     self._send_client_disconnection(self._client2)
             self._server_socket.close()
             self._server_connected = False
-            log_message("server socket closed")
+            server_logger.info("server socket closed")
         except socket.error as e:
-            log_message(f"Error stopping server: {e}")
+            server_logger.error(f"Error stopping server: {e}")
 
     def accept_connection(self) -> bool:
         this_client_socket: Optional[Socket]
@@ -187,7 +190,7 @@ class ServerConnection(ServerInterface):
         try:
             this_client_socket, this_client_address = self._server_socket.accept()
         except socket.error as e:
-            log_message(f"Error accepting connection: {e}")
+            server_logger.error(f"Error accepting connection: {e}")
             return False
         
         this_socket_fileno = this_client_socket.fileno()
@@ -196,7 +199,7 @@ class ServerConnection(ServerInterface):
             self._clients[Players.PLAYER2].has_socket:
             if self._clients[Players.PLAYER1].get_socket_fileno != this_socket_fileno and \
                 self._clients[Players.PLAYER2].get_socket_fileno != this_socket_fileno:
-                log_message("Two players already connected, cannot accept a third")
+                server_logger.warning("Two players already connected, cannot accept a third")
                 this_client_socket.close()
                 return False
 
@@ -219,7 +222,7 @@ class ServerConnection(ServerInterface):
                     self._clients[client].address = this_client_address
                     self._clients[client].is_connected = True
                     client_to_connect_already_found = True
-                    log_message(f"{client.name} reconnected at {this_client_address}")
+                    server_logger.debug(f"{client.name} reconnected at {this_client_address}")
                     
         if client_to_connect_already_found:
             return True
@@ -231,56 +234,56 @@ class ServerConnection(ServerInterface):
                 self._clients[client].socket = this_client_socket
                 self._clients[client].address = this_client_address
                 self._clients[client].is_connected = True
-                log_message(f"{client.name} connected at {this_client_address}")
+                server_logger.debug(f"{client.name} connected at {this_client_address}")
                 break
         
         return True
 
     def send_message_to_client(self, client: Players, message: str) -> bool:
         if client not in self._clients:
-            log_message("Cannot send message to {client.name}")
+            server_logger.error("Cannot send message to {client.name}")
             return False
         
         if client in self._clients.keys():
             if not self._clients[client].is_connected:
-                log_message(f"{client.name} is not connected, cannot send message")
+                server_logger.error(f"{client.name} is not connected, cannot send message")
                 return False
         
             if not self._clients[client].socket:
-                log_message("Client socket not available, cannot send message")
+                server_logger.error("Client socket not available, cannot send message")
                 return False
         
         if not isinstance(message, str):
-            log_message("Message is not a string, cannot send")
+            server_logger.error("Message is not a string, cannot send")
             return False
         
         if len(message) > 10000:
-            log_message("Message is too large, cannot send")
+            server_logger.error("Message is too large, cannot send")
             return False
         
         try:
             client_socket = self._clients[client].socket
             if client_socket is None:
-                log_message("Client socket not available, cannot send message")
+                server_logger.error("Client socket not available, cannot send message")
                 return False
             client_socket.sendall(message.encode())
             # self._clients[client].socket.sendall(message.encode())
         except socket.error as e:
-            log_message(f"Error sending message to {client.name}: {e}")
+            server_logger.error(f"Error sending message to {client.name}: {e}")
             return False
         
-        log_message(f"sent message: {message} to {client.name}")
+        server_logger.debug(f"sent message: {message} to {client.name}")
         return True
 
     def receive_message_from_client(self, client:Players) -> str:
         
         if client not in self._clients:
-            log_message(f"{client.name} cannot be used to receive messages")
+            server_logger.error(f"{client.name} cannot be used to receive messages")
             return ""
         
         if client in self._clients.keys():
             if not self._clients[client].is_connected:
-                log_message(f"{client.name} is not connected, cannot receive message from it")
+                server_logger.error(f"{client.name} is not connected, cannot receive message from it")
                 return ""
             
         received_data: bytes = b""
@@ -288,11 +291,11 @@ class ServerConnection(ServerInterface):
         try:
             client_socket = self._clients[client].socket
             if not client_socket:
-                log_message(f"{client.name} has no socket, cannot receive")
+                server_logger.error(f"{client.name} has no socket, cannot receive")
                 return ""
             received_data = client_socket.recv(1024)
         except socket.error as e:
-            log_message(f"Error receiving message from {client.name}: {e}")
+            server_logger.error(f"Error receiving message from {client.name}: {e}")
             return ""
         
         return received_data.decode()
