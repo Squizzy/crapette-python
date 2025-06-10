@@ -60,9 +60,7 @@ class Card:
     _suit: Suit
     _player_num: Players
     _face_up: bool
-    # #TODO: Work out how to do images
-    # _face_img: str
-    # _back_img: str
+
 
 
     def __init__(self, rank:Rank, suit:Suit, player_num:Players, face_img:str = "", back_img:str = "", face_up:bool = False):
@@ -78,7 +76,7 @@ class Card:
         return f"{self.rank} of {self.suit} - {face_status}"
 
     def __str__(self) -> str:
-        return self._rank.short + self._suit.short + ('u' if self._face_up else 'd')
+        return self._rank.short + self._suit.short + ('u' if self._face_up else 'd') + str(self._player_num.value)
 
     def to_dict(self) -> dict:
         # TODO: Check if still needed
