@@ -1,6 +1,8 @@
+from json import loads
+
 from constants import Players
 from network_messages import ServerNetworkMessage
-from json import loads
+
 
 from icecream import ic # type: ignore
 ic.configureOutput(prefix="message_decoder: ")
@@ -8,6 +10,7 @@ def log_message(message: str):
     DEBUG = True
     if DEBUG:
         ic(message)
+
 
 
 def decode_player_id(message: str) -> Players:
@@ -22,3 +25,14 @@ def decode_player_id(message: str) -> Players:
         raise ValueError("Incorrect message, no player ID included, or the message was not intended for this player")
     
     return Players.ERROR
+
+def decode_stacks_cards(message: str) -> dict[str, list[str]]:
+    received_message = loads(message)
+    
+    if received_message["type"] == ServerNetworkMessage.SENDING_STACKS_CARDS.value:
+        stacks = received_message["value"]
+    else:
+        log_message("decode_stacks_cards: problem getting the data")
+        
+    log_message(f"decoding_stacks_cards: {stacks=}")
+    return {}
