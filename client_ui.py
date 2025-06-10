@@ -1,8 +1,10 @@
 import pygame
 import os
 
+from constants import GAME_HEIGHT, GAME_WIDTH
 from client_ui_cards import CardsUI
 from client_ui_stacks_layout import StacksLayoutUI
+from constants import IMAGES_DIR, CARD_FACES_DIR, GAME_ICON_FILE, GAME_ICON
 
 from icecream import ic # type: ignore
 ic.configureOutput(prefix='client_ui: ')
@@ -15,7 +17,6 @@ def log_message(msg:str) -> None:
 # # dimensions of the game window
 # GAME_WIDTH: int = 1024
 # GAME_HEIGHT: int = 768
-from constants import GAME_HEIGHT, GAME_WIDTH
 
 # Initialising background colours
 FELT_GREEN = (0, 96, 0) # felt dark green 
@@ -30,7 +31,6 @@ YELLOW = (255, 255, 0) # yellow
 # GAME_ICON: pygame.Surface = pygame.image.load(GAME_ICON_FILE)
 # # GAME_ICON: pygame.Surface = pygame.image.load("img/two_backs_256x256.png")
 
-from constants import IMAGES_DIR, CARD_FACES_DIR, GAME_ICON_FILE, GAME_ICON
 
 class GameUIState:
     _is_moving: bool
