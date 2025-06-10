@@ -11,7 +11,7 @@ class TableauStacks:
     _player_num: Players
 
     def __init__(self, deck:Deck, player_num: Players):
-        if player_num not in [Players.PLAYER1, Players.PLAYER2]:
+        if player_num not in [Players.PLAYER0, Players.PLAYER1]:
             raise ValueError(f"Error: Problem initiating Tableau stacks - player specified incorrect: {player_num}")
         self._stack_name = Stacks.TABLEAU  # Name of the stack
         self._player_num =  player_num  # Player number of the stack owner

@@ -37,13 +37,13 @@ from stack_tableau import TableauStack
 # card_QS: Card = Card(rank=Rank.QUEEN, suit=Suit.SPADES, player_num=1)
 
 # One deck
-deck: Deck = Deck(Players.PLAYER1)
+deck: Deck = Deck(Players.PLAYER0)
 
 # Normal initialised deck
-tableau: TableauStack = TableauStack(deck, player_num=Players.PLAYER1)
+tableau: TableauStack = TableauStack(deck, player_num=Players.PLAYER0)
 
 # Deck initialised with some cards
-tableau1: TableauStack = TableauStack(deck, player_num=Players.PLAYER1)
+tableau1: TableauStack = TableauStack(deck, player_num=Players.PLAYER0)
 tableau1.remove_top_card()
 tableau1.force_add_card(card_8S)
 tableau1.force_add_card(card_9H)

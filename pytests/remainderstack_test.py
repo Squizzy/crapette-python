@@ -12,14 +12,14 @@ from icecream import ic #type:ignore
 from stack_remainder import RemainderStack
 
 # One deck
-deck: Deck = Deck(Players.PLAYER1)
+deck: Deck = Deck(Players.PLAYER0)
 
 # ic(deck.size)
 
 deck.draw_n_cards(13) # remove the crapette cards that won't be distributed before this test here
 deck.draw_n_cards(4) # remove the Tableau cards that won't be distributed before this test here
 
-remainder = RemainderStack(deck, Players.PLAYER1)
+remainder = RemainderStack(deck, Players.PLAYER0)
 
 def test_constructor():
     print ()
@@ -33,13 +33,13 @@ def test_constructor():
     
 def test_draw_top_card() -> None:
     # card: Card|None = remainder.draw_top_card()
-    drawn_card: TransferredCard|None = remainder.draw_top_card(Players.PLAYER1)
+    drawn_card: TransferredCard|None = remainder.draw_top_card(Players.PLAYER0)
     assert drawn_card is not None
     assert drawn_card.card == remainder.top_card
     
     tempStack: list[Card] = remainder._cards
     remainder._cards  = []
-    card = remainder.draw_top_card(Players.PLAYER1)
+    card = remainder.draw_top_card(Players.PLAYER0)
     assert not card # card is None
     remainder._cards = tempStack
 

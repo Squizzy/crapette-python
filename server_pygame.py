@@ -45,6 +45,18 @@ class GameState:
         
     def _init_stacks_cards(self) -> None:
         self._stacks_cards = {
+            "player0_crapette":      [],
+            "player0_remainder":     [],
+            "player0_bin":           [],
+            "player0_tableau0":      [],
+            "player0_tableau1":      [],
+            "player0_tableau2":      [],
+            "player0_tableau3":      [],
+            "player0_foundation0":   [],
+            "player0_foundation1":   [],
+            "player0_foundation2":   [],
+            "player0_foundation3":   [],
+            
             "player1_crapette":      [],
             "player1_remainder":     [],
             "player1_bin":           [],
@@ -56,23 +68,24 @@ class GameState:
             "player1_foundation1":   [],
             "player1_foundation2":   [],
             "player1_foundation3":   [],
-            
-            "player2_crapette":      [],
-            "player2_remainder":     [],
-            "player2_bin":           [],
-            "player2_tableau0":      [],
-            "player2_tableau1":      [],
-            "player2_tableau2":      [],
-            "player2_tableau3":      [],
-            "player2_foundation0":   [],
-            "player2_foundation1":   [],
-            "player2_foundation2":   [],
-            "player2_foundation3":   [],
         }
         self._is_player1_turn = True
         
-    def update_stacks_cards(self, player1_card_stacks: Player, player2_card_stacks: Player):
+    def update_stacks_cards(self, player0_card_stacks: Player, player1_card_stacks: Player):
 
+            self._stacks_cards["player0_crapette"] = player0_card_stacks._crapette.to_list()
+            self._stacks_cards["player0_remainder"] = player0_card_stacks._remainder.to_list()
+            self._stacks_cards["player0_bin"] = player0_card_stacks._bin.to_list()
+            self._stacks_cards["player0_tableau0"] = player0_card_stacks._tableau0.to_list()
+            self._stacks_cards["player0_tableau1"] = player0_card_stacks._tableau1.to_list()
+            self._stacks_cards["player0_tableau2"] = player0_card_stacks._tableau2.to_list()
+            self._stacks_cards["player0_tableau3"] = player0_card_stacks._tableau3.to_list()
+            self._stacks_cards["player0_foundation0"] = player0_card_stacks._foundation0.to_list()
+            self._stacks_cards["player0_foundation1"] = player0_card_stacks._foundation1.to_list()
+            self._stacks_cards["player0_foundation2"] = player0_card_stacks._foundation2.to_list()
+            self._stacks_cards["player0_foundation3"] = player0_card_stacks._foundation3.to_list()
+            server_logger.debug(f"player0_crapette updated: {self._stacks_cards['player0_crapette']}")
+            
             self._stacks_cards["player1_crapette"] = player1_card_stacks._crapette.to_list()
             self._stacks_cards["player1_remainder"] = player1_card_stacks._remainder.to_list()
             self._stacks_cards["player1_bin"] = player1_card_stacks._bin.to_list()
@@ -85,34 +98,21 @@ class GameState:
             self._stacks_cards["player1_foundation2"] = player1_card_stacks._foundation2.to_list()
             self._stacks_cards["player1_foundation3"] = player1_card_stacks._foundation3.to_list()
             server_logger.debug(f"player1_crapette updated: {self._stacks_cards['player1_crapette']}")
-            
-            self._stacks_cards["player2_crapette"] = player2_card_stacks._crapette.to_list()
-            self._stacks_cards["player2_remainder"] = player2_card_stacks._remainder.to_list()
-            self._stacks_cards["player2_bin"] = player2_card_stacks._bin.to_list()
-            self._stacks_cards["player2_tableau0"] = player2_card_stacks._tableau0.to_list()
-            self._stacks_cards["player2_tableau1"] = player2_card_stacks._tableau1.to_list()
-            self._stacks_cards["player2_tableau2"] = player2_card_stacks._tableau2.to_list()
-            self._stacks_cards["player2_tableau3"] = player2_card_stacks._tableau3.to_list()
-            self._stacks_cards["player2_foundation0"] = player2_card_stacks._foundation0.to_list()
-            self._stacks_cards["player2_foundation1"] = player2_card_stacks._foundation1.to_list()
-            self._stacks_cards["player2_foundation2"] = player2_card_stacks._foundation2.to_list()
-            self._stacks_cards["player2_foundation3"] = player2_card_stacks._foundation3.to_list()
-            server_logger.debug(f"player2_crapette updated: {self._stacks_cards['player2_crapette']}")
         
 
 class Game:
     _game_state: GameState
     _stacks_data:  dict[str, list[str]]
+    _player0: Player
     _player1: Player
-    _player2: Player
     _conn:    ServerConnection
     _game_comms: ServerGameComms
     _message_decoder: ServerMessageDecoder
     
     def __init__(self):
         # initiate the players and their game packs and stacks
+        self._player0 = Player(Players.PLAYER0)
         self._player1 = Player(Players.PLAYER1)
-        self._player2 = Player(Players.PLAYER2)
         
         # create the game state
         self._game_state = GameState()
@@ -160,7 +160,7 @@ class Game:
     
     def _get_players_cards(self) ->  dict[str, list[str]]:
 
-        self._game_state.update_stacks_cards(self._player1, self._player2)
+        self._game_state.update_stacks_cards(self._player0, self._player1)
         server_logger.debug(f"{self._game_state._stacks_cards}")
 
         return self._game_state._stacks_cards

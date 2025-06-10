@@ -12,7 +12,7 @@ class BinStack(CardStack):
     _player_num: Players
     
     def __init__(self, player_num: Players):
-        if player_num not in [Players.PLAYER1, Players.PLAYER2]:
+        if player_num not in [Players.PLAYER0, Players.PLAYER1]:
             raise ValueError(f"Error: Problem initiating Bin stack - player specified incorrect: {player_num}")
         self._stack_name = Stacks.BIN  # Name of the stack
         self._player_num = player_num  # Player number of the stack owner
@@ -41,7 +41,7 @@ class BinStack(CardStack):
                 return False
             
             if transferred_card.from_stack_name in [Stacks.CRAPETTE, Stacks.REMAINDER]:
-                if transferred_card.from_stack_owner ==  Players.PLAYER1 if self.is_player == Players.PLAYER2 else Players.PLAYER2:
+                if transferred_card.from_stack_owner ==  Players.PLAYER0 if self.is_player == Players.PLAYER1 else Players.PLAYER1:
                     return True
             
             if transferred_card.from_stack_name == Stacks.TABLEAU_STACK:

@@ -149,8 +149,8 @@ class ServerConnection(ServerInterface):
         server_logger.info("server socket initialised")
         
         self._clients = {}
+        self._clients[Players.PLAYER0] = ServerClient()
         self._clients[Players.PLAYER1] = ServerClient()
-        self._clients[Players.PLAYER2] = ServerClient()
         server_logger.info("server client slots initialised")
 
     def __del__(self):
@@ -195,10 +195,10 @@ class ServerConnection(ServerInterface):
         
         this_socket_fileno = this_client_socket.fileno()
         # Check if this is a new proposed connection or an existing one
-        if self._clients[Players.PLAYER1].has_socket and \
-            self._clients[Players.PLAYER2].has_socket:
-            if self._clients[Players.PLAYER1].get_socket_fileno != this_socket_fileno and \
-                self._clients[Players.PLAYER2].get_socket_fileno != this_socket_fileno:
+        if self._clients[Players.PLAYER0].has_socket and \
+            self._clients[Players.PLAYER1].has_socket:
+            if self._clients[Players.PLAYER0].get_socket_fileno != this_socket_fileno and \
+                self._clients[Players.PLAYER1].get_socket_fileno != this_socket_fileno:
                 server_logger.warning("Two players already connected, cannot accept a third")
                 this_client_socket.close()
                 return False

@@ -8,21 +8,21 @@ from card import Card, Rank, Suit
 from player import Players
 # import pytest
 
-card_7S = Card(rank=Rank.SEVEN, suit=Suit.SPADES, player_num=Players.PLAYER1)
-card_8H = Card(rank=Rank.EIGHT, suit=Suit.HEARTS, player_num=Players.PLAYER1)
-card_9S = Card(rank=Rank.NINE, suit=Suit.SPADES, player_num=Players.PLAYER1)
-card_QS = Card(rank=Rank.QUEEN, suit=Suit.SPADES, player_num=Players.PLAYER1)
+card_7S = Card(rank=Rank.SEVEN, suit=Suit.SPADES, player_num=Players.PLAYER0)
+card_8H = Card(rank=Rank.EIGHT, suit=Suit.HEARTS, player_num=Players.PLAYER0)
+card_9S = Card(rank=Rank.NINE, suit=Suit.SPADES, player_num=Players.PLAYER0)
+card_QS = Card(rank=Rank.QUEEN, suit=Suit.SPADES, player_num=Players.PLAYER0)
 
 
 
 def test_card_generation():
-    card_KC = Card(rank=Rank.KING, suit=Suit.CLUBS, player_num=Players.PLAYER1)
+    card_KC = Card(rank=Rank.KING, suit=Suit.CLUBS, player_num=Players.PLAYER0)
     assert card_KC._rank == Rank.KING
     assert card_KC._suit == Suit.CLUBS
     assert not card_KC._face_up
     assert card_KC._back_img == ""
     assert card_KC._face_img == ""
-    assert card_KC._player_num == Players.PLAYER1
+    assert card_KC._player_num == Players.PLAYER0
 
 
 def test_rank():

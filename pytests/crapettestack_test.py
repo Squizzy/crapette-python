@@ -20,9 +20,9 @@ from samples import card_7S_transferred_1c1
 
 
 # One deck - reset the deck size as 2 cards were taken for the tableaux above
-deck: Deck = Deck(Players.PLAYER1)
+deck: Deck = Deck(Players.PLAYER0)
 
-crapette: CrapetteStack = CrapetteStack(deck, Players.PLAYER1)
+crapette: CrapetteStack = CrapetteStack(deck, Players.PLAYER0)
 
 def test_constructor():
     print()

@@ -47,43 +47,43 @@ class PlayersGameState:
     # Returns:
     #     _type_: _description_
     """
+    _player0: GameStates.Player = GameStates.Player(0)
     _player1: GameStates.Player = GameStates.Player(0)
-    _player2: GameStates.Player = GameStates.Player(0)
 
     @classmethod
     def set_player_flag(cls, player_num: Players, flag: GameStates.Player):
-        if player_num not in [Players.PLAYER1, Players.PLAYER2]:
+        if player_num not in [Players.PLAYER0, Players.PLAYER1]:
             raise ValueError(f"Error: Problem initiating Player - player specified incorrect: {player_num}")
         # if flag not in [GameStates.Player.CRAPETTE_IS_EMPTY, GameStates.Player.REMAINDER_IS_EMPTY, GameStates.Player.BIN_IS_EMPTY]:
         #     raise ValueError(f"Error: Problem initiating Player - flag specified incorrect: {flag}")
-        if player_num == Players.PLAYER1:
-            cls._player1 |= flag
+        if player_num == Players.PLAYER0:
+            cls._player0 |= flag
         else:
-            cls._player2 |= flag
+            cls._player1 |= flag
             
     @classmethod        
     def clear_player_flag(cls, player_num: Players, flag: GameStates.Player):
-        if player_num not in [Players.PLAYER1, Players.PLAYER2]:
+        if player_num not in [Players.PLAYER0, Players.PLAYER1]:
             raise ValueError(f"Error: Problem initiating Player - player specified incorrect: {player_num}")
         # if flag not in [GameStates.Player.CRAPETTE_IS_EMPTY, GameStates.Player.REMAINDER_IS_EMPTY, GameStates.Player.BIN_IS_EMPTY]:
         #     raise ValueError(f"Error: Problem initiating Player - flag specified incorrect: {flag}")
-        if player_num == Players.PLAYER1:
-            cls._player1 &= ~flag
+        if player_num == Players.PLAYER0:
+            cls._player0 &= ~flag
         else:
-            cls._player2 &= ~flag
+            cls._player1 &= ~flag
             
     @classmethod
     def has_game_state(cls, player_num: Players, flag: GameStates.Player):
-        if player_num not in [Players.PLAYER1, Players.PLAYER2]:
+        if player_num not in [Players.PLAYER0, Players.PLAYER1]:
             raise ValueError(f"Error: Problem initiating Player - player specified incorrect: {player_num}")
         # if flag not in [GameStates.Player1.CRAPETTE_IS_EMPTY, GameStates.Player1.REMAINDER_IS_EMPTY, GameStates.Player1.BIN_IS_EMPTY]:
         #     raise ValueError(f"Error: Problem initiating Player - flag specified incorrect: {flag}") 
-        if player_num == Players.PLAYER1:
-            return bool(cls._player1 & flag)
+        if player_num == Players.PLAYER0:
+            return bool(cls._player0 & flag)
         else:
-            return bool(cls._player2 & flag)
+            return bool(cls._player1 & flag)
         
     @classmethod
     def reset_all_flags(cls):
+        cls._player0 = GameStates.Player(0)
         cls._player1 = GameStates.Player(0)
-        cls._player2 = GameStates.Player(0)
