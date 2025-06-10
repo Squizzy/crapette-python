@@ -1,0 +1,178 @@
+import pygame
+
+from constants import GAME_HEIGHT, GAME_WIDTH
+from client_ui_cards import CardsUI   
+
+
+
+class StacksLayoutUI:
+    _screen_width: int
+    _screen_height: int
+    _center_x: int
+    _center_y: int
+    _margin_x: int
+    _margin_y: int
+    _cards:  CardsUI
+    
+    def __init__(self, cards: CardsUI) -> None:
+        """
+        Initialise the stacks layout
+        Calculate the positions of the stacks
+        Store the positions in the _positions attribute
+        """
+        # Initiate the screen dimensions
+        self._screen_width = GAME_WIDTH
+        self._screen_height = GAME_HEIGHT
+        self._center_x = self._screen_width // 2
+        self._center_y = self._screen_height // 2
+        
+        # Get the cards graphics
+        self._cards = cards
+        # Initiate the margin between the stacks
+        self._margin_x = self._cards.width // 7
+        self._margin_y = self._cards.height // 7
+        
+        # Calculate the positions of the stacks for the screen dimensions
+        self._positions = self._calculate_positions()
+        
+    @property
+    def stacks_positions(self) -> dict[str, tuple[int, int, bool]]:
+        """ 
+        Get the positions of the stacks
+        
+        Returns:
+            dict[str, tuple[int, int, bool]]: a dictionary containing:
+                - key: the name of the stack
+                - values:
+                    - the top left corner coordinate of the bottom of the stack x, y
+                    - a boolean indicating if the card is placed vertically or horizontally
+        """
+        return self._positions
+    
+    # def set_screen_dimensions(self, screen_width: int, screen_height: int) -> None:
+    #     self._screen_width = screen_width
+    #     self._screen_height = screen_height
+        
+    def _calculate_positions(self) -> dict[str, tuple[int, int, bool]]:
+        """
+        Calculate the positions of the stacks
+        Assign the top left corner coordiinate of the stacks
+        Assign the orientation of the cards in the stacks
+
+        Returns:
+            dict[str, tuple[int, int, bool]]: a dictionary containing:
+                - the name of the stack
+                - the top left corner coordinate of the bottom of the stack
+                - a boolean indicating if the card is placed vertically or horizontally
+            
+        """
+        # x positions (top left corner)
+        player_center_x = self._center_x - self._cards.width // 2
+        player_left_x = player_center_x - self._cards.width - self._margin_x
+        player_right_x = player_center_x + self._cards.width + self._margin_x
+        player_foundation_x = self._center_x + self._margin_x
+        player_tableau_x = player_foundation_x + self._margin_x + self._cards.height
+        
+        opponent_center_x = self._center_x - self._cards.width // 2
+        opponent_left_x = opponent_center_x - self._cards.width - self._margin_x
+        opponent_right_x = opponent_center_x + self._cards.width + self._margin_x
+        opponent_foundation_x = self._center_x - self._margin_x - self._cards.height
+        opponent_tableau_x = opponent_foundation_x - self._margin_x - self._cards.width
+        
+        # y positions (top left corner)
+        opponent_y = self._center_y - self._cards.height * 3 - int(self._margin_y * 2.5)
+        player_y = self._center_y + self._cards.height * 2 + int(self._margin_y * 2.5)
+        tableau_top_y = self._center_y - self._cards.height * 2 - int(self._margin_y * 1.5)
+        foundation_top_y = tableau_top_y + (self._cards.height - self._cards.width) //2
+        tableau_spacing_y = self._cards.height + self._margin_y
+        # foundation_spacing_y = tableau_spacing_y + self._margin_y
+        
+        opponent_base_stacks_positions: dict[str, tuple[int, int, bool]] = {
+            "opponent_crapette":    (opponent_right_x,  opponent_y, True),
+            "opponent_remainder":   (opponent_center_x, opponent_y, True),
+            "opponent_bin":         (opponent_left_x, opponent_y, True),
+        }
+
+        player_base_stacks_positions: dict[str, tuple[int, int, bool]] = {
+            "player_crapette":  (player_left_x, player_y, True),
+            "player_remainder": (player_center_x, player_y, True),
+            "player_bin":       (player_right_x, player_y, True),
+        }
+        
+        center_stacks_positions: dict[str, tuple[int, int, bool]] = {}
+        for p in range(4):
+            o = 3 - p
+            center_stacks_positions[f"opponent_tableau_{o}"] = (opponent_tableau_x, tableau_top_y + tableau_spacing_y * o, True)
+            center_stacks_positions[f"opponent_foundation_{o}"] = (opponent_foundation_x, foundation_top_y + tableau_spacing_y * o, False)
+            center_stacks_positions[f"player_tableau_{p}"] = (player_tableau_x, tableau_top_y + tableau_spacing_y * p, True)
+            center_stacks_positions[f"player_foundation_{p}"] = (player_foundation_x, foundation_top_y + tableau_spacing_y * p, False)
+
+    #             f"opponent_tableau_4":   (opponent_tableau_x, tableau_top_y, True),
+    #             f"opponent_tableau_3":   (opponent_tableau_x, tableau_top_y + tableau_spacing_y, True),
+    #             f"opponent_tableau_2":   (opponent_tableau_x, tableau_top_y + tableau_spacing_y * 2, True),
+    #             f"opponent_tableau_1":   (opponent_tableau_x, tableau_top_y + tableau_spacing_y * 3, True),
+    #             f
+    #             f"opponent_foundation_4": (opponent_foundation_x, foundation_top_y, False),
+    #             f"opponent_foundation_3": (opponent_foundation_x, foundation_top_y + foundation_spacing_y, False),
+    #             f"opponent_foundation_2": (opponent_foundation_x, foundation_top_y + foundation_spacing_y * 2, False),
+    #             f"opponent_foundation_1": (opponent_foundation_x, foundation_top_y + foundation_spacing_y * 3, False),
+    # f
+    #             f"player_foundation_1": (player_foundation_x, foundation_top_y, False),
+    #             f"player_foundation_2": (player_foundation_x, foundation_top_y + foundation_spacing_y, False),
+    #             f"player_foundation_3": (player_foundation_x, foundation_top_y + foundation_spacing_y * 2, False),
+    #             f"player_foundation_4": (player_foundation_x, foundation_top_y + foundation_spacing_y * 3, False),
+    # f
+    #             f"player_tableau_1": (player_tableau_x, tableau_top_y, True),
+    #             f"player_tableau_2": (player_tableau_x, tableau_top_y + tableau_spacing_y, True),
+    #             f"player_tableau_3": (player_tableau_x, tableau_top_y + tableau_spacing_y * 2, True),
+    #             f"player_tableau_4": (player_tableau_x, tableau_top_y + tableau_spacing_y * 3, True),
+
+        # }
+        # combine the 3 dictionaries
+        stacks_positions = opponent_base_stacks_positions |center_stacks_positions | player_base_stacks_positions    
+        return stacks_positions
+    
+    def update_stacks_positions_and_sizes(self, width: int, height: int, cards: CardsUI) -> None:
+        """
+        Resize the screen
+        Recalculate the positions of the stacks
+        
+        Args:
+            width, height (int): new dimensions of the screen
+            cards (Cards): the set of card graphics to use
+        """
+        # update the screen dimensions
+        self._screen_width = width
+        self._screen_height = height
+        self._center_x = self._screen_width // 2
+        self._center_y = self._screen_height // 2
+        
+        # update the card dimensions
+        self._cards = cards
+        self._cards.scale_cards_faces(height)
+
+        # update the margin between the stacks
+        self._margin_x = self._cards.width // 7
+        self._margin_y = self._cards.height // 7
+        
+        # calculate the positions of the stacks
+        self._positions = self._calculate_positions()
+
+    def render_empty_stacks(self, surface: pygame.Surface, cards: CardsUI):
+        """
+        Display the stacks positions using an empty card. 
+
+        Args:
+            surface (pygame.Surface): The surface to display on
+            cards (Cards): the set of card graphics to use
+        """
+        stacks_positions = self.stacks_positions
+        
+        card_face: str = "EC"
+        # card_face = "HQ"
+        
+        for stack in stacks_positions:
+            blit_blank = self._cards.faces[card_face] if stacks_positions[stack][2] \
+                                        else pygame.transform.rotate(self._cards.faces[card_face].copy(), 90)
+            
+            surface.blit(blit_blank, (stacks_positions[stack][0], stacks_positions[stack][1]) )
