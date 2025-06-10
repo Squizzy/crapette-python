@@ -40,7 +40,7 @@ class ColoredFormatter(logging.Formatter):
 
     def format(self, record):
         # global log_time, log_message
-        log_fmt = f"{self.log_time} - {self.log_levels.get(record.levelno)} - {self.log_message}"
+        log_fmt = f"{self.log_time} {self.log_levels.get(record.levelno)} {self.log_message}"
         # log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt, datefmt="%Y/%m/%d %H:%M:%S")
         return formatter.format(record)
@@ -93,24 +93,24 @@ class GameLogger:
     def debug(self, message:str) -> None:
         caller = self._get_caller_info()
         log_caller = f"{LogColours.CALLER}{caller}{TextColours.RESET}"
-        self.logger.debug(f"{log_caller} - {message}")
+        self.logger.debug(f"{log_caller} {message}")
         
     def info(self, message:str) -> None:
         caller = self._get_caller_info()
         log_caller = f"{LogColours.CALLER}{caller}{TextColours.RESET}"
-        self.logger.info(f"{log_caller} - {message}")
+        self.logger.info(f"{log_caller} {message}")
         
     def warning(self, message:str) -> None:
         caller = self._get_caller_info()
         log_caller = f"{LogColours.CALLER}{caller}{TextColours.RESET}"
-        self.logger.warning(f"{log_caller} - {message}")
+        self.logger.warning(f"{log_caller} {message}")
         
     def error(self, message:str) -> None:
         caller = self._get_caller_info()
         log_caller = f"{LogColours.CALLER}{caller}{TextColours.RESET}"
-        self.logger.error(f"{log_caller} - {message}")
+        self.logger.error(f"{log_caller} {message}")
         
     def critical(self, message:str) -> None:
         caller = self._get_caller_info()
         log_caller = f"{LogColours.CALLER}{caller}{TextColours.RESET}"
-        self.logger.critical(f"{log_caller} - {message}")
+        self.logger.critical(f"{log_caller} {message}")
