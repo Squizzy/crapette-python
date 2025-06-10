@@ -4,6 +4,7 @@ from server_network import  ServerConnection
 from server_game_comms import ServerGameComms
 from network_messages import ClientNetworkMessage
 
+from json import loads
 
 
 
@@ -156,16 +157,26 @@ class Game:
 
         return self._game_state._stacks_cards
 
-    def _process_messages_received(self, message: ClientNetworkMessage, client: Players):
-        if message == ClientNetworkMessage.SEND_PLAYER_ID.name:
+    def _process_messages_received(self, msg: str, client: Players):
+        
+        log_message(f"received message: {msg}")
+        log_message(f"received message: {ClientNetworkMessage.QUIT.value}")
+        message = loads(msg)["type"]
+        # log_message(f"received message: {message}")
+        # log_message(f"received message: {ClientNetworkMessage.SEND_PLAYER_ID}")
+        # log_message(f"received message: {message["type"]}")
+        # log_message(f"received message: {ClientNetworkMessage.SEND_PLAYER_ID.name}")
+        if message == ClientNetworkMessage.SEND_PLAYER_ID.value:
+            log_message("YES")
             self._game_comms.send_player_id(client)
                 
-        elif message == ClientNetworkMessage.SEND_STACKS_CARDS.name:
+        elif message == ClientNetworkMessage.SEND_STACKS_CARDS.value:
             self._game_comms.send_stacks_cards(client, self._game_state._stacks_cards)
             # return "send_stacks_cards"
             
-        elif message == ClientNetworkMessage.QUIT.name:
+        elif message == ClientNetworkMessage.QUIT.value:
             # self._acknowledge("quit accepted")
+            log_message("Ok, about to quit")
             self._game_state._is_running = False
         ...
 
