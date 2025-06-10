@@ -1,7 +1,9 @@
 import socket
-from constants import Players
 from json import loads
+from abc import ABC, abstractmethod
 
+
+from constants import Players
 from network_messages import ClientNetworkMessage
 from message_decoder import decode_player_id
 
@@ -14,31 +16,56 @@ def log_message(message: str):
     if DEBUG:
         ic(message)
 
+class ClientInterface(ABC):
+    @abstractmethod
+    def connect(self) -> None:
+        """Connect to the server"""
+        pass
 
-class ClientConnection:
-    # _client_ip: str
-    # _client_port: int
+    @abstractmethod
+    def disconnect(self) -> None:
+        """Disconnect from the server"""
+        pass
+
+    @abstractmethod
+    def send_message(self, message: str) -> None:
+        """Send a message to the server"""
+        pass
+
+    @abstractmethod
+    def receive_message(self) -> str:
+        """Receive a message from the server"""
+        pass
+    
+    @abstractmethod
+    def is_connected(self) -> bool:
+        """Check if the client is connected to the server"""
+        pass
+
+
+class ClientConnection(ClientInterface):
+
     _server_ip: str
     _server_port: int
     _client_socket: socket.socket
-    _connected: bool
+    _is_connected: bool
     _player_id: int
     _stacks_cards: list[bytes]
     
     def __init__(self, server_ip:str = "127.0.0.1", server_port: int=65432) -> None:
         self._server_ip = server_ip
         self._server_port = server_port
-        self._connected = False
+        self._is_connected = False
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         log_message("client socket initialised")
 
-    def __del__(self):
-        # shut down the sockets so all connections are closed
-        # self._client_socket.shutdown(socket.SHUT_RDWR)
-        # close the socket to deallocate it
-        self._client_socket.close()
-        # log_message("client socket closed")
+    # def __del__(self):
+    #     # shut down the sockets so all connections are closed
+    #     # self._client_socket.shutdown(socket.SHUT_RDWR)
+    #     # close the socket to deallocate it
+    #     self._client_socket.close()
+    #     # log_message("client socket closed")
 
     def connect(self) -> None:
         """
@@ -51,26 +78,76 @@ class ClientConnection:
         
         log_message("client connecting to server")
         
-        if self._connected:
+        if self._is_connected:
             log_message("client already connected")
+            return
 
         else:        
-            log_message("requesting connection")
+            # log_message("requesting connection")
             try:
                 self._client_socket.connect((self._server_ip, self._server_port))
             except ConnectionError as e:
                 raise ConnectionError(f"Failed to connect to server: {e}")
         
-        self._connected = True
+        self._is_connected = True
         log_message("Connected to server")        
+
     def disconnect(self):
         """
         Disconnect from the server
         Probably not strictly necessary? To be checked later
         """
-        self.__del__()
-        self._connected = False
+        # self.__del__()
+        # TODO: Announce client disconnection to the server
+        self._client_socket.shutdown()
+        self._client_socket.close()
+        self._is_connected = False
         log_message("_disconnect: client disconnected")
+
+    def send_message(self, message: str) -> None:
+    # def send_message(self, client: Players, message: str) -> None:
+        """
+        Send a message to the server
+        """
+
+        log_message(f"client sending message to server")
+        # log_message(f"{client.name} sending message to server")
+
+        try:
+            self._client_socket.sendall(message.encode())
+        except socket.error as e:
+            raise ConnectionError(f"Failed to send message to server: {e}")
+        
+        log_message("message sent")
+
+    def receive_message(self) -> str:
+        """
+        Receive a message from the server
+        """
+        log_message("player receiving message from server")
+        # log_message(f"{self._player_id} receiving message from server")
+        
+        data: bytes = b""
+        try:
+            data = self._client_socket.recv(1024)
+            if not data:
+                raise ConnectionError(f"client received no data")
+            received_message: str = data.decode()
+        except ConnectionError as e:
+            raise ConnectionError(f"Failed to receive message from server: {e}")
+
+        log_message(f"receive_message: player data received: {len(received_message)=}")
+        # log_message(f"receive_message: {self._player_id} data received: {len(received_message)=}")
+        
+        return received_message
+
+    def is_connected(self) -> bool:
+        """
+        Check if the client is connected to the server
+        """
+        return self._is_connected
+
+
 
     def _send(self, data: str):
         """
@@ -125,70 +202,71 @@ class ClientConnection:
         # log_message(received_message)
         return received_message
 
-    def request_player_id_from_server(self) -> Players:
-        """
-        find out if we are player1 or player2
+    # def request_player_id_from_server(self) -> Players:
+    #     """
+    #     find out if we are player1 or player2
 
-        Returns:
-            Players: Players.PLAYER1 or 2
-        """
-        log_message("request_player_id_from_server: sending request")
+    #     Returns:
+    #         Players: Players.PLAYER1 or 2
+    #     """
+    #     log_message("request_player_id_from_server: sending request")
         
-        # message = "send_player_id"
-        message = ClientNetworkMessage.SEND_PLAYER_ID
-        self._send_request(message)
+    #     # message = "send_player_id"
+    #     message = ClientNetworkMessage.SEND_PLAYER_ID
+    #     self._send_request(message)
         
-        data: str = self._recv(1024)
-        # message =  loads(data)
+    #     data: str = self._recv(1024)
+    #     # message =  loads(data)
         
-        # # if data == b"":
-        # #     log_message("no client player id received")
-        # #     return None
-        # # else:
+    #     # # if data == b"":
+    #     # #     log_message("no client player id received")
+    #     # #     return None
+    #     # # else:
         
-        # #TODO: Convert to Playsers - maybe even using a dedicated method
-        # print(type(data))
-        # self._player_id = int(message)
-        # log_message(f"client player id received: {self._player_id}")
+    #     # #TODO: Convert to Playsers - maybe even using a dedicated method
+    #     # print(type(data))
+    #     # self._player_id = int(message)
+    #     # log_message(f"client player id received: {self._player_id}")
         
-        # answer = client_message_decoder.player_id(message)
+    #     # answer = client_message_decoder.player_id(message)
         
-        player = decode_player_id(data)
+    #     player = decode_player_id(data)
         
-        # return self._player_id
-        return player
+    #     # return self._player_id
+    #     return player
 
-    def server_get_stacks_cards(self):
+    # def server_get_stacks_cards(self):
         
-        log_message("server_get_stacks_cards: client requesting stacks cards")
+    #     log_message("server_get_stacks_cards: client requesting stacks cards")
         
-        # # empty the current stacks
-        # self._stacks_cards = []
+    #     # # empty the current stacks
+    #     # self._stacks_cards = []
         
-        # set the request
-        self._send_request(ClientNetworkMessage.SEND_STACKS_CARDS)
+    #     # set the request
+    #     self._send_request(ClientNetworkMessage.SEND_STACKS_CARDS)
         
-        # receive the stacks cards
-        # TODO: adjust max size sometimes - this is a little bit of an overkill...
-        data = self._recv(10000)
+    #     # receive the stacks cards
+    #     # TODO: adjust max size sometimes - this is a little bit of an overkill...
+    #     data = self._recv(10000)
         
-        # message = loads(data)
+    #     # message = loads(data)
 
-        # if the stacks cards are not empty, print the stacks cards
-        # if len(self._stacks_cards) > 0:
-        if len(data) >0:
-            info = loads(data)
-            log_message(f"client stacks cards received: {info}")
-        else:
-            log_message("no client stacks cards received")
+    #     # if the stacks cards are not empty, print the stacks cards
+    #     # if len(self._stacks_cards) > 0:
+    #     if len(data) >0:
+    #         info = loads(data)
+    #         log_message(f"client stacks cards received: {info}")
+    #     else:
+    #         log_message("no client stacks cards received")
             
 
-    def server_quit(self) -> None:
-        log_message("server_quit: client quitting")
-        message = ClientNetworkMessage.QUIT
-        self._send_request(message)
+    # def server_quit(self) -> None:
+    #     log_message("server_quit: client quitting")
+    #     self.
+    #     message = ClientNetworkMessage.QUIT
+    #     self._send_request(message)
        
-        self.disconnect()
+    #     self.disconnect()
 
 
 if __name__ in "__main__":
@@ -198,11 +276,11 @@ if __name__ in "__main__":
     # for i in range(1):
     #     print('.', end='', flush=True)
     #     time.sleep(1)
-    cc.request_player_id_from_server()
-    cc.server_get_stacks_cards()
+    # cc.request_player_id_from_server()
     # cc.server_get_stacks_cards()
     # cc.server_get_stacks_cards()
-    cc.server_quit()
+    # cc.server_get_stacks_cards()
+    # cc.server_quit()
     # cc.disconnect()
     # while cc._connected:
     #     print('.', end='', flush=True)
