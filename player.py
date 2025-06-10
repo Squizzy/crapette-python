@@ -4,7 +4,7 @@ from stack_crapette import CrapetteStack
 from stack_remainder import RemainderStack
 from stack_bin import BinStack
 # from stacks_tableau import TableauStacks
-from stacks_tableau import TableauStack
+from stack_tableau import TableauStack
 # from stacks_foundation import FoundationStacks
 from stack_foundation import FoundationStack
 from constants import Players
