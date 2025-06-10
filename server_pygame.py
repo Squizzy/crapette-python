@@ -1,20 +1,23 @@
+from json import loads
+
 from player import Player
 from constants import Players
 from server_network import  ServerConnection
 from server_game_comms import ServerGameComms
 from network_messages import ClientNetworkMessage
+from server_msg_decoder import ServerMessageDecoder
+from game_logger import GameLogger
 
-from json import loads
 
+server_logger: GameLogger
 
-
-from icecream import ic # type: ignore
-ic.configureOutput(prefix="server_pygame: ")
-def log_message(message: str):
-    # enable debug messages
-    DEBUG = True
-    if DEBUG:
-        ic(message)
+# from icecream import ic # type: ignore
+# ic.configureOutput(prefix="server_pygame: ")
+# def log_message(message: str):
+#     # enable debug messages
+#     DEBUG = True
+#     if DEBUG:
+#         ic(message)
 
 
 class GameState:
@@ -81,7 +84,7 @@ class GameState:
             self._stacks_cards["player1_foundation1"] = player1_card_stacks._foundation1.to_list()
             self._stacks_cards["player1_foundation2"] = player1_card_stacks._foundation2.to_list()
             self._stacks_cards["player1_foundation3"] = player1_card_stacks._foundation3.to_list()
-            log_message(f"player1_crapette updated: {self._stacks_cards['player1_crapette']}")
+            server_logger.debug(f"player1_crapette updated: {self._stacks_cards['player1_crapette']}")
             
             self._stacks_cards["player2_crapette"] = player2_card_stacks._crapette.to_list()
             self._stacks_cards["player2_remainder"] = player2_card_stacks._remainder.to_list()
@@ -94,7 +97,7 @@ class GameState:
             self._stacks_cards["player2_foundation1"] = player2_card_stacks._foundation1.to_list()
             self._stacks_cards["player2_foundation2"] = player2_card_stacks._foundation2.to_list()
             self._stacks_cards["player2_foundation3"] = player2_card_stacks._foundation3.to_list()
-            log_message(f"player2_crapette updated: {self._stacks_cards['player2_crapette']}")
+            server_logger.debug(f"player2_crapette updated: {self._stacks_cards['player2_crapette']}")
         
 
 class Game:
@@ -104,6 +107,7 @@ class Game:
     _player2: Player
     _conn:    ServerConnection
     _game_comms: ServerGameComms
+    _message_decoder: ServerMessageDecoder
     
     def __init__(self):
         # initiate the players and their game packs and stacks
@@ -112,10 +116,14 @@ class Game:
         
         # create the game state
         self._game_state = GameState()
-        log_message("server game state initialised")
+        server_logger.info("server game state initialised")
+        
+        self._message_decoder = ServerMessageDecoder(server_logger)
         
         # load the player cards into the game state
         self._stacks_data = self._get_players_cards()
+        server_logger.info("cards dealt")
+        server_logger.warning("cards currently not shuffled")
 
         # log_message("establishing network server")
         # self._conn = ServerConnection()
@@ -134,49 +142,50 @@ class Game:
         #     self._conn.close_connection()
         #     raise
         
-        self._conn = ServerConnection()
-        log_message("Instantiating network server")
+        self._conn = ServerConnection(server_logger)
+        server_logger.info("Instantiating network server")
         
         self._conn.start()
-        log_message("network server started")
+        server_logger.info("network server started")
         
-        self._game_comms = ServerGameComms(self._conn)
-        log_message("server game comms initialised")
+        self._game_comms = ServerGameComms(server_logger, self._conn)
+        server_logger.info("server game comms initialised")
         
         self._conn.accept_connection()
-        log_message("connected to client")
+        server_logger.info("connected to client")
 
         self._game_loop()
-        log_message("game loop ended")
+        server_logger.info("game loop ended")
     
     
     def _get_players_cards(self) ->  dict[str, list[str]]:
 
         self._game_state.update_stacks_cards(self._player1, self._player2)
-        log_message(f"{self._game_state._stacks_cards}")
+        server_logger.debug(f"{self._game_state._stacks_cards}")
 
         return self._game_state._stacks_cards
 
     def _process_messages_received(self, msg: str, client: Players):
         
-        log_message(f"received message: {msg}")
-        log_message(f"received message: {ClientNetworkMessage.QUIT.value}")
-        message = loads(msg)["type"]
+        # server_logger.debug(f"received message: {msg}")
+        # server_logger.debug(f"received message: {ClientNetworkMessage.QUIT.value}")
+        # message = loads(msg)["type"]
+        message = self._message_decoder.decode_request(msg)
+        
         # log_message(f"received message: {message}")
         # log_message(f"received message: {ClientNetworkMessage.SEND_PLAYER_ID}")
         # log_message(f"received message: {message["type"]}")
         # log_message(f"received message: {ClientNetworkMessage.SEND_PLAYER_ID.name}")
-        if message == ClientNetworkMessage.SEND_PLAYER_ID.value:
-            log_message("YES")
+        if message == ClientNetworkMessage.SEND_PLAYER_ID:
             self._game_comms.send_player_id(client)
                 
-        elif message == ClientNetworkMessage.SEND_STACKS_CARDS.value:
+        elif message == ClientNetworkMessage.SEND_STACKS_CARDS:
             self._game_comms.send_stacks_cards(client, self._game_state._stacks_cards)
             # return "send_stacks_cards"
             
-        elif message == ClientNetworkMessage.QUIT.value:
+        elif message == ClientNetworkMessage.QUIT:
             # self._acknowledge("quit accepted")
-            log_message("Ok, about to quit")
+            server_logger.info("Ok, about to quit")
             self._game_state._is_running = False
         ...
 
@@ -184,7 +193,7 @@ class Game:
     def _quit(self) -> None:
         self._game_state._is_running = False
         self._conn.stop()
-        log_message("server stopped")
+        server_logger.info("server stopped")
 
 
     def _game_loop(self):
@@ -215,15 +224,16 @@ class Game:
             #     continue
             
         self._quit()
-        log_message("server game loop ended")
+        server_logger.info("server game loop ended")
 
 
 
 if __name__ == "__main__":
+    server_logger = GameLogger("server_logger")
     
-    log_message("Starting server")
+    server_logger.info("Starting server")
     game_server = Game()
-    log_message("Game server started")
+    server_logger.info("Game server started")
     
     # game_state = GameState()
     # log_message("server game state initialised")
