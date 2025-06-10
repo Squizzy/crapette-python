@@ -1,21 +1,22 @@
 from enum import Enum
-from stack_crapette import CrapetteStack
-from deck import Deck
-from constants import Players
-from json import dumps, loads
+# from stack_crapette import CrapetteStack
+# from deck import Deck
+# from constants import Players
+# from json import dumps, loads
 
-from icecream import ic # type: ignore
-ic.configureOutput(prefix="network messages: ")
-def log_message(message: str):
-    # enable debug messages
-    DEBUG = True
-    if DEBUG:
-        ic(message)
+# from icecream import ic # type: ignore
+# ic.configureOutput(prefix="network messages: ")
+# def log_message(message: str):
+#     # enable debug messages
+#     DEBUG = True
+#     if DEBUG:
+#         ic(message)
 
 
 
 
 class ClientNetworkMessage(Enum):
+    NONE = ''
     # connectivity messages
     CONNECT  = 'connect'
     DISCONNECT = 'disconnect'
@@ -27,6 +28,7 @@ class ClientNetworkMessage(Enum):
 
 
 class ServerNetworkMessage(Enum):
+    NONE = ''
     # connectivity messages
 
     # game messages
