@@ -138,7 +138,7 @@ class ClientConnection(ClientInterface):
         
         data: bytes = b""
         try:
-            data = self._client_socket.recv(1024)
+            data = self._client_socket.recv(1500)
             if not data:
                 raise ConnectionError("client received no data")
             received_message: str = data.decode()
