@@ -269,7 +269,7 @@ class ServerConnection(ServerInterface):
             log_message(f"Error sending message to {client.name}: {e}")
             return False
         
-        log_message("sent message: {message} to {client.name}")
+        log_message(f"sent message: {message} to {client.name}")
         return True
 
     def receive_message_from_client(self, client:Players) -> str:
