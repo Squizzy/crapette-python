@@ -1,17 +1,18 @@
 import pygame
-import os
+# import os
 
 from constants import GAME_HEIGHT, GAME_WIDTH
+from constants import GAME_ICON
+# from constants import IMAGES_DIR, CARD_FACES_DIR, GAME_ICON_FILE
 from client_ui_cards import CardsUI
 from client_ui_stacks_layout import StacksLayoutUI
-from constants import IMAGES_DIR, CARD_FACES_DIR, GAME_ICON_FILE, GAME_ICON
 
-from icecream import ic # type: ignore
-ic.configureOutput(prefix='client_ui: ')
-def log_message(msg:str) -> None:
-    DEBUG = True
-    if DEBUG:
-        ic(msg)
+# from icecream import ic # type: ignore
+# ic.configureOutput(prefix='client_ui: ')
+# def log_message(msg:str) -> None:
+#     DEBUG = True
+#     if DEBUG:
+#         ic(msg)
 
 
 # # dimensions of the game window

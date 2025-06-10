@@ -2,22 +2,22 @@ import socket
 from abc import ABC, abstractmethod
 # from json import loads
 
-from network_messages import ClientNetworkMessage
+# from network_messages import ClientNetworkMessage
 from game_logger import GameLogger
 # from constants import Players
 # from message_decoder import decode_player_id
 
 
-from icecream import ic # type: ignore
 client_logger: GameLogger
 
-ic.configureOutput(prefix="client_network: ")
-def log_message(message: str):
-    # enable debug messages
-    DEBUG = True
-    if DEBUG:
-        ic(message)
-        client_logger.debug(message)
+# from icecream import ic # type: ignore
+# ic.configureOutput(prefix="client_network: ")
+# def log_message(message: str):
+#     # enable debug messages
+#     DEBUG = True
+#     if DEBUG:
+#         ic(message)
+#         client_logger.debug(message)
 
 
 class ClientInterface(ABC):
@@ -67,7 +67,7 @@ class ClientConnection(ClientInterface):
         self._is_connected = False
         self._client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        log_message("client socket initialised")
+        client_logger.debug("client socket initialised")
 
     # def __del__(self):
     #     # shut down the sockets so all connections are closed
@@ -85,10 +85,10 @@ class ClientConnection(ClientInterface):
             Nothing
         """
         
-        log_message("client connecting to server")
+        client_logger.debug("client connecting to server")
         
         if self._is_connected:
-            log_message("client already connected")
+            client_logger.debug("client already connected")
             return
 
         else:        
@@ -99,7 +99,7 @@ class ClientConnection(ClientInterface):
                 raise ConnectionError(f"Failed to connect to server: {e}")
         
         self._is_connected = True
-        log_message("Connected to server")        
+        client_logger.debug("Connected to server")        
 
     def disconnect(self):
         """
@@ -111,7 +111,7 @@ class ClientConnection(ClientInterface):
         self._client_socket.shutdown()
         self._client_socket.close()
         self._is_connected = False
-        log_message("_disconnect: client disconnected")
+        client_logger.debug("client disconnected")
 
     def send_message(self, message: str) -> None:
     # def send_message(self, client: Players, message: str) -> None:
@@ -119,7 +119,7 @@ class ClientConnection(ClientInterface):
         Send a message to the server
         """
 
-        log_message("client sending message to server")
+        client_logger.debug("client sending message to server")
         # log_message(f"{client.name} sending message to server")
 
         try:
@@ -127,13 +127,13 @@ class ClientConnection(ClientInterface):
         except socket.error as e:
             raise ConnectionError(f"Failed to send message to server: {e}")
         
-        log_message("message sent")
+        client_logger.debug("message sent")
 
     def receive_message(self) -> str:
         """
         Receive a message from the server
         """
-        log_message("player receiving message from server")
+        client_logger.debug("player receiving message from server")
         # log_message(f"{self._player_id} receiving message from server")
         
         data: bytes = b""
@@ -145,7 +145,7 @@ class ClientConnection(ClientInterface):
         except ConnectionError as e:
             raise ConnectionError(f"Failed to receive message from server: {e}")
 
-        log_message(f"receive_message: player data received: {len(received_message)=}")
+        client_logger.debug(f"receive_message: player data received: {len(received_message)=}")
         # log_message(f"receive_message: {self._player_id} data received: {len(received_message)=}")
         
         return received_message
@@ -158,58 +158,58 @@ class ClientConnection(ClientInterface):
 
 
 
-    def _send(self, data: str):
-        """
-        Send data to the server. 
-        Data needs to be a string (ideally json encoded)
+    # def _send(self, data: str):
+    #     """
+    #     Send data to the server. 
+    #     Data needs to be a string (ideally json encoded)
 
-        Args:
-            data (str): text content to transfer
-        """
+    #     Args:
+    #         data (str): text content to transfer
+    #     """
         
-        log_message("_send: sending data")
-        self._client_socket.sendall(data.encode())
-        log_message("_send: data sent")
+    #     client_logger.debug("sending data")
+    #     self._client_socket.sendall(data.encode())
+    #     log_message("_send: data sent")
 
-    def _send_request(self, message: ClientNetworkMessage) -> None:
-        """
-        Send a request to the server.
-        Data is a ClientNetworkMessage object
-        """
+    # def _send_request(self, message: ClientNetworkMessage) -> None:
+    #     """
+    #     Send a request to the server.
+    #     Data is a ClientNetworkMessage object
+    #     """
         
-        log_message(f"_send_request {message}: {message.name}")
-        self._client_socket.sendall(message.name.encode())
-        log_message("_send_request sent")
+    #     log_message(f"_send_request {message}: {message.name}")
+    #     self._client_socket.sendall(message.name.encode())
+    #     log_message("_send_request sent")
 
-    def _recv(self, max_buffer_size: int) -> str:
-        """
-        Receives data from the server and returns it as a string (maybe json encoded?).
+    # def _recv(self, max_buffer_size: int) -> str:
+    #     """
+    #     Receives data from the server and returns it as a string (maybe json encoded?).
 
-        Args:
-            max_buffer_size (int): maximum buffer size in bytees to receive data
+    #     Args:
+    #         max_buffer_size (int): maximum buffer size in bytees to receive data
 
-        Returns:
-            str: the received data in string format
-        """
-        log_message("_recv: client receiving data")
-        data: bytes = b""
-        received_message: str = ""
-        data = self._client_socket.recv(max_buffer_size)
-        received_message = data.decode()
-        # while True:
-        #     data = self._client_socket.recv(max_buffer_size)
-        #     # ic(f"_recv:client received data: {data.decode()}")
-        #     if data == b"":
-        #         if received_message == "":
-        #             continue
-        #         else:
-        #             break
-        #     else:
-        #         received_message += data.decode()
+    #     Returns:
+    #         str: the received data in string format
+    #     """
+    #     log_message("_recv: client receiving data")
+    #     data: bytes = b""
+    #     received_message: str = ""
+    #     data = self._client_socket.recv(max_buffer_size)
+    #     received_message = data.decode()
+    #     # while True:
+    #     #     data = self._client_socket.recv(max_buffer_size)
+    #     #     # ic(f"_recv:client received data: {data.decode()}")
+    #     #     if data == b"":
+    #     #         if received_message == "":
+    #     #             continue
+    #     #         else:
+    #     #             break
+    #     #     else:
+    #     #         received_message += data.decode()
          
-        log_message(f"_recv: client received data finished. {len(received_message)=} received")
-        # log_message(received_message)
-        return received_message
+    #     log_message(f"_recv: client received data finished. {len(received_message)=} received")
+    #     # log_message(received_message)
+    #     return received_message
 
     # def request_player_id_from_server(self) -> Players:
     #     """

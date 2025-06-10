@@ -4,16 +4,18 @@ from json import loads
 from constants import Players
 from client_network import ClientInterface
 from network_messages import ClientNetworkMessage, ServerNetworkMessage
-from message_encoder import encode_request
+# from message_encoder import encode_request
+from client_msg_encoder import ClientMessageEncoder
+from game_logger import GameLogger
 
-
-from icecream import ic # type: ignore
-ic.configureOutput(prefix="client_network: ")
-def log_message(message: str):
-    # enable debug messages
-    DEBUG = True
-    if DEBUG:
-        ic(message)
+client_logger: GameLogger
+# from icecream import ic # type: ignore
+# ic.configureOutput(prefix="client_network: ")
+# def log_message(message: str):
+#     # enable debug messages
+#     DEBUG = True
+#     if DEBUG:
+#         ic(message)
         
 
 class ClientGameCommsInterface(ABC):
@@ -30,9 +32,13 @@ class ClientGameCommsInterface(ABC):
 
 class ClientGameComms(ClientGameCommsInterface):
     _connection: ClientInterface
+    _client_message_encoder: ClientMessageEncoder
     
-    def __init__(self, connection) -> None:
+    def __init__(self, logger: GameLogger, connection: ClientInterface) -> None:
+        global client_logger
+        client_logger = logger
         self._connection = connection
+        self._client_message_encoder = ClientMessageEncoder(logger)
 
     def get_player_id(self) -> Players:
         """
@@ -41,9 +47,9 @@ class ClientGameComms(ClientGameCommsInterface):
         Returns:
             bool: True if sending request succeeded
         """
-        log_message("request_player_id: sending request")
+        client_logger.debug("sending player_id request")
         
-        message = encode_request(ClientNetworkMessage.SEND_PLAYER_ID)
+        message = self._client_message_encoder.encode_request(ClientNetworkMessage.SEND_PLAYER_ID)
         
         # try:
         self._connection.send_message(message)
@@ -58,7 +64,8 @@ class ClientGameComms(ClientGameCommsInterface):
         while received_message["type"] != ServerNetworkMessage.SENDING_PLAYER_ID.value:
             message = self._connection.receive_message()
             received_message = loads(message)
-            log_message(f"received message: {received_message}")
+            
+            client_logger.debug(f"received message: {received_message}")
         
         # return Players(int(received_message["value"]))
         player = str(received_message["value"]).strip().upper()
@@ -75,18 +82,18 @@ class ClientGameComms(ClientGameCommsInterface):
             bool: True if sending request succeeded
         """
         
-        log_message("server_get_stacks_cards: client requesting stacks cards")
+        client_logger.debug("client requesting stacks cards")
         
         # # empty the current stacks
         # self._stacks_cards = []
         
         # set the request
-        message = encode_request(ClientNetworkMessage.SEND_STACKS_CARDS)
+        message = self._client_message_encoder.encode_request(ClientNetworkMessage.SEND_STACKS_CARDS)
         
         try:
             self._connection.send_message(message)
         except Exception as e:
-            log_message(f"error sending request: {e}")
+            client_logger.error(f"error sending request: {e}")
             return False
         
         return True
@@ -107,9 +114,9 @@ class ClientGameComms(ClientGameCommsInterface):
         #     log_message("no client stacks cards received")
             
     def server_quit(self) -> None:
-        log_message("server_quit: client quitting")
+        client_logger.debug("client sending server notification of quuitting")
         
-        message = encode_request(ClientNetworkMessage.QUIT)
+        message = self._client_message_encoder.encode_request(ClientNetworkMessage.QUIT)
         self._connection.send_message(message)
         # self._send_request(message)
        
