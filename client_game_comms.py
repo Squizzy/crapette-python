@@ -36,7 +36,7 @@ class ClientGameCommsInterface(ABC):
         pass
     
     @abstractmethod
-    def retrieve_stacks_cards(self) -> dict[str, list[str]]:
+    def retrieve_stacks_cards(self) -> dict[str, dict[str, list[str]]]:
         """Retrieve the stacks cards as sent by server"""
         pass
     
@@ -133,7 +133,7 @@ class ClientGameComms(ClientGameCommsInterface):
         client_logger.info("client request sent")
         return True
             
-    def retrieve_stacks_cards(self) -> dict[str, list[str]]:
+    def retrieve_stacks_cards(self) -> dict[str, dict[str, list[str]]]:
         
         client_logger.info("retrieving the stacks cards as sent by the server")
         
