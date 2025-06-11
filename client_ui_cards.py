@@ -1,7 +1,12 @@
 import pygame
 import os
 
-from constants import GAME_HEIGHT, CARD_FACES_DIR
+from constants import GAME_HEIGHT, CARD_FACES_DIR, Players
+from client_game_state import GameState
+from client_ui_game_state import UIGameState
+from game_logger import GameLogger
+
+client_logger: GameLogger
 
 
 # dimensions of the image files
@@ -12,16 +17,28 @@ CARD_IMG_HEIGHT: int = 333
 CARD_IMG_WIDTH: int = 234
 
 class CardsUI:
-    _cards_faces: dict[str, pygame.Surface]
+    _game_state: GameState
+    _ui_game_state: UIGameState
+    
+    # _cards_faces: dict[str, pygame.Surface]
     _originally_loaded_cards_faces: dict[str, pygame.Surface]
     _width: int
     _height: int
     
-    def __init__(self, screen_height: int = GAME_HEIGHT) -> None:
-        self._cards_faces = {}
+    def __init__(self, logger: GameLogger, client_game_state: GameState, client_game_ui_state: UIGameState, screen_height: int = GAME_HEIGHT) -> None:
+        global client_logger
+        client_logger = logger
+        
+        self._game_state = client_game_state
+        self._ui_game_state = client_game_ui_state
+        
+        self._ui_game_state._cards_faces = {}
         self._load_cards_faces()
+        client_logger.info("card faces loaded")
+        
         self._cards_faces = self._originally_loaded_cards_faces.copy()
         self.scale_cards_faces(screen_height)
+        client_logger.info("initial cards scaling done")
         
     @property
     def faces(self) -> dict[str, pygame.Surface]:
@@ -131,17 +148,125 @@ class CardsUI:
         self._scale_cards_dimensions(screen_height)
         
         # Clear the cards faces graphics for the active game
-        self._cards_faces = {}
+        self._ui_game_state._cards_faces = {}
         
         # For each card graphic as it was originally loaded from the images...
         for card in self._originally_loaded_cards_faces:
             
             # Scale the card faces to the game size
-            self._cards_faces[card] = pygame.transform.smoothscale( \
+            self._ui_game_state._cards_faces[card] = pygame.transform.smoothscale( \
                                         self._originally_loaded_cards_faces[card], 
                                         (self.width, self.height))
 
         # Make the EC card transparent
-        self._cards_faces["EC"].set_colorkey(self._cards_faces["EC"].get_at((3,3)))
+        self._cards_faces["EC"].set_colorkey(self._ui_game_state._cards_faces["EC"].get_at((3,3)))
+        
+        # self._ui_game_state._cards_faces = self._cards_faces.copy()
     
+    def place_card(self, this_player: int, stack: str, card: str) -> None:
+        """
+        Place a card on the screen
+
+        Args:
+            screen (pygame.surface): the main display area for the game
+            player (int): the player whose turn it is
+            stack (str): the stack where the card is located
+            card (str): the card to be placed
+        """
+
+        # cards contains Suit [1 char] Rank [1 or 2 char] face_up [1 char] 
+        card_face: str = card[:-1]
+        # client_logger.debug(f"{card=} -> {card_face=}")
+        
+        # Calculate the position of the card on the screen
+        player: int = self._game_state.player_id.value        
+        stack_prefix = "player_" if this_player == player else "opponent_"
+
+        # client_logger.debug(f"{stack_prefix=} {stack=}")
+        (x, y, vertical) = self._ui_game_state.stacks_locations[stack_prefix + stack]
+        # client_logger.debug(f"({x}, {y}, {vertical})")
+        
+
+        if card[:1]:  # face up
+            card_graphic = self._ui_game_state._cards_faces[card_face]
+        else:
+            card_graphic = self._ui_game_state._cards_faces["BB" if player ==  0 else "BR"] # if player == 0 else self._ui_game_state._cards_faces["BR"] 
     
+        # blit_card = self._ui_game_state._cards_faces[card_face] if vertical \
+        #             else pygame.transform.rotate(self._ui_game_state._cards_faces[card_face].copy(), 90)
+            
+        blit_card = card_graphic if vertical else pygame.transform.rotate(card_graphic.copy(), 90)
+        
+        self._ui_game_state._surface.blit(blit_card, (x, y) )
+
+    def place_stack(self,   this_player: int, stack_name: str,  cards_list: list[str]) -> None:
+        
+        
+        # Calculate the position of the card on the screen
+        player: int = self._game_state.player_id.value   
+             
+        stack_prefix = "player_" if this_player == player else "opponent_"
+        (x, y, vertical) = self._ui_game_state.stacks_locations[stack_prefix + stack_name]
+        
+        shift: int = self.width // 4
+        
+        cards_blits = []
+        
+        for card in cards_list:    
+            # cards contains Suit [1 char] Rank [1 or 2 char] face_up [1 char] 
+            card_face: str = card[:-1]
+
+            # client_logger.debug(f"{player=} {this_player=}")
+            
+            if card[-1] == 'u':  # face up
+                card_graphic = self._ui_game_state._cards_faces[card_face]
+            else:
+                card_graphic = self._ui_game_state._cards_faces["BB" if this_player == player else "BR"] # self._ui_game_state._cards_faces["BR"] 
+        # if this_player == 1 else "BR"]
+            # blit_card = self._ui_game_state._cards_faces[card_face] if vertical \
+            #             else pygame.transform.rotate(self._ui_game_state._cards_faces[card_face].copy(), 90)
+                
+            cards_blits.append(card_graphic if vertical else pygame.transform.rotate(card_graphic.copy(), 90))
+        
+        for card_blit in cards_blits:
+            self._ui_game_state._surface.blit(card_blit, (x, y) )
+            
+            if stack_name[:-1] == "tableau" and this_player == player:
+                x += shift
+                
+            if stack_name[:-1] == "tableau" and this_player != player:
+                x -= shift
+                
+            if stack_name == "crapette" and this_player == player:
+                x -= shift
+                
+            if stack_name == "crapette" and this_player != player:
+                x += shift
+                
+                
+
+    # def place_stacks_cards(self, stacks: dict[int, dict[str, list[str]]]) -> None:
+    def place_stacks_cards(self) -> None:
+        stacks: dict[str, dict[str, list[str]]] = self._game_state.stacks_cards
+        player = self._game_state.player_id.value
+        opponent = 1 - player
+        
+        # client_logger.debug(f"HERE: {player=}: {Players(player).name}")
+        # client_logger.debug(f"{stacks}")
+        
+        # our cards
+        for stack_name, card_stack in stacks[Players(player).name].items():
+            # client_logger.debug(f"stack: {stack} : {stacks[Players(player).name][stack]}")
+            # for stack_name, card_stack in stacks[Players(player).name][stack].items():
+                self.place_stack(player, stack_name, card_stack)
+                # client_logger.debug(f"{card}")
+                # self.place_card(player, stack, card)
+                
+        # #opponent cards
+        for stack_name, card_stack in stacks[Players(opponent).name].items():
+            self.place_stack(opponent, stack_name, card_stack)
+
+        # for stack in stacks[Players(opponent).name]:
+        #     for card in stacks[Players(opponent).name][stack]:
+        #         self.place_card(opponent, stack, card)
+        
