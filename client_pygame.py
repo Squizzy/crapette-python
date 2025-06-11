@@ -5,6 +5,7 @@ from constants import Players
 from client_network import ClientConnection
 from client_game_comms import ClientGameComms
 from client_ui import GameUI
+from client_game_state import GameState
 from game_logger import GameLogger
 
 # from icecream import ic # type: ignore
@@ -40,46 +41,46 @@ CARD_IMG_HEIGHT: int = 333
 CARD_IMG_WIDTH: int = 234
 
 
-# Stores a copy of the game state from the server
-# Updates from the server
-class GameState:
-    _player_id: Players
-    _stacks_cards: dict[str, list[str]]
-    _turn_player: int
-    _is_running: bool
+# # Stores a copy of the game state from the server
+# # Updates from the server
+# class GameState:
+#     _player_id: Players
+#     _stacks_cards: dict[str, list[str]]
+#     _turn_player: int
+#     _is_running: bool
     
-    def __init__(self) -> None:
-        self._stacks_cards = {
-            "player_crapette":      [],
-            "player_remainder":     [],
-            "player_bin":           [],
-            "player_tableau":       [],
-            "player_foundation":    [],
-            "opponent_crapette":    [],
-            "opponent_remainder":   [],
-            "opponent_bin":         [],
-            "opponent_tableau":     [],
-            "opponent_foundation":  [],
-        }
-        self._is_running = False
+#     def __init__(self) -> None:
+#         self._stacks_cards = {
+#             "player_crapette":      [],
+#             "player_remainder":     [],
+#             "player_bin":           [],
+#             "player_tableau":       [],
+#             "player_foundation":    [],
+#             "opponent_crapette":    [],
+#             "opponent_remainder":   [],
+#             "opponent_bin":         [],
+#             "opponent_tableau":     [],
+#             "opponent_foundation":  [],
+#         }
+#         self._is_running = False
         
-    @property
-    def player_id(self) -> Players:
-        return self._player_id
+#     @property
+#     def player_id(self) -> Players:
+#         return self._player_id
     
-    @player_id.setter
-    def player_id(self, player: Players) -> None:
-        self._player_id = player
+#     @player_id.setter
+#     def player_id(self, player: Players) -> None:
+#         self._player_id = player
         
-    @property
-    def stacks_cards(self) -> dict[str, list[str]]:
-        return self._stacks_cards
+#     @property
+#     def stacks_cards(self) -> dict[str, list[str]]:
+#         return self._stacks_cards
     
-    @stacks_cards.setter
-    def stacks_cards(self, stacks_cards: dict[str, list[str]]) -> None:
-        for stack in stacks_cards:
-            for card in stacks_cards[stack]:
-                self._stacks_cards[stack].append(card)
+#     @stacks_cards.setter
+#     def stacks_cards(self, stacks_cards: dict[str, list[str]]) -> None:
+#         for stack in stacks_cards:
+#             for card in stacks_cards[stack]:
+#                 self._stacks_cards[stack].append(card)
 
 
 class Game:
@@ -96,7 +97,7 @@ class Game:
         client_logger.info("client gamestate instantiated")
         
         # Instantiate the game UI
-        self._game_ui = GameUI(client_logger)
+        self._game_ui = GameUI(client_logger, self._game_state)
         client_logger.info("client gameui instantiated")
         
         # connect to the server
@@ -143,13 +144,13 @@ class Game:
             # rect = blit_card.get_rect()
             if rect.collidepoint(event.pos):
                 client_logger.info("Collision detected")
-                self._game_ui._game_ui_state._is_moving = True
+                self._game_ui._ui_game_state._is_moving = True
                 
         elif event.type == pygame.MOUSEBUTTONUP:
             # print("Button Up")
-            self._game_ui._game_ui_state._is_moving = False
+            self._game_ui._ui_game_state._is_moving = False
             
-        elif event.type == pygame.MOUSEMOTION and self._game_ui._game_ui_state._is_moving:
+        elif event.type == pygame.MOUSEMOTION and self._game_ui._ui_game_state._is_moving:
             ...
             # print(f"Mouse Move: {rect.x=}, {rect.y=}")
             rect.move_ip(event.rel)
@@ -190,7 +191,7 @@ class Game:
         
         
         # A card or stack is being displaced
-        self._game_ui._game_ui_state._is_moving = False
+        self._game_ui._ui_game_state._is_moving = False
 
         # Set the game running state
         self._game_state._is_running = True
