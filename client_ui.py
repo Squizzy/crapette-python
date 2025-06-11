@@ -3,9 +3,12 @@ import pygame
 
 from constants import GAME_HEIGHT, GAME_WIDTH
 from constants import GAME_ICON
+from constants import TableColours
 # from constants import IMAGES_DIR, CARD_FACES_DIR, GAME_ICON_FILE
 from client_ui_cards import CardsUI
 from client_ui_stacks_layout import StacksLayoutUI
+from client_ui_game_state import UIGameState
+from client_game_state import GameState
 from game_logger import GameLogger
 
 client_logger: GameLogger
@@ -23,10 +26,10 @@ client_logger: GameLogger
 # GAME_HEIGHT: int = 768
 
 # Initialising background colours
-FELT_GREEN = (0, 96, 0) # felt dark green 
-FELT_RED = (96, 0, 0) # felt dark red 
-FELT_BLUE = (0, 0, 96) # felt dark blue 
-YELLOW = (255, 255, 0) # yellow 
+# FELT_GREEN = (0, 96, 0) # felt dark green 
+# FELT_RED = (96, 0, 0) # felt dark red 
+# FELT_BLUE = (0, 0, 96) # felt dark blue 
+# YELLOW = (255, 255, 0) # yellow 
 
 # # icon of the game
 # IMAGES_DIR: str = os.path.dirname(os.path.abspath(__file__)) + "/img/"
@@ -36,56 +39,60 @@ YELLOW = (255, 255, 0) # yellow
 # # GAME_ICON: pygame.Surface = pygame.image.load("img/two_backs_256x256.png")
 
 
-class GameUIState:
-    _is_moving: bool
-    ...
+# class GameUIState:
+#     _is_moving: bool
+#     ...
 
 
 class GameUI:
-    _game_ui_state: GameUIState
+    _game_state: GameState
+    _ui_game_state: UIGameState
     _cards_ui: CardsUI
     _stacks_ui_cards_layout: StacksLayoutUI
     
-    _surface: pygame.Surface
+    # _surface: pygame.Surface
     _table_colour: tuple[int, int, int]
     # _cards: CardsUI
     _stacks_layout: StacksLayoutUI
         
-    def __init__(self, logger: GameLogger):
+    def __init__(self, logger: GameLogger, game_state: GameState):
         global client_logger
         client_logger = logger
         
-        self._table_colour = FELT_GREEN
-        self._pygame_init()
-        self._surface = self._window_init()
-        client_logger.info("SDL surface instantiated")
+        self._game_state = game_state
         
-        self._game_ui_state  = GameUIState()
+        self._ui_game_state  = UIGameState()
         client_logger.info("Game UI state instantiated")
         
-        self._cards_ui = CardsUI(GAME_HEIGHT)
+        self._table_colour = TableColours.FELT_GREEN
+        self._pygame_init()
+        self._ui_game_state._surface = self._window_init()
+        # self._surface = self._window_init()
+        client_logger.info("SDL surface instantiated")
+        
+        self._cards_ui = CardsUI(client_logger,  game_state, self._ui_game_state, GAME_HEIGHT)
         client_logger.info("Cards UI instantiated")
         
-        self._stacks_layout = StacksLayoutUI(self._cards_ui)
+        self._stacks_layout = StacksLayoutUI(self._cards_ui, self._ui_game_state)
         client_logger.info("Stacks UI instantiated")
-        self._game_ui_state._is_moving = False
+        self._ui_game_state._is_moving = False
         
 
-    @property
-    def surface(self) -> pygame.Surface:
-        return self._surface
+    # @property
+    # def surface(self) -> pygame.Surface:
+    #     return self._surface
     
-    @surface.setter
-    def surface(self, surface: pygame.Surface) -> None:
-        self._surface = surface
+    # @surface.setter
+    # def surface(self, surface: pygame.Surface) -> None:
+    #     self._surface = surface
     
     @property 
     def cards(self) -> CardsUI:
         return self._cards_ui
     
-    @property 
-    def stacks_layout(self) -> StacksLayoutUI:
-        return self._stacks_layout
+    # @property 
+    # def stacks_layout(self) -> StacksLayoutUI:
+    #     return self._stacks_layout
 
     @property
     def table_colour(self) -> tuple[int, int, int]:
@@ -131,7 +138,7 @@ class GameUI:
         """
         self._surface = pygame.display.set_mode((width, height), other)
         self._surface.fill(self.table_colour)
-        self.stacks_layout.update_stacks_positions_and_sizes(width, height, self.cards)
+        self._stacks_layout.update_stacks_locations_and_sizes(width, height, self.cards)
 
     def _window_redraw(self):
         """
@@ -139,7 +146,11 @@ class GameUI:
         """
         
         # place empty cards in the stacks positions
-        self.stacks_layout.render_empty_stacks(self.surface, self.cards)
+        self._stacks_layout.render_empty_stacks(self._ui_game_state._surface, self.cards)
+        # self._ui_game_state.stacks_locations = self._ui_game_state.stacks_locations
+        self._cards_ui.place_stacks_cards()
+        # self._cards_ui.place_stacks_cards(self._game_state._stacks_cards)
+        
         
         # update the window
         pygame.display.flip()
