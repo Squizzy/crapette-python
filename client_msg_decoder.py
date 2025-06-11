@@ -47,7 +47,7 @@ class ClientMessageDecoder:
         
         # return Players.ERROR
 
-    def decode_stacks_cards(self, message: str) -> dict[str, list[str]]:
+    def decode_stacks_cards(self, message: str) -> dict[str, dict[str, list[str]]]:
         
         # Extract the stacks cards from the received message
         received_value = loads(message)["value"]
