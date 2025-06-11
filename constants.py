@@ -20,7 +20,7 @@ GAME_ICON_FILE: str = os.path.join(IMAGES_DIR, "two_backs_256x256.png")
 GAME_ICON: pygame.Surface = pygame.image.load(GAME_ICON_FILE)
 # GAME_ICON: pygame.Surface = pygame.image.load("img/two_backs_256x256.png")
 
-class Colours:
+class TableColours:
     # Initialising background colours
     FELT_GREEN = (0, 96, 0) # felt dark green 
     FELT_RED = (96, 0, 0) # felt dark red 
