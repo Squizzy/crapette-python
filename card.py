@@ -76,7 +76,7 @@ class Card:
         return f"{self.rank} of {self.suit} - {face_status}"
 
     def __str__(self) -> str:
-        return self._rank.short + self._suit.short + ('u' if self._face_up else 'd') + str(self._player_num.value)
+        return self._suit.short + self._rank.short +  ('u' if self._face_up else 'd')  # + str(self._player_num.value)
 
     def to_dict(self) -> dict:
         # TODO: Check if still needed
