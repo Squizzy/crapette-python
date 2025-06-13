@@ -9,9 +9,13 @@ from client_ui_cards import CardsUI
 from client_ui_stacks_layout import StacksLayoutUI
 from client_ui_game_state import UIGameState
 from client_game_state import GameState
-from game_logger import GameLogger
 
-client_logger: GameLogger
+from game_logger import GameLogger, DebugLevel
+client_logger: GameLogger = GameLogger("client_ui", level=DebugLevel.client_ui.value)
+
+# from game_logger import GameLogger
+
+# client_logger: GameLogger
 
 # from icecream import ic # type: ignore
 # ic.configureOutput(prefix='client_ui: ')
@@ -55,9 +59,9 @@ class GameUI:
     # _cards: CardsUI
     _stacks_layout: StacksLayoutUI
         
-    def __init__(self, logger: GameLogger, game_state: GameState):
-        global client_logger
-        client_logger = logger
+    def __init__(self, game_state: GameState):
+        # global client_logger
+        # client_logger = logger
         
         self._game_state = game_state
         
@@ -68,13 +72,13 @@ class GameUI:
         # self._surface = self._window_init()
         client_logger.info("SDL window instantiated")
         
-        self._ui_game_state  = UIGameState(client_logger, window)
+        self._ui_game_state  = UIGameState(window)
         client_logger.info("Game UI state instantiated")
         
-        self._cards_ui = CardsUI(client_logger,  game_state, self._ui_game_state, GAME_HEIGHT)
+        self._cards_ui = CardsUI(game_state, self._ui_game_state)
         client_logger.info("Cards UI instantiated")
         
-        self._stacks_layout = StacksLayoutUI(client_logger, self._ui_game_state)
+        self._stacks_layout = StacksLayoutUI(self._ui_game_state)
         client_logger.info("Stacks UI instantiated")
         
         self._ui_game_state._is_moving = False
@@ -140,7 +144,7 @@ class GameUI:
         """
         self._surface = pygame.display.set_mode((width, height), other)
         self._surface.fill(self.table_colour)
-        self._ui_game_state.on_window_resize((width, height))
+        self._ui_game_state.on_window_resize(self._surface)
         # self._stacks_layout.update_stacks_locations_and_sizes(width, height, self.cards)
 
     def _window_redraw(self):
@@ -149,7 +153,8 @@ class GameUI:
         """
         
         # place empty cards in the stacks positions
-        self._stacks_layout.render_empty_stacks(self._ui_game_state._window, self.cards)
+        # self._stacks_layout.render_empty_stacks(self._ui_game_state._window, self.cards)
+        self._stacks_layout.render_empty_stacks()
         # self._ui_game_state.stacks_locations = self._ui_game_state.stacks_locations
         self._cards_ui.place_stacks_cards()
         # self._cards_ui.place_stacks_cards(self._game_state._stacks_cards)
@@ -162,8 +167,8 @@ class GameUI:
         area: str = "table"
         
         for key, list_of_Rects in self._ui_game_state.collision_areas.items():
-            for rect, card in list_of_Rects:
+            for rect, card_num, card in list_of_Rects:
                 if rect.collidepoint(event.pos):
                     area = key
                     
-        return f"{event.pos=} - Hit: {area=}"
+        return f"{event.pos=} - Hit: {area=} {card_num=}"
