@@ -12,7 +12,6 @@ class Deck:
         self._cards = []
         for suit in Suit:
             for rank in Rank:
-                # TODO: add pictures
                 self._cards.append(Card(rank, suit, playerNum))
 
     @property
