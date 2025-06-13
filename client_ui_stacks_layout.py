@@ -1,7 +1,7 @@
 import pygame
 
-from constants import GAME_HEIGHT, GAME_WIDTH
-from client_ui_cards import CardsUI   
+# from constants import GAME_HEIGHT, GAME_WIDTH
+# from client_ui_cards import CardsUI   
 from client_ui_game_state import UIGameState
 from game_logger import GameLogger
 
@@ -197,7 +197,7 @@ class StacksLayoutUI:
     #     # self._ui_game_state.stacks_locations = self._calculate_locations()
     #     # self._locations = self._calculate_locations()
 
-    def render_empty_stacks(self, surface: pygame.Surface, cards: CardsUI):
+    def render_empty_stacks(self) -> None:
         """
         Display the stacks positions using an empty card. 
 
@@ -215,7 +215,9 @@ class StacksLayoutUI:
         for stack in stacks_locations:
             (x, y, vertical) = stacks_locations[stack]
             blank_blit = card_graphics if vertical else pygame.transform.rotate(card_graphics.copy(), 90)
+            
             if card_face == "EC":
                 blank_blit.set_colorkey(blank_blit.get_at((3,3)))
             
-            surface.blit(blank_blit, (x, y) )
+            self._ui_game_state.window.blit(blank_blit, (x, y) )
+            # surface.blit(blank_blit, (x, y) )
