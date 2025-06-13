@@ -61,19 +61,20 @@ class GameUI:
         
         self._game_state = game_state
         
-        self._ui_game_state  = UIGameState()
-        client_logger.info("Game UI state instantiated")
-        
         self._table_colour = TableColours.FELT_GREEN
         self._pygame_init()
-        self._ui_game_state._surface = self._window_init()
+        window: pygame.Surface = self._window_init()
+        # self._ui_game_state._window = self._window_init()
         # self._surface = self._window_init()
-        client_logger.info("SDL surface instantiated")
+        client_logger.info("SDL window instantiated")
+        
+        self._ui_game_state  = UIGameState(client_logger, window)
+        client_logger.info("Game UI state instantiated")
         
         self._cards_ui = CardsUI(client_logger,  game_state, self._ui_game_state, GAME_HEIGHT)
         client_logger.info("Cards UI instantiated")
         
-        self._stacks_layout = StacksLayoutUI(client_logger, self._cards_ui, self._ui_game_state)
+        self._stacks_layout = StacksLayoutUI(client_logger, self._ui_game_state)
         client_logger.info("Stacks UI instantiated")
         
         self._ui_game_state._is_moving = False
@@ -139,7 +140,8 @@ class GameUI:
         """
         self._surface = pygame.display.set_mode((width, height), other)
         self._surface.fill(self.table_colour)
-        self._stacks_layout.update_stacks_locations_and_sizes(width, height, self.cards)
+        self._ui_game_state.on_window_resize((width, height))
+        # self._stacks_layout.update_stacks_locations_and_sizes(width, height, self.cards)
 
     def _window_redraw(self):
         """
@@ -147,7 +149,7 @@ class GameUI:
         """
         
         # place empty cards in the stacks positions
-        self._stacks_layout.render_empty_stacks(self._ui_game_state._surface, self.cards)
+        self._stacks_layout.render_empty_stacks(self._ui_game_state._window, self.cards)
         # self._ui_game_state.stacks_locations = self._ui_game_state.stacks_locations
         self._cards_ui.place_stacks_cards()
         # self._cards_ui.place_stacks_cards(self._game_state._stacks_cards)
@@ -155,3 +157,13 @@ class GameUI:
         
         # update the window
         pygame.display.flip()
+
+    def check_for_collision(self, event: pygame.event.Event) -> str:
+        area: str = "table"
+        
+        for key, list_of_Rects in self._ui_game_state.collision_areas.items():
+            for rect, card in list_of_Rects:
+                if rect.collidepoint(event.pos):
+                    area = key
+                    
+        return f"{event.pos=} - Hit: {area=}"
