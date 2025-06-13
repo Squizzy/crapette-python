@@ -2,6 +2,7 @@ import pygame
 import os
 
 from constants import GAME_HEIGHT, CARD_FACES_DIR, Players
+# , CARD_IMG_HEIGHT, CARD_IMG_WIDTH
 from client_game_state import GameState
 from client_ui_game_state import UIGameState
 from game_logger import GameLogger
@@ -9,48 +10,51 @@ from game_logger import GameLogger
 client_logger: GameLogger
 
 
-# dimensions of the image files
-# objective value based on the graphics files used for th game
-# TODO: this is for the png I am currently using
-# -  eventually might be better to scan all files or store the values in a config file?
-CARD_IMG_HEIGHT: int = 333
-CARD_IMG_WIDTH: int = 234
-
 class CardsUI:
     _game_state: GameState
     _ui_game_state: UIGameState
     
     # _cards_faces: dict[str, pygame.Surface]
-    _originally_loaded_cards_faces: dict[str, pygame.Surface]
+    # _originally_loaded_cards_faces: dict[str, pygame.Surface]
     _width: int
     _height: int
     
     def __init__(self, logger: GameLogger, client_game_state: GameState, client_game_ui_state: UIGameState, screen_height: int = GAME_HEIGHT) -> None:
+        # associate the logger with the class
         global client_logger
         client_logger = logger
         
+        # associate the game state with the class
         self._game_state = client_game_state
+                
+        # associate the ui game state with the class
         self._ui_game_state = client_game_ui_state
         
         self._ui_game_state._cards_faces = {}
         self._load_cards_faces()
-        client_logger.info("card faces loaded")
+        # client_logger.info("card faces loaded")
+        # keyfaces: list[str] = []
+        # keyfaces = [key for key, _ in self._ui_game_state._cards_faces.items()]
+        # kf: str = ""
+        # for keyface in keyfaces:
+        #     kf += "[" + str(keyface)  + "] "
+        # client_logger.error(f"{kf}")
         
-        self._cards_faces = self._originally_loaded_cards_faces.copy()
-        self.scale_cards_faces(screen_height)
+        # self._cards_faces = self._originally_loaded_cards_faces.copy()
+        # self.scale_cards_faces(screen_height)
         client_logger.info("initial cards scaling done")
         
-    @property
-    def faces(self) -> dict[str, pygame.Surface]:
-        return self._cards_faces
+    # @property
+    # def faces(self) -> dict[str, pygame.Surface]:
+    #     return self._cards_faces
     
-    @property
-    def width(self) -> int:
-        return self._width
+    # @property
+    # def width(self) -> int:
+    #     return self._width
     
-    @property
-    def height(self) -> int:
-        return self._height
+    # @property
+    # def height(self) -> int:
+    #     return self._height
     
     def _load_cards_faces(self) -> None:
         """
@@ -121,47 +125,76 @@ class CardsUI:
             cards_faces[card] = cards_faces[card].convert()
 
         # Store this as the original dictionary to ensure consistent quality
-        self._originally_loaded_cards_faces = cards_faces.copy()
+        self._ui_game_state._originally_loaded_cards_faces = cards_faces.copy()
+        
+        
+        self._ui_game_state.scale_cards_faces()
+        
+        # print(self._ui_game_state._cards_faces["EC"].get_rect())
+        # self._ui_game_state.cards_faces = cards_faces.copy()
+        
+        # self.scale_cards_faces()
+        # This is not stored in the _ui_game_state - only the rescaled sprites are stored there
     
-    def _scale_cards_dimensions(self, screen_height: int) -> None:
-        """
-        Set the dimensions of the card faces for the game size
-        The size will retain the proportion of the original graphic
+    # def _scaled_card_dimensions(self) -> None:
+    # # def _scale_cards_dimensions(self, screen_height: int) -> None:
+    
+    # #TODO: Move this to the _ui_game_state
+    #     """
+    #     Set the dimensions of the card faces for the game size
+    #     The size will retain the proportion of the original graphic
         
-        Args:
-            screen_height (int): the height of the game window
+    #     Args:
+    #         screen_height (int): the height of the game window
         
-        Returns:
-            Nothing
-        """
-        self._height = screen_height // 7
-        self._width = self._height * CARD_IMG_WIDTH // CARD_IMG_HEIGHT
+    #     Returns:
+    #         Nothing
+    #     """
+    #     #TODO: get screen height into iu gamestate
+    #     h: int = self._ui_game_state.screen_height // 7
+    #     w: int = self._ui_game_state.card_height * CARD_IMG_WIDTH // CARD_IMG_HEIGHT
+    #     # h: int = screen_height // 7
+    #     # w: int = self._height * CARD_IMG_WIDTH // CARD_IMG_HEIGHT
+        
+    #     self._ui_game_state.card_dimensions = (w, h)
+        
+    #     # self._height = screen_height // 7
+    #     # self._width = self._height * CARD_IMG_WIDTH // CARD_IMG_HEIGHT
 
-    def scale_cards_faces(self, screen_height: int) -> None:
-        """
-        Scale the card faces to the game size
-        Method is called by other objects when resizing the game window
+    # def scale_cards_faces(self) -> None:
+    # # def scale_cards_faces(self, screen_height: int) -> None:
+    #     """
+    #     Scale the card faces to the game size
+    #     Method is called by other objects when resizing the game window
         
-        Returns:
-            Nothing
-        """
-        self._scale_cards_dimensions(screen_height)
+    #     Returns:
+    #         Nothing
+    #     """
+    #     # self._scaled_card_dimensions()
+    #     # self._scale_cards_dimensions(self._ui_game_state.screen_height)
+    #     # self._scale_cards_dimensions(screen_height)
         
-        # Clear the cards faces graphics for the active game
-        self._ui_game_state._cards_faces = {}
-        
-        # For each card graphic as it was originally loaded from the images...
-        for card in self._originally_loaded_cards_faces:
+    #     # Clear the cards faces graphics for the active game
+    #     self._ui_game_state._cards_faces = {}
+    #     client_logger.error(f"{self._originally_loaded_cards_faces}")
             
-            # Scale the card faces to the game size
-            self._ui_game_state._cards_faces[card] = pygame.transform.smoothscale( \
-                                        self._originally_loaded_cards_faces[card], 
-                                        (self.width, self.height))
+    #     scaled_cards: dict[str, pygame.Surface] = {}
+    #     # For each card graphic as it was originally loaded from the images...
+    #     for card in self._originally_loaded_cards_faces:
+    #         scaled_cards[card] = pygame.transform.smoothscale( \
+    #                                     self._originally_loaded_cards_faces[card], 
+    #                                     self._ui_game_state.card_dimensions)
+            
+    #         # Scale the card faces to the game size
+    #         self._ui_game_state._cards_faces[card] = pygame.transform.smoothscale( \
+    #                                     self._originally_loaded_cards_faces[card], 
+    #                                     self._ui_game_state.card_dimensions)
+    #                                     # (self.width, self.height))
 
-        # Make the EC card transparent
-        self._cards_faces["EC"].set_colorkey(self._ui_game_state._cards_faces["EC"].get_at((3,3)))
+    #     # Make the EC card transparent
+    #     self._ui_game_state._cards_faces["EC"].set_colorkey(self._ui_game_state._cards_faces["EC"].get_at((3,3)))
         
-        # self._ui_game_state._cards_faces = self._cards_faces.copy()
+    #     # self._ui_game_state._cards_faces = self._cards_faces.copy()
     
     def place_card(self, this_player: int, stack: str, card: str) -> None:
         """
@@ -208,7 +241,8 @@ class CardsUI:
         stack_prefix = "player_" if this_player == player else "opponent_"
         (x, y, vertical) = self._ui_game_state.stacks_locations[stack_prefix + stack_name]
         
-        shift: int = self.width // 4
+        shift: int = self._ui_game_state.tableau_cards_shift
+        # shift: int = self.width // 4
         
         cards_blits = []
         
@@ -237,11 +271,11 @@ class CardsUI:
             if stack_name[:-1] == "tableau" and this_player != player:
                 x -= shift
                 
-            if stack_name == "crapette" and this_player == player:
-                x -= shift
+            # if stack_name == "crapette" and this_player == player:
+            #     x -= shift
                 
-            if stack_name == "crapette" and this_player != player:
-                x += shift
+            # if stack_name == "crapette" and this_player != player:
+            #     x += shift
                 
                 
 
