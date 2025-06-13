@@ -48,7 +48,7 @@ class ColoredFormatter(logging.Formatter):
 
 class GameLogger:
     
-    def __init__(self, name: str, log_file: str | None = None) -> None:
+    def __init__(self, name: str, log_file: str | None = None, level: int = logging.WARNING) -> None:
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
         
@@ -56,7 +56,8 @@ class GameLogger:
 
         # Console handler with colours
         console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.DEBUG)
+        # console_handler.setLevel(logging.DEBUG)
+        console_handler.setLevel(level)
         console_handler.setFormatter(ColoredFormatter())
         self.logger.addHandler(console_handler)
         
