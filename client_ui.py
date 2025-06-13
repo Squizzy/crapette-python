@@ -73,8 +73,9 @@ class GameUI:
         self._cards_ui = CardsUI(client_logger,  game_state, self._ui_game_state, GAME_HEIGHT)
         client_logger.info("Cards UI instantiated")
         
-        self._stacks_layout = StacksLayoutUI(self._cards_ui, self._ui_game_state)
+        self._stacks_layout = StacksLayoutUI(client_logger, self._cards_ui, self._ui_game_state)
         client_logger.info("Stacks UI instantiated")
+        
         self._ui_game_state._is_moving = False
         
 
