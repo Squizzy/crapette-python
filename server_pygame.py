@@ -1,3 +1,4 @@
+import time
 
 from player import Player
 from constants import Players
@@ -237,6 +238,7 @@ class Game:
             
             # else:
             #     continue
+            time.sleep(0.016)
             
         self._quit()
         server_logger.info("server game loop ended")
