@@ -3,8 +3,9 @@ import pygame
 from constants import GAME_HEIGHT, GAME_WIDTH
 from client_ui_cards import CardsUI   
 from client_ui_game_state import UIGameState
+from game_logger import GameLogger
 
-
+client_logger: GameLogger
 
 class StacksLayoutUI:
     _ui_game_state: UIGameState
@@ -17,13 +18,16 @@ class StacksLayoutUI:
     _cards:  CardsUI
     # _locations: dict[str, tuple[int, int, bool]]
     
-    def __init__(self, cards: CardsUI, game_ui_state: UIGameState) -> None:
+    def __init__(self, logger: GameLogger, cards: CardsUI, ui_game_state: UIGameState) -> None:
         """
         Initialise the stacks layout
         Calculate the positions of the stacks
         Store the positions in the _positions attribute
         """
-        self._ui_game_state = game_ui_state
+        global client_logger
+        client_logger = logger
+        
+        self._ui_game_state = ui_game_state
         
         # Initiate the screen dimensions
         self._screen_width = GAME_WIDTH
@@ -34,8 +38,10 @@ class StacksLayoutUI:
         # Get the cards graphics
         self._cards = cards
         # Initiate the margin between the stacks
-        self._margin_x = self._cards.width // 7
-        self._margin_y = self._cards.height // 7
+        self._margin_x = self._ui_game_state.card_dimensions[0] // 7
+        self._margin_y = self._ui_game_state.card_dimensions[1] // 7
+        # self._margin_x = self._cards.width // 7
+        # self._margin_y = self._cards.height // 7
         
         # Calculate the positions of the stacks for the screen dimensions
         # self._locations = self._calculate_locations()
@@ -72,25 +78,48 @@ class StacksLayoutUI:
                 - a boolean indicating if the card is placed vertically or horizontally
             
         """
-        # x positions (top left corner)
-        player_center_x = self._center_x - self._cards.width // 2
-        player_left_x = player_center_x - self._cards.width - self._margin_x
-        player_right_x = player_center_x + self._cards.width + self._margin_x
-        player_foundation_x = self._center_x + self._margin_x
-        player_tableau_x = player_foundation_x + self._margin_x + self._cards.height
         
-        opponent_center_x = self._center_x - self._cards.width // 2
-        opponent_left_x = opponent_center_x - self._cards.width - self._margin_x
-        opponent_right_x = opponent_center_x + self._cards.width + self._margin_x
-        opponent_foundation_x = self._center_x - self._margin_x - self._cards.height
-        opponent_tableau_x = opponent_foundation_x - self._margin_x - self._cards.width
+        # self._cards.width = self._ui_game_state.card_dimensions[0]
+        # self._cards.height = self._ui_game_state.card_dimensions[1]
+        
+        
+        
+        
+        
+        # x positions (top left corner)
+        player_center_x = self._center_x - self._ui_game_state.card_dimensions[0] // 2
+        player_left_x = player_center_x - self._ui_game_state.card_dimensions[0] - self._margin_x
+        player_right_x = player_center_x + self._ui_game_state.card_dimensions[0] + self._margin_x
+        player_foundation_x = self._center_x + self._margin_x
+        player_tableau_x = player_foundation_x + self._margin_x + self._ui_game_state.card_dimensions[1]
+        # player_center_x = self._center_x - self._cards.width // 2
+        # player_left_x = player_center_x - self._cards.width - self._margin_x
+        # player_right_x = player_center_x + self._cards.width + self._margin_x
+        # player_foundation_x = self._center_x + self._margin_x
+        # player_tableau_x = player_foundation_x + self._margin_x + self._cards.height
+        
+        opponent_center_x = self._center_x - self._ui_game_state.card_dimensions[0] // 2
+        opponent_left_x = opponent_center_x - self._ui_game_state.card_dimensions[0] - self._margin_x
+        opponent_right_x = opponent_center_x + self._ui_game_state.card_dimensions[0] + self._margin_x
+        opponent_foundation_x = self._center_x - self._margin_x - self._ui_game_state.card_dimensions[1]
+        opponent_tableau_x = opponent_foundation_x - self._margin_x - self._ui_game_state.card_dimensions[0]
+        # opponent_center_x = self._center_x - self._cards.width // 2
+        # opponent_left_x = opponent_center_x - self._cards.width - self._margin_x
+        # opponent_right_x = opponent_center_x + self._cards.width + self._margin_x
+        # opponent_foundation_x = self._center_x - self._margin_x - self._cards.height
+        # opponent_tableau_x = opponent_foundation_x - self._margin_x - self._cards.width
         
         # y positions (top left corner)
-        opponent_y = self._center_y - self._cards.height * 3 - int(self._margin_y * 2.5)
-        player_y = self._center_y + self._cards.height * 2 + int(self._margin_y * 2.5)
-        tableau_top_y = self._center_y - self._cards.height * 2 - int(self._margin_y * 1.5)
-        foundation_top_y = tableau_top_y + (self._cards.height - self._cards.width) //2
-        tableau_spacing_y = self._cards.height + self._margin_y
+        opponent_y = self._center_y - self._ui_game_state.card_dimensions[1] * 3 - int(self._margin_y * 2.5)
+        player_y = self._center_y + self._ui_game_state.card_dimensions[1] * 2 + int(self._margin_y * 2.5)
+        tableau_top_y = self._center_y - self._ui_game_state.card_dimensions[1] * 2 - int(self._margin_y * 1.5)
+        foundation_top_y = tableau_top_y + (self._ui_game_state.card_dimensions[1] - self._ui_game_state.card_dimensions[0]) //2
+        tableau_spacing_y = self._ui_game_state.card_dimensions[1] + self._margin_y
+        # opponent_y = self._center_y - self._cards.height * 3 - int(self._margin_y * 2.5)
+        # player_y = self._center_y + self._cards.height * 2 + int(self._margin_y * 2.5)
+        # tableau_top_y = self._center_y - self._cards.height * 2 - int(self._margin_y * 1.5)
+        # foundation_top_y = tableau_top_y + (self._cards.height - self._cards.width) //2
+        # tableau_spacing_y = self._cards.height + self._margin_y
         # foundation_spacing_y = tableau_spacing_y + self._margin_y
         
         opponent_base_stacks_positions: dict[str, tuple[int, int, bool]] = {
@@ -155,11 +184,14 @@ class StacksLayoutUI:
         
         # update the card dimensions
         self._cards = cards
-        self._cards.scale_cards_faces(height)
+        # self._cards.scale_cards_faces()
+        self._ui_game_state.scale_cards_faces()
 
         # update the margin between the stacks
-        self._margin_x = self._cards.width // 7
-        self._margin_y = self._cards.height // 7
+        self._margin_x = self._ui_game_state.card_dimensions[0] // 7
+        self._margin_y = self._ui_game_state.card_dimensions[1] // 7
+        # self._margin_x = self._cards.width // 7
+        # self._margin_y = self._cards.height // 7
         
         # calculate the positions of the stacks
         self._ui_game_state.stacks_locations = self._calculate_locations()
@@ -178,11 +210,22 @@ class StacksLayoutUI:
         card_face: str = "EC"
         # card_face = "HQ"
         
-        card_graphics = self._ui_game_state._cards_faces[card_face]
+        # tcards: list[str] = []
+        # for card, _ in self._ui_game_state._cards_faces.items():
+        #     tcards.append(card)
         
+        # client_logger.debug(f"{tcards=}")
+        # client_logger.debug(f"{self._ui_game_state._cards_faces=}")
+        
+        # card_graphics = self._ui_game_state._cards_faces[card_face]
+        card_graphics = self._ui_game_state.card_face(card_face)
+
         for stack in stacks_locations:
             (x, y, vertical) = stacks_locations[stack]
             blank_blit = card_graphics if vertical else pygame.transform.rotate(card_graphics.copy(), 90)
+            # bw: int = blank_blit.get_width()
+            # bh: int = blank_blit.get_height()
+            # print(f"{bw=} {bh=}")
             if card_face == "EC":
                 blank_blit.set_colorkey(blank_blit.get_at((3,3)))
             
