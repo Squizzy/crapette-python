@@ -13,6 +13,9 @@ class Players(Enum):
 GAME_WIDTH: int = 1024
 GAME_HEIGHT: int = 768
 
+# How much the cards of the tableau overlap (4 means 1/4 visible)
+TABLEAU_CARDS_SHIFT: int = 4
+
 # TODO: this is for the png I am currently using
 # -  eventually might be better to scan all files or store the values in a config file?
 CARD_IMG_HEIGHT: int = 333
