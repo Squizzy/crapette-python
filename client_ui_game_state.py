@@ -1,10 +1,11 @@
 import pygame
+from pprint import pprint
 
 from constants import CARD_IMG_WIDTH, CARD_IMG_HEIGHT, TABLEAU_CARDS_SHIFT
 # ,GAME_WIDTH, GAME_HEIGHT
-from game_logger import GameLogger
 
-client_logger: GameLogger
+from game_logger import GameLogger, DebugLevel
+client_logger: GameLogger = GameLogger("client_ui_game_state", level=DebugLevel.client_ui_game_state.value)
 
 class UIGameState:
     
@@ -23,14 +24,15 @@ class UIGameState:
     _stacks_spacing_w: int  # the horizontal spacing between the stacks
     _stacks_spacing_y: int  # the vertical spacing between the stacks
     _stacks_locations: dict[str, tuple[int, int, bool]]  # (x, y, V(True)/H)
-    _collision_areas: dict[str, list[tuple[pygame.Rect, str]]]  # {stack: } [(x,y,w,h),  card__str__ )
+    _tableau_card_locations: dict[str, list[tuple[int, str]]]  # location of the tableau cards. tableaux, x, card__str__
+    _collision_areas: dict[str, list[tuple[pygame.Rect, int, str]]]  # {stack: } [(x,y,w,h),  card_num, card__str__ )
     
     _is_moving: bool
     
     
-    def __init__(self, logger: GameLogger, surface: pygame.Surface) -> None:
-        global client_logger
-        client_logger = logger
+    def __init__(self, surface: pygame.Surface) -> None:
+        # global client_logger
+        # client_logger = GameLogger("ui_game_state_logger", level=logging.DEBUG)
         
         self._window = surface
         self._set_window_dimensions()          # Store the window dimensions (w, h)
@@ -39,16 +41,17 @@ class UIGameState:
         self._set_card_dimensions()             # Store the scaled cards sprite dimensions for the window size (w, h)
         self._originally_loaded_cards_faces = {}
         self._cards_faces = {}
+        # self._scale_cards_faces()
         
         # below two need to be set before the stacks location is set
         # as the collision area is calculated immediate when the stacks location is set
         # and it needs these values
         self._tableau_stacks_cards_quantity = {
-            "player_tableau0": 1,
-            "player_tableau1": 1,
+            "player_tableau0": 5,
+            "player_tableau1": 5,
             "player_tableau2": 1,
             "player_tableau3": 1,
-            "opponent_tableau0": 1,
+            "opponent_tableau0": 5,
             "opponent_tableau1": 1,
             "opponent_tableau2": 1,
             "opponent_tableau3": 1,
@@ -59,30 +62,6 @@ class UIGameState:
         self._set_collision_areas()             # calculate and store the collision areas
         # client_logger.error(f"{self.collision_areas}")
         # self._stacks_locations = {}
-        # self._collision_areas = {
-        #     "player_crapette": [],
-        #     "player_remainder": [],
-        #     "player_bin": [],
-        #     "player_tableau0": [],
-        #     "player_tableau1": [],
-        #     "player_tableau2": [],
-        #     "player_tableau3": [],
-        #     "player_foundation0":   [],
-        #     "player_foundation1":   [],
-        #     "player_foundation2":   [],
-        #     "player_foundation3":   [],
-        #     "opponent_crapette": [],
-        #     "opponent_remainder": [],
-        #     "opponent_bin": [],
-        #     "opponent_tableau1": [],
-        #     "opponent_tableau2": [],
-        #     "opponent_tableau3": [],
-        #     "opponent_tableau0": [],
-        #     "opponent_foundation0":   [],
-        #     "opponent_foundation1":   [],
-        #     "opponent_foundation2":   [],
-        #     "opponent_foundation3":   [],
-        # }
         
         self._is_moving = False
      
@@ -91,15 +70,6 @@ class UIGameState:
     def window(self) -> pygame.Surface:
         return self._window
     
-    # @window.setter
-    # def window(self, surface: pygame.Surface) -> None:
-    #     """returns the game screen that the game is rendered on
-
-    #     Args:
-    #         surface (pygame.Surface): the game screen window
-    #     """
-    #     self._window = surface
-    
     @property
     def window_dimensions(self) -> tuple[int, int]:
         """The dimensions of the game screen"""
@@ -107,12 +77,6 @@ class UIGameState:
         #     rect = self.window.get_rect()
         #     self.window_dimensions = rect.w, rect.h
         return self._window_dimensions
-    
-    # @window_dimensions.setter
-    # def window_dimensions(self, dimensions: tuple[int, int]) -> None:
-    #     """Set the ui_game_state value  - not strictly necesssary probably"""
-        
-    #     self._window_dimensions = dimensions
     
     def _set_window_dimensions(self) -> None:
         """set the window_dimensions variable using the window dimensions"""
@@ -134,14 +98,6 @@ class UIGameState:
         """The centre of the game screen"""
         return self._window_centre
     
-    # @window_centre.setter
-    # def window_centre(self, centre: tuple[int, int] | None) -> None:
-    #     """set the ui_game_state value  - not strictly necesssary probably"""
-    #     if centre is None:
-    #         rect = self.window.get_rect()
-    #         self._window_centre = rect.w // 2, rect.h // 2
-    #     else:
-    #         self._window_centre = centre
     
     def _set_window_centre(self) -> None:
         rect = self.window.get_rect()
@@ -166,18 +122,19 @@ class UIGameState:
         Returns:
             tuple[int, int]: width, height
         """
-        if self._card_dimensions == (0, 0):
-            self.scale_card_dimensions()
+        # if self._card_dimensions == (0, 0):
+        #     self.scale_card_dimensions()
         return self._card_dimensions
 
     @card_dimensions.setter
-    def card_dimensions(self, dimensions: tuple[int, int] | None) -> tuple[int, int]:
+    def card_dimensions(self, dimensions: tuple[int, int]) -> None:
+    # def card_dimensions(self, dimensions: tuple[int, int] | None) -> tuple[int, int]:
         """Set the scaled card dimensions"""
-        if dimensions is None:
-            self.scale_card_dimensions()
-        else:
-            self._card_dimensions = dimensions
-        return self._card_dimensions
+        # if dimensions is None:
+        #     self.scale_card_dimensions()
+        # else:
+        self._card_dimensions = dimensions
+        # return self._card_dimensions
 
     @property
     def card_width(self) -> int:
@@ -191,43 +148,46 @@ class UIGameState:
 
     def _set_card_dimensions(self) -> None:
         """set the card dimensions for the window size"""
-        self.scale_card_dimensions()
-
-    # Scaled card sprite dimensions (width, height)
-    def scale_card_dimensions(self) -> tuple[int, int]:
-        """
-        Set the dimensions of the card faces for the game size
-        The size will retain the proportion of the original graphic
-        """
         h: int = self.window_height // 7
         w: int = h * CARD_IMG_WIDTH // CARD_IMG_HEIGHT
         
         self._card_dimensions = (w, h)
-        return self._card_dimensions
+
+    # Scaled card sprite dimensions (width, height)
+    # def scale_card_dimensions(self) -> tuple[int, int]:
+    #     """
+    #     Set the dimensions of the card faces for the game size
+    #     The size will retain the proportion of the original graphic
+    #     """
+    #     #TODO: just keet _set_card_dimensions
+    #     h: int = self.window_height // 7
+    #     w: int = h * CARD_IMG_WIDTH // CARD_IMG_HEIGHT
+        
+    #     self._card_dimensions = (w, h)
+    #     return self._card_dimensions
 
     
     # Card faces
     @property
-    def original_loaded_cards_faces(self) -> dict[str, pygame.Surface]:
+    def originally_loaded_cards_faces(self) -> dict[str, pygame.Surface]:
         """returns all the cards sprites as loaded from the image files"""
         return self._originally_loaded_cards_faces
     
-    @original_loaded_cards_faces.setter
-    def original_loaded_cards_faces(self, faces: dict[str, pygame.Surface]) -> None:
+    @originally_loaded_cards_faces.setter
+    def originally_loaded_cards_faces(self, faces: dict[str, pygame.Surface]) -> None:
         """Set the original loaded cards faces, then generate the scaled cards faces"""
+        # load the original cards
         self._originally_loaded_cards_faces = faces
-        self.scale_cards_faces()
-    
-    def scale_cards_faces(self) -> None:
-        """Generate the scaled cards faces from the original loaded cards faces"""
-        # scaled_faces: dict[str, pygame.Surface] = {}
         
+        # immediately resize the sprites to be used
+        self._scale_cards_faces()
+    
+    def _scale_cards_faces(self) -> None:
+        """Generate the scaled cards faces from the original loaded cards faces"""
         for card_face in self._originally_loaded_cards_faces:
-        #     scaled_faces[card_face] = pygame.transform.smoothscale( \
             self._cards_faces[card_face] = pygame.transform.smoothscale( \
                                         self._originally_loaded_cards_faces[card_face],
                                         self.card_dimensions) 
-        # self._cards_faces = scaled_faces.copy()
         
     @property
     def cards_faces(self) -> dict[str, pygame.Surface]:
@@ -327,7 +287,32 @@ class UIGameState:
         # combine the 3 dictionaries
         self._stacks_locations = opponent_base_stacks_positions |center_stacks_positions | player_base_stacks_positions    
         
-
+    def _set_stack_tableau_locations(self) -> None:
+        
+        tableau_card_locations: dict[str, list[tuple[int, str]]] = {
+            "player_tableau0":  [],
+            "player_tableau1":  [],
+            "player_tableau2":  [],
+            "player_tableau3":  [],
+            "opponent_tableau0": [],
+            "opponent_tableau1": [],
+            "opponent_tableau2": [],
+            "opponent_tableau3": [],
+        }
+        
+        for stack in self.stacks_locations:
+            if stack[:-1] == "player_tableau":
+                #TODO: 12 should be sufficient in reality as the ace should go to the foundation, but...
+                for card in range(13):
+                    tableau_card_locations[stack].append((self.stacks_locations[stack][0] + self.tableau_cards_shift * card, ""))
+                    
+            elif stack[:-1] == "opponent_tableau":
+                #TODO: 12 should be sufficient in reality as the ace should go to the foundation, but...
+                for card in range(13):
+                    tableau_card_locations[stack].append((self.stacks_locations[stack][0] - self.tableau_cards_shift * card, ""))
+        
+        self._tableau_card_locations = tableau_card_locations.copy()            
+        
 
     @property
     def tableau_cards_shift(self) -> int:
@@ -358,6 +343,7 @@ class UIGameState:
             the card dimensions and
             the card shift from the previous card (for the tableau), if needed
         """
+        # Initialise the collision areas
         self._collision_areas = {
             "player_crapette": [],
             "player_remainder": [],
@@ -384,45 +370,74 @@ class UIGameState:
         }
 
         # Calculate the collision areas for the stacks
+        # using the stack position (top left corner) and the card dimensions
         for stack in self._stacks_locations:
+            card_num: int = 0
             col_area = pygame.Rect(
                     self._stacks_locations[stack][0], #  x
                     self._stacks_locations[stack][1], #  y
                     self.card_width,   #  w
                     self.card_height    #  h
                     )
-            
+            # print(f"1 - {col_area.x=}")
             # crapette, remainder, bin and fondation can only be hit in one place
-            if stack[:-1] != "player_tableau" or stack[:-1] != "opponent_tableau":
-                self._collision_areas[stack].append((col_area, ""))
+            if stack[:-1] != "player_tableau" and stack[:-1] != "opponent_tableau":
+                self._collision_areas[stack].append((col_area, card_num, ""))
             
-            # tableau cards shift so multiple cards can be picked, so there are multiple 
-            # collision areas are needed depending on which card we pick
+            # tableau cards shift and multiple cards can be picked, 
+            # so multiple collision areas are needed depending on which card we pick
             else:
-                self._collision_areas[stack] =[]
-                tableau_card_quantity: int = self._tableau_stacks_cards_quantity[stack]
+                tableau_x = col_area.x
+                tableau_w = col_area.w
+                # tableau_card_quantity: int = self._tableau_stacks_cards_quantity[stack]
                 # If there are several cards on the tableau, the cards above the base as shiftted, 
                 # right for player, left for opponent
                 # only the top card will be fully colliding, 
-                for card_num in range(tableau_card_quantity):
+                for card_num in range(13):
+                    # print(f"{self.card_width} -> {self.tableau_cards_shift=}")
+                    # print(f"{tableau_card_quantity}")
+                    # print(f"2 - {col_area.x=}")
+                    # print(f"{stack=}")
+                    # rect: pygame.Rect = pygame.Rect((col_area.x, col_area.y, col_area.w, col_area.h)) 
                     if stack[:-1] == "player_tableau":
-                        col_area.x += self._tableau_cards_shift
+                        tableau_x = tableau_x + self.tableau_cards_shift * card_num
+                        # col_area.x = col_area.x + self.tableau_cards_shift * card_num
+                        # rect.x += self.tableau_cards_shift
+                        # client_logger.warning(f"{stack=} - {rect=}")
                     else:
-                        col_area.x -= self._tableau_cards_shift
-                    
-                    # the cards below the top card can only be hit over the shift area
-                    if card_num  < tableau_card_quantity:
-                        col_area.w = self._tableau_cards_shift
                         
-                    # in addition, the opponent tableau shifts to the right,
-                    # so the collision happens on the right side of the card
-                    if stack[:-1] == "opponent_tableau":
-                        col_area.x += self.card_width - self.tableau_cards_shift
-                            
-            self._collision_areas[stack].append((col_area, ""))
-                      
+                        tableau_x = tableau_x - self.tableau_cards_shift * card_num
+                        # col_area.x = col_area.x - self.tableau_cards_shift * card_num
+                        # recct.x -= self.tableau_cards_shift
+                    
+                    # Hopefully going in reverse order of the cards, we can check the top card first 
+                    # # the cards below the top card can only be hit over the shift area
+                    # if card_num  < tableau_card_quantity:
+                    #     # col_area.w = self.tableau_cards_shift
+                    #     tableau_w = self.tableau_cards_shift
+                        
+                    #     # in addition, the opponent tableau shifts to the right,
+                    #     # so the collision happens on the right side of the card
+                    #     if stack[:-1] == "opponent_tableau":
+                    #         # col_area.x = col_area.x + self.card_width - self.tableau_cards_shift
+                    #         tableau_x = tableau_x  + self.card_width - self.tableau_cards_shift
+                    
+                    rect: pygame.Rect = pygame.Rect((tableau_x, col_area.y, tableau_w, col_area.h))
+                    
+                    # test_card:str = "H2"
+                    # card_graphics = self.card_face(test_card)
+                    # self.window.blit(card_graphics, (tableau_x, col_area.y) )
+                    client_logger.warning(f"{stack=} - {rect=}")
+                    print(card_num)
+                        
+                    # self._collision_areas[stack].append((col_area, card_num, ""))
+                    self._collision_areas[stack].append((rect, card_num, ""))
+                    
+        # client_logger.error(f"JUST SET: {self._collision_areas=}")
+        pprint(self._collision_areas)
+                             
     @property
-    def collision_areas(self) -> dict[str, list[tuple[pygame.Rect, str]]]:
+    def collision_areas(self) -> dict[str, list[tuple[pygame.Rect, int, str]]]:
         """returns the collision areas
         Its value is recalculated before it is returned
 
@@ -433,30 +448,28 @@ class UIGameState:
                         pygame Rect (x, y, w, h) of the collision area
                         card name (str) of the card that is in the collision area
         """
-        # self._set_collision_areas()
         return self._collision_areas
     
     
-    
-    # @property
-    # def screen_dimensions(self) -> tuple[int, int]:
-    #     return self._screen_dimensions
-    
-    # @screen_dimensions.setter
-    # def screen_dimensions(self, new_dimensions: tuple[int, int]) -> None:
-    #     self._screen_dimensions = new_dimensions
-    #     self.scale_card_dimensions
+    # Events Handling
+    def on_window_resize(self, surface: pygame.Surface):
+
+        client_logger.error(f"1 {self.cards_faces}")
+
+        self._window = surface
         
+        self._set_window_dimensions()          # Store the window dimensions (w, h)
+        self._set_window_centre()              # Store the window centre (x, y)
         
-    # @property
-    # def screen_width(self) -> int:
-    #     return self._screen_dimensions [0]
-    
-    # @property
-    # def screen_height(self) -> int:
-    #     return self._screen_dimensions[1]
-    
-    def on_window_resize(self, new_dimension: tuple[int, int]):
-        self._screen_dimensions = new_dimension
-        self._card_dimensions = (0,0)
+        self._set_card_dimensions()             # Store the scaled cards sprite dimensions for the window size (w, h)
+        self._scale_cards_faces()
+        
+        # below two need to be set before the stacks location is set
+        # as the collision area is calculated immediate when the stacks location is set
+        # and it needs these values
+
+        self._set_tableau_cards_shift()        # Store the shift of the tableau card from the previous card of the same tableau stack
+        self._set_stacks_spacing()              # Calculate and store the stacks spacings
+        self._set_stacks_locations()            # calculate and store the stacks base locations
+        self._set_collision_areas()             # calculate and store the collision areas
         
