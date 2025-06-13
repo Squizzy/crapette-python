@@ -13,6 +13,12 @@ class Players(Enum):
 GAME_WIDTH: int = 1024
 GAME_HEIGHT: int = 768
 
+# TODO: this is for the png I am currently using
+# -  eventually might be better to scan all files or store the values in a config file?
+CARD_IMG_HEIGHT: int = 333
+CARD_IMG_WIDTH: int = 234
+
+
 # icon of the game
 IMAGES_DIR: str = os.path.dirname(os.path.abspath(__file__)) + "/img/"
 CARD_FACES_DIR: str = os.path.join(IMAGES_DIR, "card_faces")
