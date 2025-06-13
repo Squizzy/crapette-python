@@ -3,9 +3,13 @@ import pygame
 # from constants import GAME_HEIGHT, GAME_WIDTH
 # from client_ui_cards import CardsUI   
 from client_ui_game_state import UIGameState
-from game_logger import GameLogger
 
-client_logger: GameLogger
+from game_logger import GameLogger, DebugLevel
+client_logger: GameLogger = GameLogger("client_ui_stacks_layout", level=DebugLevel.client_ui_stacks_layout.value)
+
+# from game_logger import GameLogger
+
+# client_logger: GameLogger
 
 class StacksLayoutUI:
     _ui_game_state: UIGameState
@@ -17,15 +21,15 @@ class StacksLayoutUI:
     # _margin_y: int
     # _cards:  CardsUI
     
-    def __init__(self, logger: GameLogger, ui_game_state: UIGameState) -> None:
+    def __init__(self, ui_game_state: UIGameState) -> None:
     # def __init__(self, logger: GameLogger, cards: CardsUI, ui_game_state: UIGameState) -> None:
         """
         Initialise the stacks layout
         Calculate the positions of the stacks
         Store the positions in the _positions attribute
         """
-        global client_logger
-        client_logger = logger
+        # global client_logger
+        # client_logger = logger
         
         self._ui_game_state = ui_game_state
         

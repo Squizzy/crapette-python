@@ -7,9 +7,13 @@ from client_network import ClientConnection
 from client_game_comms import ClientGameComms
 from client_ui import GameUI
 from client_game_state import GameState
-from game_logger import GameLogger
 
-client_logger: GameLogger
+from game_logger import GameLogger, DebugLevel
+client_logger: GameLogger = GameLogger("client_pygame", level=DebugLevel.client_pygame.value)
+
+# from game_logger import GameLogger, logging
+
+# client_logger: GameLogger
 
 # from icecream import ic # type: ignore
 # ic.configureOutput(prefix='client_pygame: ')
@@ -97,12 +101,13 @@ class Game:
         self._game_state = GameState()
         client_logger.info("client gamestate instantiated")
         
+        
         # Instantiate the game UI
-        self._game_ui = GameUI(client_logger, self._game_state)
+        self._game_ui = GameUI(self._game_state)
         client_logger.info("client gameui instantiated")
         
         # connect to the server
-        self._connection = ClientConnection(client_logger)
+        self._connection = ClientConnection()
         self._connection.connect()
         client_logger.info("client connection established")
         
@@ -112,7 +117,7 @@ class Game:
         # self._game_state.player_id = s
         # log_message(self._game_state.player_id.name)    
         
-        self._game_comms = ClientGameComms(client_logger, self._connection)
+        self._game_comms = ClientGameComms(self._connection)
         
         # get the cards from the server and assign them to the game state
         # No this need to happen in the game loop
@@ -286,9 +291,7 @@ class Game:
 
 
 if __name__ == "__main__":
-    
-    client_logger =  GameLogger("client_logger")
-    
+        
     game: Game = Game()
     # pygame_init()
     # surface: pygame.Surface = window_init()

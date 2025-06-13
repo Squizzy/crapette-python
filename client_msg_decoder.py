@@ -2,9 +2,13 @@ from json import loads
 
 from constants import Players
 # from network_messages import ServerNetworkMessage
-from game_logger import GameLogger
 
-client_logger: GameLogger
+from game_logger import GameLogger, DebugLevel
+client_logger: GameLogger = GameLogger("client_msg_decoder", level=DebugLevel.client_msg_decoder.value)
+
+# from game_logger import GameLogger
+
+# client_logger: GameLogger
 # from icecream import ic # type: ignore
 # ic.configureOutput(prefix="message_decoder: ")
 # def log_message(message: str):
@@ -15,9 +19,8 @@ client_logger: GameLogger
 
 class ClientMessageDecoder:
 
-    def __init__(self, logger:GameLogger):
-        global client_logger
-        client_logger = logger
+    def __init__(self):
+        ...
 
     def decode_player_id(self, message: str) -> Players:
         

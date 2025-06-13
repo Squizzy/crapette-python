@@ -7,9 +7,14 @@ from network_messages import ClientNetworkMessage, ServerNetworkMessage
 # from message_encoder import encode_request
 from client_msg_encoder import ClientMessageEncoder
 from client_msg_decoder import ClientMessageDecoder
-from game_logger import GameLogger
 
-client_logger: GameLogger
+from game_logger import GameLogger, DebugLevel
+client_logger: GameLogger = GameLogger("client_game_comms", level=DebugLevel.client_game_comms.value)
+
+
+# from game_logger import GameLogger
+
+# client_logger: GameLogger
 # from icecream import ic # type: ignore
 # ic.configureOutput(prefix="client_network: ")
 # def log_message(message: str):
@@ -52,12 +57,11 @@ class ClientGameComms(ClientGameCommsInterface):
     _message_encoder: ClientMessageEncoder
     _message_decoder: ClientMessageDecoder
     
-    def __init__(self, logger: GameLogger, connection: ClientInterface) -> None:
-        global client_logger
-        client_logger = logger
+    def __init__(self, connection: ClientInterface) -> None:
+
         self._connection = connection
-        self._message_encoder = ClientMessageEncoder(logger)
-        self._message_decoder = ClientMessageDecoder(logger)
+        self._message_encoder = ClientMessageEncoder()
+        self._message_decoder = ClientMessageDecoder()
 
     def request_player_id(self) -> bool:
         """Request the server to send the player ID

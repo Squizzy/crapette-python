@@ -2,9 +2,12 @@ from json import dumps
 
 # from constants import Players
 from network_messages import ClientNetworkMessage
-from game_logger import GameLogger
 
-client_logger: GameLogger
+from game_logger import GameLogger, DebugLevel
+client_logger: GameLogger = GameLogger("client_msg_eencoder", level=DebugLevel.client_msg_encoder.value)
+# from game_logger import GameLogger
+
+# client_logger: GameLogger
 
 # from icecream import ic # type: ignore
 # ic.configureOutput(prefix="message_encoder: ")
@@ -14,9 +17,8 @@ client_logger: GameLogger
 #         ic(message)
         
 class ClientMessageEncoder:
-    def __init__(self, logger: GameLogger):
-        global client_logger
-        client_logger = logger
+    def __init__(self):
+        ...
         
     def encode_request(self, message: ClientNetworkMessage) -> str:
         msg = {

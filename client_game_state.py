@@ -1,5 +1,7 @@
 from constants import Players
 
+from game_logger import GameLogger, DebugLevel
+client_logger: GameLogger = GameLogger("client_game_state", level=DebugLevel.client_game_state.value)
 
 # Stores a copy of the game state from the server
 # Updates from the server

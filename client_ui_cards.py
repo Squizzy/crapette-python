@@ -1,13 +1,17 @@
 import pygame
 import os
 
-from constants import GAME_HEIGHT, CARD_FACES_DIR, Players
-# , CARD_IMG_HEIGHT, CARD_IMG_WIDTH
+from constants import CARD_FACES_DIR, Players
+# , GAME_HEIGHT, CARD_IMG_HEIGHT, CARD_IMG_WIDTH
 from client_game_state import GameState
 from client_ui_game_state import UIGameState
-from game_logger import GameLogger
 
-client_logger: GameLogger
+from game_logger import GameLogger, DebugLevel
+client_logger: GameLogger = GameLogger("client_ui_cards", level=DebugLevel.client_ui_cards.value)
+
+# from game_logger import GameLogger
+
+# client_logger: GameLogger
 
 
 class CardsUI:
@@ -19,10 +23,7 @@ class CardsUI:
     _width: int
     _height: int
     
-    def __init__(self, logger: GameLogger, client_game_state: GameState, client_game_ui_state: UIGameState, screen_height: int = GAME_HEIGHT) -> None:
-        # associate the logger with the class
-        global client_logger
-        client_logger = logger
+    def __init__(self, client_game_state: GameState, client_game_ui_state: UIGameState) -> None:
         
         # associate the game state with the class
         self._game_state = client_game_state

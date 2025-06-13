@@ -2,13 +2,16 @@ import socket
 from abc import ABC, abstractmethod
 # from json import loads
 
+from game_logger import GameLogger, DebugLevel
+client_logger: GameLogger = GameLogger("client_network", level=DebugLevel.client_network.value)
+
 # from network_messages import ClientNetworkMessage
-from game_logger import GameLogger
+# from game_logger import GameLogger
 # from constants import Players
 # from message_decoder import decode_player_id
 
 
-client_logger: GameLogger
+# client_logger: GameLogger
 
 # from icecream import ic # type: ignore
 # ic.configureOutput(prefix="client_network: ")
@@ -58,9 +61,7 @@ class ClientConnection(ClientInterface):
     
     
     
-    def __init__(self, logger: GameLogger, server_ip:str = "127.0.0.1", server_port: int=65432) -> None:
-        global client_logger 
-        client_logger = logger
+    def __init__(self, server_ip:str = "127.0.0.1", server_port: int=65432) -> None:
         
         self._server_ip = server_ip
         self._server_port = server_port
@@ -280,7 +281,7 @@ class ClientConnection(ClientInterface):
 
 if __name__ in "__main__":
     i = 0
-    cc = ClientConnection(client_logger)
+    cc = ClientConnection()
     cc.connect()
     # for i in range(1):
     #     print('.', end='', flush=True)
