@@ -125,10 +125,10 @@ class CardsUI:
             cards_faces[card] = cards_faces[card].convert()
 
         # Store this as the original dictionary to ensure consistent quality
-        self._ui_game_state._originally_loaded_cards_faces = cards_faces.copy()
+        self._ui_game_state.originally_loaded_cards_faces = cards_faces.copy()
         
         
-        self._ui_game_state.scale_cards_faces()
+        # self._ui_game_state.scale_cards_faces()
         
         # print(self._ui_game_state._cards_faces["EC"].get_rect())
         # self._ui_game_state.cards_faces = cards_faces.copy()
