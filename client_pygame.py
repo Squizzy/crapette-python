@@ -1,5 +1,6 @@
 import pygame
 import os
+import time
 
 from constants import Players
 from client_network import ClientConnection
@@ -33,12 +34,7 @@ GAME_ICON_FILE: str = os.path.join(IMAGES_DIR, "two_backs_256x256.png")
 GAME_ICON: pygame.Surface = pygame.image.load(GAME_ICON_FILE)
 # GAME_ICON: pygame.Surface = pygame.image.load("img/two_backs_256x256.png")
 
-# dimensions of the image files
-# objective value based on the graphics files used for th game
-# TODO: this is for the png I am currently using
-# -  eventually might be better to scan all files or store the values in a config file?
-CARD_IMG_HEIGHT: int = 333
-CARD_IMG_WIDTH: int = 234
+
 
 
 # # Stores a copy of the game state from the server
@@ -178,12 +174,13 @@ class Game:
         # def game_loop(surface: pygame.Surface, stacks_layout: StacksLayout, cards: Cards):
         # clock: pygame.time.Clock = pygame.time.Clock()
 
-        blit_card = self._game_ui._cards_ui.faces["HQ"]
+        # blit_card = self._game_ui._ui_game_state.card_face["HQ"]
+        # blit_card = self._game_ui._cards_ui.faces["HQ"]
         # blit_card_width = card_faces["HQ"].get_width()
         # blit_card_height = card_faces["HQ"].get_height()
         # blit_card_angle = 0
 
-        rect: pygame.Rect = blit_card.get_rect()
+        # rect: pygame.Rect = blit_card.get_rect()
         # rect: pygame.Rect = card_faces["HQ"].get_rect()
         # surface.blit(blit_card, (100, 100))
 
@@ -196,13 +193,16 @@ class Game:
         # Set the game running state
         self._game_state._is_running = True
         
+        # previous = time.time()
         # Game loop 
         while self._game_state._is_running:
-            
+            # current = time.time()
+            # elapsed = current - previous
+            # previous = current
             # Handle events
             for event in pygame.event.get():
-                self._handle_events(event, rect)
-                
+                # self._handle_events(event, rect)
+                pass
                 
             # self.get_stacks_cards()
             # self.get_stacks_cards_from_server()
@@ -217,7 +217,8 @@ class Game:
             # pygame.display.flip()
             
             # delay
-            pygame.time.delay(100)
+            # pygame.time.delay(1000)
+            time.sleep(0.016)
             
             # Make a circle
             # pygame.draw.circle(surface, (FELT_BLUE), (GAME_WIDTH/2, GAME_HEIGHT/2), 75)
