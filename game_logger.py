@@ -1,11 +1,43 @@
 import logging
 import inspect
+from enum import Enum
 
 # from datetime import datetime
 from pathlib import Path
 # from typing import Optional
 
 from constants import TextColours
+
+class DebugLevel(Enum):
+    card = logging.WARNING
+    cardstack = logging.WARNING
+    client_game_comms = logging.WARNING
+    client_game_state = logging.WARNING
+    client_msg_decoder = logging.WARNING
+    client_msg_encoder = logging.WARNING
+    client_network = logging.WARNING
+    client_pygame = logging.DEBUG
+    client_ui_cards = logging.DEBUG
+    client_ui_game_state = logging.DEBUG
+    client_ui_stacks_layout = logging.DEBUG
+    client_ui = logging.DEBUG
+    constants = logging.WARNING
+    deck = logging.WARNING
+    game_logger = logging.WARNING
+    network_messages = logging.WARNING
+    player = logging.WARNING
+    server_game_comms = logging.WARNING
+    server_game_state = logging.WARNING
+    server_msg_decoder = logging.WARNING
+    server_msg_encoder = logging.WARNING
+    server_network = logging.WARNING
+    server_pygame = logging.WARNING
+    stack_bin = logging.WARNING
+    stack_crapette = logging.WARNING
+    stack_foundation = logging.WARNING
+    stack_remainder = logging.WARNING
+    stack_tableau = logging.WARNING
+    stacks = logging.WARNING
 
 class LogColours:
     TIME = TextColours.GREY 
