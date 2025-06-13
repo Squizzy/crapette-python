@@ -9,6 +9,8 @@ from client_ui import GameUI
 from client_game_state import GameState
 from game_logger import GameLogger
 
+client_logger: GameLogger
+
 # from icecream import ic # type: ignore
 # ic.configureOutput(prefix='client_pygame: ')
 # def log_message(msg:str) -> None:
@@ -87,6 +89,9 @@ class Game:
 
     
     def __init__(self) -> None:
+        # global client_logger
+        # client_logger = GameLogger()
+
         
         # Instantiate the game state
         self._game_state = GameState()
@@ -129,18 +134,22 @@ class Game:
         self._game_state._stacks_cards = self._game_comms.retrieve_stacks_cards()
         client_logger.info(f"{self._game_state._stacks_cards}")
         
-        
 
-    def _handle_events(self, event, rect) -> None:
+    def _handle_events(self, event) -> None:
+        
+        rect = pygame.Rect(0, 0, 0, 0)
+        
         if event.type == pygame.QUIT:
             self._game_state._is_running = False
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.pos:
+                client_logger.debug(self._game_ui.check_for_collision(event))
             # print("Button Down")
             # rect = blit_card.get_rect()
-            if rect.collidepoint(event.pos):
-                client_logger.info("Collision detected")
-                self._game_ui._ui_game_state._is_moving = True
+            # if rect.collidepoint(event.pos):
+            #     client_logger.info("Collision detected")
+            #     self._game_ui._ui_game_state._is_moving = True
                 
         elif event.type == pygame.MOUSEBUTTONUP:
             # print("Button Up")
@@ -201,8 +210,9 @@ class Game:
             # previous = current
             # Handle events
             for event in pygame.event.get():
+                self._handle_events(event)
                 # self._handle_events(event, rect)
-                pass
+                # pass
                 
             # self.get_stacks_cards()
             # self.get_stacks_cards_from_server()
@@ -252,21 +262,21 @@ class Game:
 #     #TODO: Implement the server_get_stacks_cards function - use get_stacks_cards_from_server() instead?
 #     ...
     
-def player_stacks_init(player: int):
+# def player_stacks_init(player: int):
 
-    # create the stacks dictionary
-    stacks_cards: dict[str, list[str]] = {
-        "player_crapette":      [],
-        "player_remainder":     [],
-        "player_bin":           [],
-        "player_tableau":       [],
-        "player_foundation":    [],
-        "opponent_crapette":    [],
-        "opponent_remainder":   [],
-        "opponent_bin":         [],
-        "opponent_tableau":     [],
-        "opponent_foundation":  [],
-    }
+#     # create the stacks dictionary
+#     stacks_cards: dict[str, list[str]] = {
+#         "player_crapette":      [],
+#         "player_remainder":     [],
+#         "player_bin":           [],
+#         "player_tableau":       [],
+#         "player_foundation":    [],
+#         "opponent_crapette":    [],
+#         "opponent_remainder":   [],
+#         "opponent_bin":         [],
+#         "opponent_tableau":     [],
+#         "opponent_foundation":  [],
+#     }
     
   
 
