@@ -1,7 +1,7 @@
 from stacks import Stacks
 from card import Card, TransferredCard
 from constants import Players
-from gamestates import GameStates, PlayersGameState
+from server_game_state import GameStates, PlayersGameState
 from abc import ABC, abstractmethod
 
 # Generic stack class from which all the stacks that hold cards inherit.

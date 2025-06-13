@@ -3,7 +3,7 @@ from stacks import Stacks, StacksInitSizes
 from constants import Players
 from card import Card, TransferredCard, TransferredNCards
 from deck import Deck
-from gamestates import GameStates, PlayersGameState
+from server_game_state import GameStates, PlayersGameState
 
 # The class representiing the player's remainder stack object
 
