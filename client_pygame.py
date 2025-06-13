@@ -2,7 +2,7 @@ import pygame
 import os
 import time
 
-from constants import Players
+# from constants import Players
 from client_network import ClientConnection
 from client_game_comms import ClientGameComms
 from client_ui import GameUI
@@ -132,7 +132,7 @@ class Game:
         # print(crapette_stack)
         self._game_comms.request_stacks_cards()
         self._game_state._stacks_cards = self._game_comms.retrieve_stacks_cards()
-        client_logger.info(f"{self._game_state._stacks_cards}")
+        # client_logger.info(f"{self._game_state._stacks_cards}")
         
 
     def _handle_events(self, event) -> None:
@@ -174,6 +174,7 @@ class Game:
 
     def _handle_graphics(self) -> None:
         self._game_ui._window_redraw()
+        ...
 
     def game_loop(self) -> None:
         """
