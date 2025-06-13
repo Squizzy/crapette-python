@@ -85,7 +85,8 @@ class GameLogger:
             caller_frame = stack[2]
             module = caller_frame.frame.f_globals['__name__']
             function = caller_frame.function
-            return f"[{module}:{function}]"
+            line_number = caller_frame.lineno
+            return f"[{module}:{function}]:{line_number}"
         except Exception:
             return "no stack for logging info"
 
