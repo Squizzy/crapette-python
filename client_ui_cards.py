@@ -230,7 +230,7 @@ class CardsUI:
             
         blit_card = card_graphic if vertical else pygame.transform.rotate(card_graphic.copy(), 90)
         
-        self._ui_game_state._surface.blit(blit_card, (x, y) )
+        self._ui_game_state._window.blit(blit_card, (x, y) )
 
     def place_stack(self,   this_player: int, stack_name: str,  cards_list: list[str]) -> None:
         
@@ -263,7 +263,7 @@ class CardsUI:
             cards_blits.append(card_graphic if vertical else pygame.transform.rotate(card_graphic.copy(), 90))
         
         for card_blit in cards_blits:
-            self._ui_game_state._surface.blit(card_blit, (x, y) )
+            self._ui_game_state._window.blit(card_blit, (x, y) )
             
             if stack_name[:-1] == "tableau" and this_player == player:
                 x += shift
