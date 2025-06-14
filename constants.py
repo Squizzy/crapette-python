@@ -1,6 +1,5 @@
 from enum import Enum
 import os
-import pygame
 
 # The enum representing the players
 class Players(Enum):
@@ -22,12 +21,15 @@ CARD_IMG_HEIGHT: int = 333
 CARD_IMG_WIDTH: int = 234
 
 
-# icon of the game
+# images folder
 IMAGES_DIR: str = os.path.dirname(os.path.abspath(__file__)) + "/img/"
+
+# card faces folder
 CARD_FACES_DIR: str = os.path.join(IMAGES_DIR, "card_faces")
+
+# game icon file location
 GAME_ICON_FILE: str = os.path.join(IMAGES_DIR, "two_backs_256x256.png")
-GAME_ICON: pygame.Surface = pygame.image.load(GAME_ICON_FILE)
-# GAME_ICON: pygame.Surface = pygame.image.load("img/two_backs_256x256.png")
+
 
 class TableColours:
     # Initialising background colours
