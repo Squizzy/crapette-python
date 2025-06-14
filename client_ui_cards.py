@@ -189,7 +189,7 @@ class CardsUI:
         # player: int = self._game_state.player_id.value        
         # stack_prefix = "player_" if this_player == player else "opponent_"
 
-        ((x, y, w, h), vertical) = self._ui_game_state.stacks_locations[stack_name]
+        ((x, y, w, h), vertical) = self._ui_game_state.stacks_positions[stack_name]
         
         return (x, y), vertical
         
@@ -306,6 +306,8 @@ class CardsUI:
             for stack in player_stacks:
                 
                 # if the stack is a tableau
+                # taken separately because there is a max of 13 and the card_rect is different per card
+                # so all placeholders have been pre-allocated
                 if "tableau" in stack:
                     # enumerate through the cards
                     for i in range(len(self._game_state.stacks_cards[self._game_state.player_id.name][stack])):
@@ -313,14 +315,18 @@ class CardsUI:
                         stack_card_name = self._game_state.stacks_cards[self._game_state.player_id.name][stack][i]
                         
                         # Get the tuple for the tableau_card_positions dictionary 
-                        card_rect, card_num, card_name = self._ui_game_state.tableau_cards_positions[stack_prefix + stack][i]
+                        # card_rect, card_num, card_name = self._ui_game_state.tableau_cards_positions[stack_prefix + stack][i]
+                        card_rect, card_num, card_name = self._ui_game_state.cards_positions[stack_prefix + stack][i]
                         
                         # update the tuple with the correct card number and card name
-                        self._ui_game_state.tableau_cards_positions[stack_prefix + stack][i] = card_rect, i, stack_card_name
+                        # self._ui_game_state.tableau_cards_positions[stack_prefix + stack][i] = card_rect, i, stack_card_name
+                        self._ui_game_state.cards_positions[stack_prefix + stack][i] = card_rect, i, stack_card_name
 
                     # Remmove any element that was from a previous stack and above the current stack quantity        
-                    while len(self._ui_game_state.tableau_cards_positions[stack_prefix + stack]) > len(stack):
-                            self._ui_game_state.tableau_cards_positions[stack_prefix + stack].pop()
+                    while len(self._ui_game_state.cards_positions[stack_prefix + stack]) > len(stack):
+                            self._ui_game_state.cards_positions[stack_prefix + stack].pop()
+                    # while len(self._ui_game_state.tableau_cards_positions[stack_prefix + stack]) > len(stack):
+                    #         self._ui_game_state.tableau_cards_positions[stack_prefix + stack].pop()
                     
                 else:
                     # enumerate through the cards
@@ -329,15 +335,22 @@ class CardsUI:
                         stack_card_name = self._game_state.stacks_cards[self._game_state.player_id.name][stack][i]
                         
                         # Get the tuple for the non_tableau_card_positions dictionary 
-                        card_rect, card_num, card_name = self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack][0]
+                        card_rect, card_num, card_name = self._ui_game_state.cards_positions[stack_prefix + stack][0]
+                        # card_rect, card_num, card_name = self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack][0]
                         
                         # update the tuple with the correct card number and card name                        
-                        if i <= len(self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack]) - 1:
-                            self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack][i] = card_rect, i, stack_card_name
+                        if i <= len(self._ui_game_state.cards_positions[stack_prefix + stack]) - 1:
+                            self._ui_game_state.cards_positions[stack_prefix + stack][i] = card_rect, i, stack_card_name
                         else:
-                            self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack].append((card_rect, i, stack_card_name))
+                            self._ui_game_state.cards_positions[stack_prefix + stack].append((card_rect, i, stack_card_name))
+                        # if i <= len(self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack]) - 1:
+                        #     self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack][i] = card_rect, i, stack_card_name
+                        # else:
+                        #     self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack].append((card_rect, i, stack_card_name))
                     
 
                     # Remmove any element that was from a previous stack and above the current stack quantity        
-                    while len(self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack]) > len(stack):
-                            self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack].pop()
+                    while len(self._ui_game_state.cards_positions[stack_prefix + stack]) > len(stack):
+                            self._ui_game_state.cards_positions[stack_prefix + stack].pop()
+                    # while len(self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack]) > len(stack):
+                    #         self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack].pop()
