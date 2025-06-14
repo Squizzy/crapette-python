@@ -94,6 +94,8 @@ class GameUI:
         Redraw the game screen
         """
         
+        self._cards_ui.fill_card_positions()
+
         # place empty cards in the stacks positions
         self._stacks_layout.render_empty_stacks()   
         
@@ -109,7 +111,8 @@ class GameUI:
     def check_for_collision(self, event: pygame.event.Event) -> str:
         
         area: str = "table" # default value: hit the table
-        card_found = -1
+        card_found: int = -1
+        card_name_found: str = "none/table"
         
         collision_checklist_order = [
             "player_crapette",
@@ -134,11 +137,15 @@ class GameUI:
         
         found_collision: bool = False
         for stack in collision_checklist_order:
-            card_rect, _ = self._ui_game_state.stacks_locations[stack]
-            if card_rect.collidepoint(event.pos):
-                area = stack
-                card_found = 0
-                found_collision = True
+            # card_rect, _ = self._ui_game_state.stacks_locations[stack]
+            card_rect: pygame.Rect
+            for card_rect, card_num, card_name in reversed(self._ui_game_state.non_tableau_cards_positions[stack]):
+                if card_rect.collidepoint(event.pos):
+                    if card_name != "":
+                        area = stack
+                        card_found = card_num
+                        card_name_found = card_name
+                        found_collision = True
         
         if not found_collision:
             tableau_checklist_order = [
@@ -156,13 +163,15 @@ class GameUI:
                 if found_collision:
                     break
 
-                for card_rect, card_num, card_name in reversed(self._ui_game_state.tableau_cards_locations[tableau]):
+                for card_rect, card_num, card_name in reversed(self._ui_game_state.tableau_cards_positions[tableau]):
                     if card_rect.collidepoint(event.pos):
-                        area = tableau
-                        found_collision = True
-                        card_found = card_num
-                        break
+                        if card_name != "":
+                            area = tableau
+                            found_collision = True
+                            card_found = card_num
+                            card_name_found = card_name
+                            break
                     
-        return f"Hit: {area=} {card_found=}"
+        return f"Hit: {area=} {card_found=} {card_name_found=}"
 
 
