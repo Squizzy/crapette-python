@@ -217,7 +217,7 @@ class StacksLayoutUI:
         card_graphics = self._ui_game_state.card_face(card_face)
 
         for stack in stacks_locations:
-            (x, y, vertical) = stacks_locations[stack]
+            ((x, y, w, h), vertical) = stacks_locations[stack]
             blank_blit = card_graphics if vertical else pygame.transform.rotate(card_graphics.copy(), 90)
             
             if card_face == "EC":
@@ -225,3 +225,28 @@ class StacksLayoutUI:
             
             self._ui_game_state.window.blit(blank_blit, (x, y) )
             # surface.blit(blank_blit, (x, y) )
+            
+    def render_stacks_locations(self) -> None:
+        for stack in self._ui_game_state.stacks_locations:
+            if "crapette" in stack:
+                pygame.draw.rect(self._ui_game_state.window, (128, 50, 0), self._ui_game_state.stacks_locations[stack][0], 5)
+            else:    
+                pygame.draw.rect(self._ui_game_state.window, (128, 128, 128), self._ui_game_state.stacks_locations[stack][0], 1)
+
+
+    # def render_collision_areas(self) -> None:
+    #     for stack in self._ui_game_state.collision_areas:
+    #         for card in self._ui_game_state.collision_areas[stack]:
+    #             pygame.draw.rect(self._ui_game_state.window, ( 0, 0, 255), card[0], 2)
+    #             # pygame.draw.circle(self._ui_game_state.window, ( 0, 255, 0), (card[0].x + (card[0].w // 2), card[0].y +(card[0].h // 2)), 2)
+    #             pygame.draw.circle(self._ui_game_state.window, ( 0, 255, 0), card[0].center, 2)
+            
+    def render_tableau_cards_locations(self) -> None:
+
+        for stack in self._ui_game_state.tableau_cards_locations:
+            
+            for card_rect, card_num, card_name in self._ui_game_state.tableau_cards_locations[stack]:
+
+                pygame.draw.rect(self._ui_game_state.window, ( 255, 255, 0), card_rect, 2)
+
+            
