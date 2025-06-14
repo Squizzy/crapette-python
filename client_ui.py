@@ -2,9 +2,9 @@ import pygame
 # import os
 
 from constants import GAME_HEIGHT, GAME_WIDTH
-from constants import GAME_ICON
+from constants import GAME_ICON_FILE
 from constants import TableColours
-# from constants import IMAGES_DIR, CARD_FACES_DIR, GAME_ICON_FILE
+# from constants import IMAGES_DIR, CARD_FACES_DIR
 from client_ui_cards import CardsUI
 from client_ui_stacks_layout import StacksLayoutUI
 from client_ui_game_state import UIGameState
@@ -12,40 +12,6 @@ from client_game_state import GameState
 
 from game_logger import GameLogger, DebugLevel
 client_logger: GameLogger = GameLogger("client_ui", level=DebugLevel.client_ui.value)
-
-# from game_logger import GameLogger
-
-# client_logger: GameLogger
-
-# from icecream import ic # type: ignore
-# ic.configureOutput(prefix='client_ui: ')
-# def log_message(msg:str) -> None:
-#     DEBUG = True
-#     if DEBUG:
-#         ic(msg)
-
-
-# # dimensions of the game window
-# GAME_WIDTH: int = 1024
-# GAME_HEIGHT: int = 768
-
-# Initialising background colours
-# FELT_GREEN = (0, 96, 0) # felt dark green 
-# FELT_RED = (96, 0, 0) # felt dark red 
-# FELT_BLUE = (0, 0, 96) # felt dark blue 
-# YELLOW = (255, 255, 0) # yellow 
-
-# # icon of the game
-# IMAGES_DIR: str = os.path.dirname(os.path.abspath(__file__)) + "/img/"
-# CARD_FACES_DIR: str = os.path.join(IMAGES_DIR, "card_faces")
-# GAME_ICON_FILE: str = os.path.join(IMAGES_DIR, "two_backs_256x256.png")
-# GAME_ICON: pygame.Surface = pygame.image.load(GAME_ICON_FILE)
-# # GAME_ICON: pygame.Surface = pygame.image.load("img/two_backs_256x256.png")
-
-
-# class GameUIState:
-#     _is_moving: bool
-#     ...
 
 
 class GameUI:
@@ -80,21 +46,13 @@ class GameUI:
         client_logger.info("Stacks UI instantiated")
         
         self._ui_game_state.on_window_resize(self._ui_game_state.window)      
-   
-    # @property 
-    # def cards(self) -> CardsUI:
-    #     return self._cards_ui
 
-    # @property
-    # def table_colour(self) -> tuple[int, int, int]:
-    #     return self._table_colour
 
     def _pygame_init(self) -> None:
         """
         Initialize pygame
         """
         pygame.init()
-
 
     def _window_init(self):
         """
@@ -105,18 +63,17 @@ class GameUI:
         """
         # Set up the game window
         self._ui_game_state.window = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.RESIZABLE)
-        # surface: pygame.Surface = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), pygame.RESIZABLE)
 
         # Set title of window
         pygame.display.set_caption("pygame title")
 
         # Set icon if window
-        pygame.display.set_icon(GAME_ICON)
+        self._ui_game_state.game_icon = pygame.image.load(GAME_ICON_FILE)
+        pygame.display.set_icon(self._ui_game_state.game_icon)
 
         # Change the background
         self._ui_game_state.window.fill(self._ui_game_state.table_colour)
 
-    
     def _window_resize(self, width: int, height: int, other: int) -> None:   
         """
         Resize the game surface and reset its background colour
@@ -128,10 +85,9 @@ class GameUI:
             height (int): new height of the game window
             other (int | None): another parameter for the resize method
         """
-        self._surface = pygame.display.set_mode((width, height), other)
-        self._surface.fill(self._ui_game_state.table_colour)
-        self._ui_game_state.on_window_resize(self._surface)
-        # self._stacks_layout.update_stacks_locations_and_sizes(width, height, self.cards)
+        surface: pygame.Surface = pygame.display.set_mode((width, height), other)
+        surface.fill(self._ui_game_state.table_colour)
+        self._ui_game_state.on_window_resize(surface)
 
     def _window_redraw(self):
         """
@@ -139,12 +95,10 @@ class GameUI:
         """
         
         # place empty cards in the stacks positions
-        # self._stacks_layout.render_empty_stacks(self._ui_game_state._window, self.cards)
         self._stacks_layout.render_empty_stacks()
-        # self._ui_game_state.stacks_locations = self._ui_game_state.stacks_locations
-        self._cards_ui.place_stacks_cards()
-        # self._cards_ui.place_stacks_cards(self._game_state._stacks_cards)
         
+        # place the cards on the stacks (initially, 13 on the crapette, 1 on each own tableau and rest in remainder)
+        self._cards_ui.place_stacks_cards()
         
         # update the window
         pygame.display.flip()
