@@ -1,7 +1,7 @@
 import pygame
 from pprint import pprint
 
-from constants import CARD_IMG_WIDTH, CARD_IMG_HEIGHT, TABLEAU_CARDS_SHIFT
+from constants import CARD_IMG_WIDTH, CARD_IMG_HEIGHT, TABLEAU_CARDS_SHIFT,  TableColours
 # ,GAME_WIDTH, GAME_HEIGHT
 
 from game_logger import GameLogger, DebugLevel
@@ -9,10 +9,10 @@ client_logger: GameLogger = GameLogger("client_ui_game_state", level=DebugLevel.
 
 class UIGameState:
     
-    
     _window: pygame.Surface  # the screen that contains the game
     _window_dimensions: tuple[int, int]
     _window_centre: tuple[int, int]
+    _table_colour: tuple[int, int, int]
     
     # _screen_dimensions: tuple[int, int]  # (width, height) 
     _originally_loaded_cards_faces: dict[str, pygame.Surface]  # the sprites from the original file
@@ -24,21 +24,23 @@ class UIGameState:
     _stacks_spacing_w: int  # the horizontal spacing between the stacks
     _stacks_spacing_y: int  # the vertical spacing between the stacks
     _stacks_locations: dict[str, tuple[int, int, bool]]  # (x, y, V(True)/H)
-    _tableau_card_locations: dict[str, list[tuple[int, str]]]  # location of the tableau cards. tableaux, x, card__str__
+    _tableau_cards_locations: dict[str, list[tuple[int, str]]]  # location of the tableau cards. tableaux, x, card__str__
     _collision_areas: dict[str, list[tuple[pygame.Rect, int, str]]]  # {stack: } [(x,y,w,h),  card_num, card__str__ )
     
     _is_moving: bool
     
     
-    def __init__(self, surface: pygame.Surface) -> None:
+    def __init__(self) -> None:
         # global client_logger
         # client_logger = GameLogger("ui_game_state_logger", level=logging.DEBUG)
         
-        self._window = surface
-        self._set_window_dimensions()          # Store the window dimensions (w, h)
-        self._set_window_centre()              # Store the window centre (x, y)
+        # self._window = surface
         
-        self._set_card_dimensions()             # Store the scaled cards sprite dimensions for the window size (w, h)
+        # self._set_window_dimensions()          # Store the window dimensions (w, h)
+        # self._set_window_centre()              # Store the window centre (x, y)
+        
+        # self._set_card_dimensions()             # Store the scaled cards sprite dimensions for the window size (w, h)
+        self._card_dimensions = (0, 0)
         self._originally_loaded_cards_faces = {}
         self._cards_faces = {}
         # self._scale_cards_faces()
@@ -56,19 +58,27 @@ class UIGameState:
             "opponent_tableau2": 1,
             "opponent_tableau3": 1,
         }
-        self._set_tableau_cards_shift()        # Store the shift of the tableau card from the previous card of the same tableau stack
-        self._set_stacks_spacing()              # Calculate and store the stacks spacings
-        self._set_stacks_locations()            # calculate and store the stacks base locations
-        self._set_collision_areas()             # calculate and store the collision areas
+        self._stacks_locations = {}
+        self._tableau_cards_locations = {}
+        # self._set_tableau_cards_shift()        # Store the shift of the tableau card from the previous card of the same tableau stack
+        # self._set_stacks_spacing()              # Calculate and store the stacks spacings
+        # self._set_stacks_locations()            # calculate and store the stacks base locations
+        # self._set_collision_areas()             # calculate and store the collision areas
         # client_logger.error(f"{self.collision_areas}")
         # self._stacks_locations = {}
         
+        self.table_colour = TableColours.FELT_GREEN
         self._is_moving = False
      
     # window: the game area not including the title bar
     @property
     def window(self) -> pygame.Surface:
         return self._window
+    
+    @window.setter
+    def window(self, surface: pygame.Surface) -> None:
+        """assign the window surface"""
+        self._window = surface
     
     @property
     def window_dimensions(self) -> tuple[int, int]:
@@ -98,7 +108,6 @@ class UIGameState:
         """The centre of the game screen"""
         return self._window_centre
     
-    
     def _set_window_centre(self) -> None:
         rect = self.window.get_rect()
         self._window_centre = rect.w // 2, rect.h // 2
@@ -113,6 +122,16 @@ class UIGameState:
         """returns the y position of the centre point"""
         return self._window_centre[1]
     
+    @property
+    def table_colour(self) -> tuple[int, int, int]:
+        """return the colour used for the background of the game"""
+        return self._table_colour
+    
+    @table_colour.setter
+    def table_colour(self, table_colour: tuple[int, int, int]) -> None:
+        """sets the background colour for the game"""
+        self._table_colour = table_colour
+
     
     # Cards
     @property
@@ -243,6 +262,8 @@ class UIGameState:
         Assign the orientation of the cards in the stacks           
         """
         
+        # TODO: Rework these as rects, not (x,y)
+        
         # x locations (top left corner)
         player_center_x = self.window_centre_x - self.card_width // 2
         player_left_x = player_center_x - self.card_width - self._stacks_spacing_w
@@ -286,8 +307,13 @@ class UIGameState:
 
         # combine the 3 dictionaries
         self._stacks_locations = opponent_base_stacks_positions |center_stacks_positions | player_base_stacks_positions    
-        
-    def _set_stack_tableau_locations(self) -> None:
+    
+    @property
+    def tableau_cards_locations(self) -> dict[str, list[tuple[int, str]]]:
+        """the ordered location of each card of the stack"""
+        return self._tableau_cards_locations
+    
+    def _set_tableau_cards_locations(self) -> None:
         
         tableau_card_locations: dict[str, list[tuple[int, str]]] = {
             "player_tableau0":  [],
@@ -311,7 +337,7 @@ class UIGameState:
                 for card in range(13):
                     tableau_card_locations[stack].append((self.stacks_locations[stack][0] - self.tableau_cards_shift * card, ""))
         
-        self._tableau_card_locations = tableau_card_locations.copy()            
+        self._tableau_cards_locations = tableau_card_locations.copy()            
         
 
     @property
@@ -472,4 +498,5 @@ class UIGameState:
         self._set_stacks_spacing()              # Calculate and store the stacks spacings
         self._set_stacks_locations()            # calculate and store the stacks base locations
         self._set_collision_areas()             # calculate and store the collision areas
+        self._set_tableau_cards_locations()
         
