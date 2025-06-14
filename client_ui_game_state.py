@@ -1,4 +1,5 @@
 import pygame
+from pprint import pprint
 
 from constants import CARD_IMG_WIDTH, CARD_IMG_HEIGHT, TABLEAU_CARDS_SHIFT,  TableColours
 # ,GAME_WIDTH, GAME_HEIGHT
@@ -24,8 +25,9 @@ class UIGameState:
     _tableau_cards_shift: int  # the shift of the tableau card from the previous card of the same tableau stack
     _stacks_spacing_w: int  # the horizontal spacing between the stacks
     _stacks_spacing_y: int  # the vertical spacing between the stacks
-    _stacks_locations: dict[str, tuple[pygame.Rect, bool]]  # (x, y, V(True)/H)
-    _tableau_cards_locations: dict[str, list[tuple[pygame.Rect, int, str]]]  # location of the tableau cards. tableaux, x, card__str__
+    _stacks_locations: dict[str, tuple[pygame.Rect, bool]]  # (Stack location as rect, V(True)/H)
+    _non_tableau_cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]]  # location of the non-tableau cards. non-tableaus, x, y
+    _tableau_cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]]  # location of the tableau cards. tableaux, x, card__str__
     # _collision_areas: dict[str, list[tuple[pygame.Rect, int, str]]]  # {stack: } [(x,y,w,h),  card_num, card__str__ )
     
     _is_moving: bool
@@ -60,7 +62,23 @@ class UIGameState:
             "opponent_tableau3": 1,
         }
         self._stacks_locations = {}
-        self._tableau_cards_locations = {}
+        self._tableau_cards_positions = {}
+        self._non_tableau_cards_positions = {}
+        #                 "player_crapette": [],
+        #     "player_remainder": [],
+        #     "opponent_bin": [],
+        #     "player_foundation0":  [],
+        #     "player_foundation1":  [],
+        #     "player_foundation2":  [],
+        #     "player_foundation3":  [],
+        #     "opponent_crapette": [],
+        #     "opponent_remainder": [],
+        #     "opponent.bin": [],
+        #     "opponent_foundation0": [],
+        #     "opponent_foundation1": [],
+        #     "opponent_foundation2": [],
+        #     "opponent_foundation3": [],
+        # }
         # self._set_tableau_cards_shift()        # Store the shift of the tableau card from the previous card of the same tableau stack
         # self._set_stacks_spacing()              # Calculate and store the stacks spacings
         # self._set_stacks_locations()            # calculate and store the stacks base locations
@@ -320,18 +338,18 @@ class UIGameState:
         self._stacks_locations = opponent_base_stacks_positions |center_stacks_positions | player_base_stacks_positions    
     
     @property
-    def tableau_cards_locations(self) -> dict[str, list[tuple[pygame.Rect, int, str]]]:
+    def tableau_cards_positions(self) -> dict[str, list[tuple[pygame.Rect, int, str]]]:
         """the ordered location of each card of the stack"""
-        return self._tableau_cards_locations
+        return self._tableau_cards_positions
     
-    @tableau_cards_locations.setter
-    def tableau_cards_locations(self, tableau_cards_locations: dict[str, list[tuple[pygame.Rect, int, str]]]) -> None:
+    @tableau_cards_positions.setter
+    def tableau_cards_positions(self, tableau_cards_locations: dict[str, list[tuple[pygame.Rect, int, str]]]) -> None:
         """Set the ordered location of each card of the stack"""
-        self._tableau_cards_locations = tableau_cards_locations
+        self._tableau_cards_positions = tableau_cards_locations
     
-    def _set_tableau_cards_locations(self) -> None:
+    def _set_tableau_cards_positions(self) -> None:
         
-        tableau_card_locations: dict[str, list[tuple[pygame.Rect, int, str]]] = {
+        tableau_card_positions: dict[str, list[tuple[pygame.Rect, int, str]]] = {
             "player_tableau0":  [],
             "player_tableau1":  [],
             "player_tableau2":  [],
@@ -346,22 +364,78 @@ class UIGameState:
             # Initialise a rectangle at the base of the stack
             rect:pygame.Rect = self.stacks_locations[stack][0]
             
-            if stack[:-1] == "player_tableau":
+            if "player_tableau" in stack:
                 #TODO: 12 should be sufficient in reality as the ace should 
                 # go to the foundation, but...
                 for card in range(13):
-                    tableau_card_locations[stack].append((rect, card, ""))
+                    tableau_card_positions[stack].append((rect, card, ""))
                     rect = rect.move((self.tableau_cards_shift,0))
                     
-            elif stack[:-1] == "opponent_tableau":
+            elif "opponent_tableau" in stack:
                 #TODO: 12 should be sufficient in reality as the ace should 
                 # go to the foundation, but...
                 for card in range(13):
-                    tableau_card_locations[stack].append((rect, card, ""))
+                    tableau_card_positions[stack].append((rect, card, ""))
                     rect = rect.move((-self.tableau_cards_shift,0))
         
-        self._tableau_cards_locations = tableau_card_locations.copy()
+        self._tableau_cards_positions = tableau_card_positions.copy()
         
+    @property
+    def non_tableau_cards_positions(self) -> dict[str, list[tuple[pygame.Rect, int, str]]]:
+        """the ordered location of each non-tableau card of the stack"""
+        return self._non_tableau_cards_positions
+    
+    @non_tableau_cards_positions.setter
+    def non_tableau_cards_positions(self, non_tableau_cards_locations: dict[str, list[tuple[pygame.Rect, int, str]]]) -> None:
+        """Set the ordered location of each non-tableau card of the stack"""
+        self._non_tableau_cards_positions = non_tableau_cards_locations
+        
+    def _set_non_tableau_cards_positions(self) -> None:
+        """Set the ordered location of each non-tableau card of the stack"""
+        
+        non_tableau_cards_stacks = [
+            "player_crapette",
+            "player_remainder",
+            "player_bin",
+            "player_foundation0",
+            "player_foundation1",
+            "player_foundation2",
+            "player_foundation3",
+            "opponent_crapette",
+            "opponent_remainder",
+            "opponent_bin",
+            "opponent_foundation0",
+            "opponent_foundation1",
+            "opponent_foundation2",
+            "opponent_foundation3",
+        ]
+        
+        non_tableau_cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]] = {
+            "player_crapette": [],
+            "player_remainder": [],
+            "player_bin": [],
+            "player_foundation0":  [],
+            "player_foundation1":  [],
+            "player_foundation2":  [],
+            "player_foundation3":  [],
+            "opponent_crapette": [],
+            "opponent_remainder": [],
+            "opponent_bin": [],
+            "opponent_foundation0": [],
+            "opponent_foundation1": [],
+            "opponent_foundation2": [],
+            "opponent_foundation3": [],
+        }
+
+        for stack in self.stacks_locations:
+            # Initialise a rectangle at the base of the stack
+            rect: pygame.Rect
+            rect = self.stacks_locations[stack][0]
+
+            if stack in non_tableau_cards_stacks:
+                non_tableau_cards_positions[stack].append((rect , -1, ""))
+
+        self.non_tableau_cards_positions = non_tableau_cards_positions.copy()
 
     @property
     def tableau_cards_shift(self) -> int:
@@ -527,5 +601,11 @@ class UIGameState:
         self._set_stacks_spacing()              # Calculate and store the stacks spacings
         self._set_stacks_locations()            # calculate and store the stacks base locations
         # self._set_collision_areas()             # calculate and store the collision areas
-        self._set_tableau_cards_locations()
+        self._set_tableau_cards_positions()
+        self._set_non_tableau_cards_positions()
+        
+        pprint(f"{self.tableau_cards_positions}")
+        # client_logger.debug(f"{self.tableau_cards_positions}")
+        
+        # client_logger.debug(f"{self.non_tableau_cards_positions}")
         
