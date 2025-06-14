@@ -1,5 +1,4 @@
 import pygame
-import os
 import time
 
 # from constants import Players
@@ -11,79 +10,6 @@ from client_game_state import GameState
 from game_logger import GameLogger, DebugLevel
 client_logger: GameLogger = GameLogger("client_pygame", level=DebugLevel.client_pygame.value)
 
-# from game_logger import GameLogger, logging
-
-# client_logger: GameLogger
-
-# from icecream import ic # type: ignore
-# ic.configureOutput(prefix='client_pygame: ')
-# def log_message(msg:str) -> None:
-#     DEBUG = True
-#     if DEBUG:
-#         # ic(msg)
-#         client_logger.debug(msg)
-
-# dimensions of the game window
-GAME_WIDTH: int = 1024
-GAME_HEIGHT: int = 768
-
-# Initialising background colours
-FELT_GREEN = (0, 96, 0) # felt dark green 
-FELT_RED = (96, 0, 0) # felt dark red 
-FELT_BLUE = (0, 0, 96) # felt dark blue 
-YELLOW = (255, 255, 0) # yellow 
-
-# icon of the game
-IMAGES_DIR: str = os.path.dirname(os.path.abspath(__file__)) + "/img/"
-CARD_FACES_DIR: str = os.path.join(IMAGES_DIR, "card_faces")
-GAME_ICON_FILE: str = os.path.join(IMAGES_DIR, "two_backs_256x256.png")
-GAME_ICON: pygame.Surface = pygame.image.load(GAME_ICON_FILE)
-# GAME_ICON: pygame.Surface = pygame.image.load("img/two_backs_256x256.png")
-
-
-
-
-# # Stores a copy of the game state from the server
-# # Updates from the server
-# class GameState:
-#     _player_id: Players
-#     _stacks_cards: dict[str, list[str]]
-#     _turn_player: int
-#     _is_running: bool
-    
-#     def __init__(self) -> None:
-#         self._stacks_cards = {
-#             "player_crapette":      [],
-#             "player_remainder":     [],
-#             "player_bin":           [],
-#             "player_tableau":       [],
-#             "player_foundation":    [],
-#             "opponent_crapette":    [],
-#             "opponent_remainder":   [],
-#             "opponent_bin":         [],
-#             "opponent_tableau":     [],
-#             "opponent_foundation":  [],
-#         }
-#         self._is_running = False
-        
-#     @property
-#     def player_id(self) -> Players:
-#         return self._player_id
-    
-#     @player_id.setter
-#     def player_id(self, player: Players) -> None:
-#         self._player_id = player
-        
-#     @property
-#     def stacks_cards(self) -> dict[str, list[str]]:
-#         return self._stacks_cards
-    
-#     @stacks_cards.setter
-#     def stacks_cards(self, stacks_cards: dict[str, list[str]]) -> None:
-#         for stack in stacks_cards:
-#             for card in stacks_cards[stack]:
-#                 self._stacks_cards[stack].append(card)
-
 
 class Game:
     _game_state: GameState
@@ -91,21 +17,18 @@ class Game:
     _connection: ClientConnection
     _game_comms: ClientGameComms
 
-    
     def __init__(self) -> None:
-        # global client_logger
-        # client_logger = GameLogger()
-
         
         # Instantiate the game state
         self._game_state = GameState()
         client_logger.info("client gamestate instantiated")
         
-        
         # Instantiate the game UI
         self._game_ui = GameUI(self._game_state)
         client_logger.info("client gameui instantiated")
         
+        
+        # TODO: Move the network stuff to a network_state
         # connect to the server
         self._connection = ClientConnection()
         self._connection.connect()
@@ -129,17 +52,9 @@ class Game:
         self._game_state.player_id = self._game_comms.retrieve_player_id()
         client_logger.debug(f"client player id acquired: {self._game_state.player_id.name}")
         
-            
-        # stacks_cards =  self._comm.server_get_stacks_cards()
-        # # self._message_decoder = client_message_decoder()
-        # crapette_stack = client_message_decoder.crapette_stack(message=stacks_cards)
-        # # crapette_stack = self._message_decoder(stacks_cards)
-        # print(crapette_stack)
         self._game_comms.request_stacks_cards()
         self._game_state._stacks_cards = self._game_comms.retrieve_stacks_cards()
-        # client_logger.info(f"{self._game_state._stacks_cards}")
         
-
     def _handle_events(self, event) -> None:
         
         rect = pygame.Rect(0, 0, 0, 0)
@@ -157,7 +72,7 @@ class Game:
             #     self._game_ui._ui_game_state._is_moving = True
                 
         elif event.type == pygame.MOUSEBUTTONUP:
-            # print("Button Up")
+            # client_logger.debug("Button Up")
             self._game_ui._ui_game_state._is_moving = False
             
         elif event.type == pygame.MOUSEMOTION and self._game_ui._ui_game_state._is_moving:
@@ -173,34 +88,18 @@ class Game:
             
         elif  event.type == pygame.VIDEORESIZE:
             self._game_ui._window_resize(event.w, event.h, pygame.RESIZABLE)
+            
         else:
             pass
 
-
     def _handle_graphics(self) -> None:
         self._game_ui._window_redraw()
-        ...
 
     def game_loop(self) -> None:
         """
         The main game loop
 
         """
-        # def game_loop(surface: pygame.Surface, stacks_layout: StacksLayout, cards: Cards):
-        # clock: pygame.time.Clock = pygame.time.Clock()
-
-        # blit_card = self._game_ui._ui_game_state.card_face["HQ"]
-        # blit_card = self._game_ui._cards_ui.faces["HQ"]
-        # blit_card_width = card_faces["HQ"].get_width()
-        # blit_card_height = card_faces["HQ"].get_height()
-        # blit_card_angle = 0
-
-        # rect: pygame.Rect = blit_card.get_rect()
-        # rect: pygame.Rect = card_faces["HQ"].get_rect()
-        # surface.blit(blit_card, (100, 100))
-
-        # color = FELT_GREEN
-        
         
         # A card or stack is being displaced
         self._game_ui._ui_game_state._is_moving = False
@@ -209,95 +108,31 @@ class Game:
         self._game_state._is_running = True
         
         # previous = time.time()
+        
         # Game loop 
         while self._game_state._is_running:
             # current = time.time()
             # elapsed = current - previous
             # previous = current
+            
+            
             # Handle events
             for event in pygame.event.get():
                 self._handle_events(event)
-                # self._handle_events(event, rect)
-                # pass
-                
-            # self.get_stacks_cards()
-            # self.get_stacks_cards_from_server()
+
+            # Handle graphics
             self._handle_graphics()
-            # self._window_redraw()
+
             
-            # # place empty cards in the stacks positions
-            # self.stacks_layout.render_empty_stacks(self.surface, self.cards)
-            
-            # # update the window
-            # # pygame.display.update()
-            # pygame.display.flip()
-            
-            # delay
-            # pygame.time.delay(1000)
+            # delay the game loop so it runs once every 16 milliseconds
             time.sleep(0.016)
-            
-            # Make a circle
-            # pygame.draw.circle(surface, (FELT_BLUE), (GAME_WIDTH/2, GAME_HEIGHT/2), 75)
-
-            # Make a rectangle
-            # this_rect = pygame.draw.rect(surface, color=YELLOW, rect=pygame.Rect(30, 30, 60, 60))
-
-            # print("blitting")
-            # surface.blit(blit_card, rect)
-
-            # scaling
-            # blit_card_width = int(blit_card_width * 0.99)
-            # blit_card_height = int(blit_card_height * 0.99)
-            # blit_card = pygame.transform.smoothscale(card_faces["HQ"], (blit_card_width, blit_card_height))
-
-            # rotating
-            # blit_card_angle = blit_card_angle + 3
-            # blit_card = pygame.transform.rotate(blit_card, blit_card_angle)
-            # card_faces["HQ"] = pygame.transform.scale(card_faces["HQ"], (int(card_faces["HQ"].get_size()[0]*0.99), int(card_faces["HQ"].get_size()[1]*0.99)))
-
-            # surface.blit(card_faces["EC"], (120, 120))
-
-
-
-            # clock.tick(3000)
-
+        
+        # for now if the game loop is finished, then quit the game    
         self._game_comms.server_quit()
         pygame.quit()
-
-# def server_get_stacks_cards():
-#     #TODO: Implement the server_get_stacks_cards function - use get_stacks_cards_from_server() instead?
-#     ...
-    
-# def player_stacks_init(player: int):
-
-#     # create the stacks dictionary
-#     stacks_cards: dict[str, list[str]] = {
-#         "player_crapette":      [],
-#         "player_remainder":     [],
-#         "player_bin":           [],
-#         "player_tableau":       [],
-#         "player_foundation":    [],
-#         "opponent_crapette":    [],
-#         "opponent_remainder":   [],
-#         "opponent_bin":         [],
-#         "opponent_tableau":     [],
-#         "opponent_foundation":  [],
-#     }
-    
-  
-
-
-
 
 
 if __name__ == "__main__":
         
     game: Game = Game()
-    # pygame_init()
-    # surface: pygame.Surface = window_init()
-    # cards: Cards = Cards(GAME_HEIGHT)
-    # stacks_layout: StacksLayout = StacksLayout(cards)
-    # stacks_cards: dict[str, list[str]] = player_stacks_init(1)
-    # load_card_faces()
-    # game_loop(game.surface, game.stacks_layout, game.cards)
     game.game_loop()
