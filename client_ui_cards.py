@@ -2,7 +2,6 @@ import pygame
 import os
 
 from constants import CARD_FACES_DIR, Players
-# , GAME_HEIGHT, CARD_IMG_HEIGHT, CARD_IMG_WIDTH
 from client_game_state import GameState
 from client_ui_game_state import UIGameState
 
@@ -167,6 +166,13 @@ class CardsUI:
             
         return card_graphic
     
+    def get_stack_name(self, stack: str, this_player:int) -> str:
+        """Return the stack to be used for this card"""
+        player: int = self._game_state.player_id.value        
+        stack_prefix = "player_" if this_player == player else "opponent_"
+        
+        return stack_prefix + stack
+    
     def where_to_place_card_initially(self, this_player: int, stack:str) -> tuple[tuple[int, int], bool]:
         """
         Calculate the position where the card should be placed
@@ -179,10 +185,11 @@ class CardsUI:
             The top left position of the card on the window
         """
         
-        player: int = self._game_state.player_id.value        
-        stack_prefix = "player_" if this_player == player else "opponent_"
+        stack_name = self.get_stack_name(stack, this_player)
+        # player: int = self._game_state.player_id.value        
+        # stack_prefix = "player_" if this_player == player else "opponent_"
 
-        ((x, y, w, h), vertical) = self._ui_game_state.stacks_locations[stack_prefix + stack]
+        ((x, y, w, h), vertical) = self._ui_game_state.stacks_locations[stack_name]
         
         return (x, y), vertical
         
@@ -220,92 +227,53 @@ class CardsUI:
         # Orientate the card for the stack
         card_graphic = self.card_orientate(card_graphic, vertical) 
         
+        # render the graphic on the window
         self._ui_game_state.window.blit(card_graphic, card_placement)
-        
-        # card_face: str = card[:-2]
-        
-        # Calculate the position of the card on the screen
-        # player: int = self._game_state.player_id.value        
-        # stack_prefix = "player_" if this_player == player else "opponent_"
-
-        # ((x, y, w, h), vertical) = self._ui_game_state.stacks_locations[stack_prefix + stack]
-        
-
-        # if card[-2] == 'u':  # face up or down. this is the second to last char.
-        #     card_graphic = self._ui_game_state._cards_faces[card_face]
-        # else:
-        #     card_back = "BB" if Players(card[-1]) == self._game_state.player_id else "BR"
-        #     card_graphic = self._ui_game_state._cards_faces[card_back] 
     
-        # blit_card = self._ui_game_state._cards_faces[card_face] if vertical \
-        #             else pygame.transform.rotate(self._ui_game_state._cards_faces[card_face].copy(), 90)
+    # def register_card_on_stack(self, stack: str, this_player: int, card: str) -> None:
+    #     """Register the card either in the stacks_locations or in the tableau_locations"""
+        
+    #     stack_name = self.get_stack_name(stack, this_player)
+        
+    #     if "tableau" in stack_name:
             
-        # blit_card = card_graphic if vertical else pygame.transform.rotate(card_graphic.copy(), 90)
-        
-        # self._ui_game_state._window.blit(blit_card, (x, y) )
-        
+    #         self._ui_game_state.tableau_cards_locations
+    
+    
     def place_on_stack_initially(self, this_player: int, stack: str,  cards_list: list[str]) -> None:
         
         
-        # Calculate the position of the card on the screen
-        # player: int = self._game_state.player_id.value   
-             
-        # stack_prefix = "player_" if this_player == player else "opponent_"
-        # ((x, y, w, h), vertical) = self._ui_game_state.stacks_locations[stack_prefix + stack_name]
-        
         card_placement, vertical = self.where_to_place_card_initially(this_player, stack)
         
-        shift: int = self._ui_game_state.tableau_cards_shift
-        # shift: int = self.width // 4
+        cards_blits: list[pygame.Surface] = []
         
-        cards_blits = []
-        
+        # Get all the cards for this stack
         for card in cards_list:
-        #     # cards contains Suit [1 char] Rank [1 or 2 char] face_up [1 char] 
-        #     card_face: str = card[:-1]
-
-        #     # client_logger.debug(f"{player=} {this_player=}")
-            
-        #     if card[-1] == 'u':  # face up
-        #         card_graphic = self._ui_game_state._cards_faces[card_face]
-        #     else:
-        #         card_graphic = self._ui_game_state._cards_faces["BB" if this_player == player else "BR"] # self._ui_game_state._cards_faces["BR"] 
-        # # if this_player == 1 else "BR"]
-        #     # blit_card = self._ui_game_state._cards_faces[card_face] if vertical \
-        #     #             else pygame.transform.rotate(self._ui_game_state._cards_faces[card_face].copy(), 90)
-            card_graphic = self.get_card_graphic(card)    
+            card_graphic: pygame.Surface = self.get_card_graphic(card)    
             card_graphic = self.card_orientate(card_graphic, vertical)
             
-                
-            # cards_blits.append(card_graphic if vertical else pygame.transform.rotate(card_graphic.copy(), 90))
             cards_blits.append(card_graphic)
         
         for card_blit in cards_blits:
+            # Render the card on the display
             self._ui_game_state.window.blit(card_blit, card_placement )
             
             if "tableau" in stack:
+                shift: int = self._ui_game_state.tableau_cards_shift
+                # If the card belongs to player
                 if this_player == self._game_state.player_id.value:
+                    # shift right the position for the next card to be placed down
                     next_card_position = (card_placement[0] + shift, card_placement[1])
                 else:
+                    # shift left
                     next_card_position = (card_placement[0] - shift, card_placement[1])
                 card_placement = next_card_position
 
-                    
-
-                
-            # self._ui_game_state._window.blit(card_blit, (x, y) )
+            # stack_name = self.get_stack_name(stack, this_player)
             
-            # if stack_name[:-1] == "tableau" and this_player == player:
-            #     x += shift
-                
-            # if stack_name[:-1] == "tableau" and this_player != player:
-            #     x -= shift
-                
-            # if stack_name == "crapette" and this_player == player:
-            #     x -= shift
-                
-            # if stack_name == "crapette" and this_player != player:
-            #     x += shift
+            # # record that the card was placed on the stack
+            # self._ui_game_state.stacks_locations[stack_name] = (card_placement[0], card_placement[1], vertical)
+
                 
     def place_stacks_cards_initially(self) -> None:
         stacks: dict[str, dict[str, list[str]]] = self._game_state.stacks_cards
@@ -319,3 +287,57 @@ class CardsUI:
         # #opponent cards
         for stack_name, card_stack in stacks[Players(opponent).name].items():
             self.place_on_stack_initially(opponent, stack_name, card_stack)
+
+
+    def fill_card_positions(self) -> None:
+        """
+        Fill the tableau card locations with the correct card values
+        """               
+        
+        # go player after player:
+        for player_name, player_stacks in self._game_state.stacks_cards.items():
+            
+            if Players[player_name] == self._game_state.player_id:
+                stack_prefix = "player_"
+            else:
+                stack_prefix = "opponent_"
+                
+            # the stack after stack for that player
+            for stack in player_stacks:
+                
+                # if the stack is a tableau
+                if "tableau" in stack:
+                    # enumerate through the cards
+                    for i in range(len(self._game_state.stacks_cards[self._game_state.player_id.name][stack])):
+                        # Get the card name that was provided by the server
+                        stack_card_name = self._game_state.stacks_cards[self._game_state.player_id.name][stack][i]
+                        
+                        # Get the tuple for the tableau_card_positions dictionary 
+                        card_rect, card_num, card_name = self._ui_game_state.tableau_cards_positions[stack_prefix + stack][i]
+                        
+                        # update the tuple with the correct card number and card name
+                        self._ui_game_state.tableau_cards_positions[stack_prefix + stack][i] = card_rect, i, stack_card_name
+
+                    # Remmove any element that was from a previous stack and above the current stack quantity        
+                    while len(self._ui_game_state.tableau_cards_positions[stack_prefix + stack]) > len(stack):
+                            self._ui_game_state.tableau_cards_positions[stack_prefix + stack].pop()
+                    
+                else:
+                    # enumerate through the cards
+                    for i in range(len(self._game_state.stacks_cards[self._game_state.player_id.name][stack])):
+                        # Get the card name that was provided by the server
+                        stack_card_name = self._game_state.stacks_cards[self._game_state.player_id.name][stack][i]
+                        
+                        # Get the tuple for the non_tableau_card_positions dictionary 
+                        card_rect, card_num, card_name = self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack][0]
+                        
+                        # update the tuple with the correct card number and card name                        
+                        if i <= len(self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack]) - 1:
+                            self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack][i] = card_rect, i, stack_card_name
+                        else:
+                            self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack].append((card_rect, i, stack_card_name))
+                    
+
+                    # Remmove any element that was from a previous stack and above the current stack quantity        
+                    while len(self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack]) > len(stack):
+                            self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack].pop()
