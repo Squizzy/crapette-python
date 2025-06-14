@@ -7,11 +7,13 @@ from constants import CARD_IMG_WIDTH, CARD_IMG_HEIGHT, TABLEAU_CARDS_SHIFT,  Tab
 from game_logger import GameLogger, DebugLevel
 client_logger: GameLogger = GameLogger("client_ui_game_state", level=DebugLevel.client_ui_game_state.value)
 
+
 class UIGameState:
     
     _window: pygame.Surface  # the screen that contains the game
     _window_dimensions: tuple[int, int]
     _window_centre: tuple[int, int]
+    _game_icon: pygame.Surface
     _table_colour: tuple[int, int, int]
     
     # _screen_dimensions: tuple[int, int]  # (width, height) 
@@ -132,6 +134,16 @@ class UIGameState:
         """sets the background colour for the game"""
         self._table_colour = table_colour
 
+    @property
+    def game_icon(self) -> pygame.Surface:
+        """The game icon used in the game window"""
+        return self._game_icon
+    
+    @game_icon.setter
+    def game_icon(self, game_icon: pygame.Surface) -> None:
+        """sets the game icon for the game window"""
+        self._game_icon = game_icon
+    
     
     # Cards
     @property
@@ -453,8 +465,8 @@ class UIGameState:
                     # test_card:str = "H2"
                     # card_graphics = self.card_face(test_card)
                     # self.window.blit(card_graphics, (tableau_x, col_area.y) )
-                    client_logger.warning(f"{stack=} - {rect=}")
-                    print(card_num)
+                    # client_logger.warning(f"{stack=} - {rect=}")
+                    # print(card_num)
                         
                     # self._collision_areas[stack].append((col_area, card_num, ""))
                     self._collision_areas[stack].append((rect, card_num, ""))
@@ -479,8 +491,6 @@ class UIGameState:
     
     # Events Handling
     def on_window_resize(self, surface: pygame.Surface):
-
-        client_logger.error(f"1 {self.cards_faces}")
 
         self._window = surface
         
