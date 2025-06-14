@@ -243,9 +243,9 @@ class StacksLayoutUI:
             
     def render_tableau_cards_locations(self) -> None:
 
-        for stack in self._ui_game_state.tableau_cards_locations:
+        for stack in self._ui_game_state.tableau_cards_positions:
             
-            for card_rect, card_num, card_name in self._ui_game_state.tableau_cards_locations[stack]:
+            for card_rect, card_num, card_name in self._ui_game_state.tableau_cards_positions[stack]:
 
                 pygame.draw.rect(self._ui_game_state.window, ( 255, 255, 0), card_rect, 2)
 
