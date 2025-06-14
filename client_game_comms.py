@@ -11,17 +11,6 @@ from client_msg_decoder import ClientMessageDecoder
 from game_logger import GameLogger, DebugLevel
 client_logger: GameLogger = GameLogger("client_game_comms", level=DebugLevel.client_game_comms.value)
 
-
-# from game_logger import GameLogger
-
-# client_logger: GameLogger
-# from icecream import ic # type: ignore
-# ic.configureOutput(prefix="client_network: ")
-# def log_message(message: str):
-#     # enable debug messages
-#     DEBUG = True
-#     if DEBUG:
-#         ic(message)
         
 
 class ClientGameCommsInterface(ABC):
