@@ -94,14 +94,20 @@ class GameUI:
         Redraw the game screen
         """
         
+        # TODO: Move to the correct location
+        client_logger.warning("move fill_card_position call to the correct location")
         self._cards_ui.fill_card_positions()
 
         # place empty cards in the stacks positions
         self._stacks_layout.render_empty_stacks()   
         
-        # place the cards on the stacks (initially, 13 on the crapette, 1 on each own tableau and rest in remainder)
-        self._cards_ui.place_stacks_cards_initially()
+        # stacks location as rectangles declared, not sprites like empty_stacks do
+        # might keep it as looks ok
         self._stacks_layout.render_stacks_locations()
+        
+        # place the cards on the stacks (initially, 13 on the crapette, 1 on each own tableau and rest in remainder)
+        # self._cards_ui.place_stacks_cards_initially()
+        
         # self._stacks_layout.render_collision_areas()
         # self._stacks_layout.render_tableau_cards_locations()
         
@@ -139,7 +145,8 @@ class GameUI:
         for stack in collision_checklist_order:
             # card_rect, _ = self._ui_game_state.stacks_locations[stack]
             card_rect: pygame.Rect
-            for card_rect, card_num, card_name in reversed(self._ui_game_state.non_tableau_cards_positions[stack]):
+            # for card_rect, card_num, card_name in reversed(self._ui_game_state.non_tableau_cards_positions[stack]):
+            for card_rect, card_num, card_name in reversed(self._ui_game_state.cards_positions[stack]):
                 if card_rect.collidepoint(event.pos):
                     if card_name != "":
                         area = stack
@@ -163,7 +170,8 @@ class GameUI:
                 if found_collision:
                     break
 
-                for card_rect, card_num, card_name in reversed(self._ui_game_state.tableau_cards_positions[tableau]):
+                # for card_rect, card_num, card_name in reversed(self._ui_game_state.tableau_cards_positions[tableau]):
+                for card_rect, card_num, card_name in reversed(self._ui_game_state.cards_positions[tableau]):
                     if card_rect.collidepoint(event.pos):
                         if card_name != "":
                             area = tableau
