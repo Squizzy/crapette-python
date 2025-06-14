@@ -95,10 +95,13 @@ class GameUI:
         """
         
         # place empty cards in the stacks positions
-        self._stacks_layout.render_empty_stacks()
+        self._stacks_layout.render_empty_stacks()   
         
         # place the cards on the stacks (initially, 13 on the crapette, 1 on each own tableau and rest in remainder)
-        self._cards_ui.place_stacks_cards()
+        self._cards_ui.place_stacks_cards_initially()
+        self._stacks_layout.render_stacks_locations()
+        # self._stacks_layout.render_collision_areas()
+        # self._stacks_layout.render_tableau_cards_locations()
         
         # update the window
         pygame.display.flip()
@@ -125,57 +128,41 @@ class GameUI:
             "opponent_foundation3",
         ]
         
-        tableau_checklist_order = [
-            "player_tableau0",
-            "player_tableau1",
-            "player_tableau2",
-            "player_tableau3",
-            "opponent_tableau0",
-            "opponent_tableau1",
-            "opponent_tableau2",
-            "opponent_tableau3",
-        ]
         
         #TODO: if there is no card on the stack, the collision should be with the table.
         # check the value of the card __str__ for this
         
         found_collision: bool = False
         for stack in collision_checklist_order:
-            for rect, card_num, card in self._ui_game_state.collision_areas[stack]:
-                if rect.collidepoint(event.pos):
-                    area = stack
-                    card_found = 0
-                    found_collision = True
+            card_rect, _ = self._ui_game_state.stacks_locations[stack]
+            if card_rect.collidepoint(event.pos):
+                area = stack
+                card_found = 0
+                found_collision = True
         
         if not found_collision:
-            # Check each tableau in order
+            tableau_checklist_order = [
+                "player_tableau0",
+                "player_tableau1",
+                "player_tableau2",
+                "player_tableau3",
+                "opponent_tableau0",
+                "opponent_tableau1",
+                "opponent_tableau2",
+                "opponent_tableau3",
+            ]
+            # Check each tableau in order, from top-most card so we hit the top one first
             for tableau in tableau_checklist_order:
                 if found_collision:
                     break
-                # Get the list of cards on this tableau
-                cards_list = self._ui_game_state.tableau_cards_locations[tableau].copy()
-                # Reverse the list of cards so the 13th (12th) is at position 0, the one we want to test first
-                cards_list.reverse()
-                # get the x position of this card
-                for x, card in cards_list:
-                    # Find the rect of this card, 
-                    # for this we need the tableau stack rect, and substitute the x
-                    # first, get the base pos of the stack
-                    tableau_collision = self._ui_game_state.collision_areas[tableau]
-                    # create a variable that inherits these coordinates
-                    card_collision: pygame.Rect = tableau_collision[0][0] #0th item on the list is base pos of stack, the other 0 represent the Rect of it 
-                    # replace the x with the one of the card
-                    card_collision.x = x
-                    if card_collision.collidepoint(event.pos):
-                        area = stack
+
+                for card_rect, card_num, card_name in reversed(self._ui_game_state.tableau_cards_locations[tableau]):
+                    if card_rect.collidepoint(event.pos):
+                        area = tableau
                         found_collision = True
                         card_found = card_num
                         break
-            
-            
-        # for key, list_of_Rects in self._ui_game_state.collision_areas.items():
-            # for rect, card_num, card in list_of_Rects:
-            #     if rect.collidepoint(event.pos):
-            #         area = key
                     
-        return f"{event.pos=} - Hit: {area=} {card_found=}"
+        return f"Hit: {area=} {card_found=}"
+
+
