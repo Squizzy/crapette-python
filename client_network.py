@@ -11,18 +11,6 @@ client_logger: GameLogger = GameLogger("client_network", level=DebugLevel.client
 # from message_decoder import decode_player_id
 
 
-# client_logger: GameLogger
-
-# from icecream import ic # type: ignore
-# ic.configureOutput(prefix="client_network: ")
-# def log_message(message: str):
-#     # enable debug messages
-#     DEBUG = True
-#     if DEBUG:
-#         ic(message)
-#         client_logger.debug(message)
-
-
 class ClientInterface(ABC):
     @abstractmethod
     def connect(self) -> None:
@@ -70,20 +58,11 @@ class ClientConnection(ClientInterface):
         self._client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         client_logger.info("client socket initialised")
 
-    # def __del__(self):
-    #     # shut down the sockets so all connections are closed
-    #     # self._client_socket.shutdown(socket.SHUT_RDWR)
-    #     # close the socket to deallocate it
-    #     self._client_socket.close()
-    #     # log_message("client socket closed")
 
     def connect(self) -> None:
         """
         Connect to the server
         Send a connection request to the server 
-        
-        Returns:
-            Nothing
         """
         
         client_logger.info("client connecting to server")
@@ -93,7 +72,6 @@ class ClientConnection(ClientInterface):
             return
 
         else:        
-            # log_message("requesting connection")
             try:
                 self._client_socket.connect((self._server_ip, self._server_port))
             except ConnectionError as e:
@@ -115,13 +93,11 @@ class ClientConnection(ClientInterface):
         client_logger.info("client disconnected")
 
     def send_message(self, message: str) -> None:
-    # def send_message(self, client: Players, message: str) -> None:
         """
         Send a message to the server
         """
 
         client_logger.info("client sending message to server")
-        # log_message(f"{client.name} sending message to server")
 
         try:
             self._client_socket.sendall(message.encode())
@@ -146,7 +122,7 @@ class ClientConnection(ClientInterface):
         except ConnectionError as e:
             raise ConnectionError(f"Failed to receive message from server: {e}")
 
-        client_logger.debug(f"player data received length: {len(received_message)}")
+        # client_logger.debug(f"player data received length: {len(received_message)}")
         # log_message(f"receive_message: {self._player_id} data received: {len(received_message)=}")
         
         return received_message
