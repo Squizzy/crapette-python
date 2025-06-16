@@ -1,7 +1,6 @@
 import pygame
 import time
 
-# from constants import Players
 from client_network import ClientConnection
 from client_game_comms import ClientGameComms
 from client_ui import GameUI
@@ -58,13 +57,27 @@ class Game:
     def _handle_events(self, event) -> None:
         
         rect = pygame.Rect(0, 0, 0, 0)
+        # card: pygame.Surface = pygame.Surface((1,1))
         
         if event.type == pygame.QUIT:
             self._game_state._is_running = False
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            client_logger.debug("Button Down")
             if event.pos:
-                client_logger.debug(self._game_ui.check_for_collision(event))
+                # card_found: dict[str, str| int| pygame.Rect | pygame.Surface] | None
+                card_found = self._game_ui.check_for_collision(event)
+                client_logger.debug(f"{card_found}")
+                if card_found is not None:
+                    self._game_ui._ui_game_state._is_moving = True
+                    # rect = card.get_rect()
+                    self._game_ui._ui_game_state.card_to_move = card_found
+                    # self._game_ui._ui_game_state._card_to_move_sprite = card_found["ca"]
+                    # self._game_ui._ui_game_state._card_to_move_rect = rect
+                    client_logger.debug(f"{type(event.pos)=}, {event.pos=}")
+                    # self._game_ui._ui_game_state._click_pos = event.pos
+                    client_logger.debug(f"{rect}")
+                # client_logger.debug(self._game_ui.check_for_collision(event))
             # print("Button Down")
             # rect = blit_card.get_rect()
             # if rect.collidepoint(event.pos):
@@ -72,13 +85,14 @@ class Game:
             #     self._game_ui._ui_game_state._is_moving = True
                 
         elif event.type == pygame.MOUSEBUTTONUP:
-            # client_logger.debug("Button Up")
+            client_logger.debug("Button Up")
             self._game_ui._ui_game_state._is_moving = False
+            self._game_ui._ui_game_state.reset_card_to_move()
             
         elif event.type == pygame.MOUSEMOTION and self._game_ui._ui_game_state._is_moving:
             ...
-            # print(f"Mouse Move: {rect.x=}, {rect.y=}")
-            rect.move_ip(event.rel)
+            # print(f"Mouse Move: {(rect.x, rect.y)=}, {event.rel=} \r", end="")
+            self._game_ui._ui_game_state._card_to_move["card_rect_on_window"].move_ip(event.rel)
             
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -115,7 +129,7 @@ class Game:
             # elapsed = current - previous
             # previous = current
             
-            
+
             # Handle events
             for event in pygame.event.get():
                 self._handle_events(event)
