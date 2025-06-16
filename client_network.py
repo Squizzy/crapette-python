@@ -1,14 +1,8 @@
 import socket
 from abc import ABC, abstractmethod
-# from json import loads
 
 from game_logger import GameLogger, DebugLevel
 client_logger: GameLogger = GameLogger("client_network", level=DebugLevel.client_network.value)
-
-# from network_messages import ClientNetworkMessage
-# from game_logger import GameLogger
-# from constants import Players
-# from message_decoder import decode_player_id
 
 
 class ClientInterface(ABC):
@@ -39,15 +33,12 @@ class ClientInterface(ABC):
 
 
 class ClientConnection(ClientInterface):
-
     _server_ip: str
     _server_port: int
     _client_socket: socket.socket
     _is_connected: bool
     _player_id: int
     _stacks_cards: list[bytes]
-    
-    
     
     def __init__(self, server_ip:str = "127.0.0.1", server_port: int=65432) -> None:
         
@@ -134,143 +125,8 @@ class ClientConnection(ClientInterface):
         return self._is_connected
 
 
-
-    # def _send(self, data: str):
-    #     """
-    #     Send data to the server. 
-    #     Data needs to be a string (ideally json encoded)
-
-    #     Args:
-    #         data (str): text content to transfer
-    #     """
-        
-    #     client_logger.debug("sending data")
-    #     self._client_socket.sendall(data.encode())
-    #     log_message("_send: data sent")
-
-    # def _send_request(self, message: ClientNetworkMessage) -> None:
-    #     """
-    #     Send a request to the server.
-    #     Data is a ClientNetworkMessage object
-    #     """
-        
-    #     log_message(f"_send_request {message}: {message.name}")
-    #     self._client_socket.sendall(message.name.encode())
-    #     log_message("_send_request sent")
-
-    # def _recv(self, max_buffer_size: int) -> str:
-    #     """
-    #     Receives data from the server and returns it as a string (maybe json encoded?).
-
-    #     Args:
-    #         max_buffer_size (int): maximum buffer size in bytees to receive data
-
-    #     Returns:
-    #         str: the received data in string format
-    #     """
-    #     log_message("_recv: client receiving data")
-    #     data: bytes = b""
-    #     received_message: str = ""
-    #     data = self._client_socket.recv(max_buffer_size)
-    #     received_message = data.decode()
-    #     # while True:
-    #     #     data = self._client_socket.recv(max_buffer_size)
-    #     #     # ic(f"_recv:client received data: {data.decode()}")
-    #     #     if data == b"":
-    #     #         if received_message == "":
-    #     #             continue
-    #     #         else:
-    #     #             break
-    #     #     else:
-    #     #         received_message += data.decode()
-         
-    #     log_message(f"_recv: client received data finished. {len(received_message)=} received")
-    #     # log_message(received_message)
-    #     return received_message
-
-    # def request_player_id_from_server(self) -> Players:
-    #     """
-    #     find out if we are player1 or player2
-
-    #     Returns:
-    #         Players: Players.PLAYER1 or 2
-    #     """
-    #     log_message("request_player_id_from_server: sending request")
-        
-    #     # message = "send_player_id"
-    #     message = ClientNetworkMessage.SEND_PLAYER_ID
-    #     self._send_request(message)
-        
-    #     data: str = self._recv(1024)
-    #     # message =  loads(data)
-        
-    #     # # if data == b"":
-    #     # #     log_message("no client player id received")
-    #     # #     return None
-    #     # # else:
-        
-    #     # #TODO: Convert to Playsers - maybe even using a dedicated method
-    #     # print(type(data))
-    #     # self._player_id = int(message)
-    #     # log_message(f"client player id received: {self._player_id}")
-        
-    #     # answer = client_message_decoder.player_id(message)
-        
-    #     player = decode_player_id(data)
-        
-    #     # return self._player_id
-    #     return player
-
-    # def server_get_stacks_cards(self):
-        
-    #     log_message("server_get_stacks_cards: client requesting stacks cards")
-        
-    #     # # empty the current stacks
-    #     # self._stacks_cards = []
-        
-    #     # set the request
-    #     self._send_request(ClientNetworkMessage.SEND_STACKS_CARDS)
-        
-    #     # receive the stacks cards
-    #     # TODO: adjust max size sometimes - this is a little bit of an overkill...
-    #     data = self._recv(10000)
-        
-    #     # message = loads(data)
-
-    #     # if the stacks cards are not empty, print the stacks cards
-    #     # if len(self._stacks_cards) > 0:
-    #     if len(data) >0:
-    #         info = loads(data)
-    #         log_message(f"client stacks cards received: {info}")
-    #     else:
-    #         log_message("no client stacks cards received")
-            
-
-    # def server_quit(self) -> None:
-    #     log_message("server_quit: client quitting")
-    #     self.
-    #     message = ClientNetworkMessage.QUIT
-    #     self._send_request(message)
-       
-    #     self.disconnect()
-
-
 if __name__ in "__main__":
-    i = 0
     cc = ClientConnection()
     cc.connect()
-    # for i in range(1):
-    #     print('.', end='', flush=True)
-    #     time.sleep(1)
-    # cc.request_player_id_from_server()
-    # cc.server_get_stacks_cards()
-    # cc.server_get_stacks_cards()
-    # cc.server_get_stacks_cards()
-    # cc.server_quit()
-    # cc.disconnect()
-    # while cc._connected:
-    #     print('.', end='', flush=True)
-    #     time.sleep(1)
-    #     i += 1
-    #     if i > 10:
-    #         cc._connected = False
+    cc.disconnect()
+
