@@ -1,4 +1,5 @@
 import pygame
+# from typing import TypedDict
 from pprint import pprint
 
 from constants import CARD_IMG_WIDTH, CARD_IMG_HEIGHT, TABLEAU_CARDS_SHIFT,  TableColours
@@ -6,6 +7,13 @@ from constants import CARD_IMG_WIDTH, CARD_IMG_HEIGHT, TABLEAU_CARDS_SHIFT,  Tab
 
 from game_logger import GameLogger, DebugLevel
 client_logger: GameLogger = GameLogger("client_ui_game_state", level=DebugLevel.client_ui_game_state.value)
+
+# class CardToMove(TypedDict):
+#        stack: str # stack found
+#        card_name: str # card name found
+#        card_pos_on_stack: int # card position on stack
+#        card_rect_on_window: pygame.Rect # Position and size of the card found
+#        card_sprite: pygame.Surface # the card sprite
 
 
 class UIGameState:
@@ -32,7 +40,12 @@ class UIGameState:
     # _tableau_cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]]  # location of the tableau cards. tableaux, x, card__str__
     
     _is_moving: bool
-    
+    # _card_to_move: dict[str, str | int | pygame.Rect | pygame.Surface]
+    # _card_to_move: dict[str, str| int| pygame.Rect | pygame.Surface]
+    _card_to_move: dict
+    # _card_to_move_sprite: pygame.Surface
+    # _card_to_move_rect: pygame.Rect
+
     
     def __init__(self) -> None:
         self._card_dimensions = (0, 0)
@@ -55,6 +68,8 @@ class UIGameState:
         
         self.table_colour = TableColours.FELT_GREEN
         self._is_moving = False
+        self.reset_card_to_move()
+        # self._click_pos = (int, int)
      
     #region window: the game area not including the title bar
     @property
@@ -213,7 +228,7 @@ class UIGameState:
     #region Stacks
     @property
     def stacks_positions(self) -> dict[str, tuple[pygame.Rect, bool]]:
-        """The calculated location of the base of the stack on the game screen
+        """The calculated position of the base of the stack on the game screen
 
         Returns:
             dict[str, tuple[int, int, bool]]: 
@@ -227,10 +242,10 @@ class UIGameState:
     
     @stacks_positions.setter
     def stacks_positions(self, stacks_positions: dict[str, tuple[pygame.Rect, bool]]) -> None:
-        """Sets the stacks locations calculated for the current screen
+        """Sets the stacks positions calculated for the current screen
 
         Args:
-            stacks_locations (dict[str, tuple[int, int, bool]]): 
+            stacks_positions (dict[str, tuple[int, int, bool]]): 
                 dictionary of:
                     stack name: 
                         top left corner x offset, 
@@ -246,7 +261,7 @@ class UIGameState:
         self._stacks_spacing_w = self.card_width // 7
         self._stacks_spacing_y = self.card_height // 7
         
-    def _set_stacks_locations(self) -> None:
+    def _set_stacks_positions(self) -> None:
         """
         Calculate the positions of the stacks
         Assign the top left corner coordiinate of the stacks
@@ -255,7 +270,7 @@ class UIGameState:
         
         # TODO: Rework these as rects, not (x,y)
         
-        # x locations (top left corner)
+        # x positions (top left corner)
         player_center_x = self.window_centre_x - self.card_width // 2
         player_left_x = player_center_x - self.card_width - self._stacks_spacing_w
         player_right_x = player_center_x + self.card_width + self._stacks_spacing_w
@@ -268,14 +283,14 @@ class UIGameState:
         opponent_foundation_x = self.window_centre_x - self._stacks_spacing_w - self.card_height
         opponent_tableau_x = opponent_foundation_x - self._stacks_spacing_w - self.card_width
         
-        # y locations (top left corner)
+        # y positions (top left corner)
         opponent_y = self.window_centre_y - self.card_height * 3 - int(self._stacks_spacing_y * 2.5)
         player_y = self.window_centre_y + self.card_height * 2 + int(self._stacks_spacing_y * 2.5)
         tableau_top_y = self.window_centre_y - self.card_height * 2 - int(self._stacks_spacing_y * 1.5)
         foundation_top_y = tableau_top_y + (self.card_height - self.card_width) //2
         tableau_spacing_y = self.card_height + self._stacks_spacing_y
 
-        # Assign the locations
+        # Assign the positions
         opponent_base_stacks_positions: dict[str, tuple[pygame.Rect, bool]] = {
             "opponent_crapette":    (pygame.Rect(opponent_right_x,  opponent_y, self.card_width, self.card_height), True),
             "opponent_remainder":   (pygame.Rect(opponent_center_x, opponent_y, self.card_width, self.card_height), True),
@@ -304,12 +319,12 @@ class UIGameState:
     #region Cards Positions
     @property
     def cards_positions(self) -> dict[str, list[tuple[pygame.Rect, int, str]]]:
-        """the ordered location of each card of the stack"""
+        """the ordered position of each card of the stack"""
         return self._cards_positions
 
     @cards_positions.setter
     def cards_positions(self, cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]]) -> None:
-        """Set the ordered location of each card of the stack"""
+        """Set the ordered position of each card of the stack"""
         self._cards_positions = cards_positions
     
     def _set_cards_positions(self) -> None:
@@ -359,14 +374,23 @@ class UIGameState:
             rect: pygame.Rect = self.stacks_positions[stack][0]
 
             if stack in non_tableau_cards_stacks:
-                non_tableau_cards_positions[stack].append((rect , -1, ""))
+                #Foundations will have 13 cards max
+                if "foundation" in stack:
+                    for card_num in range(13):
+                        non_tableau_cards_positions[stack].append((rect , card_num, ""))
+                
+                # In extreme case (impossible) other player stacks will have 104 cards (2x decks of cards)
+                else:
+                    for card_num in range(104):
+                        non_tableau_cards_positions[stack].append((rect , card_num, ""))
+                        
 
 
         
         # Step 2:
         # Set the ordered position of each tableau card of the stack
         
-        tableau_card_positions: dict[str, list[tuple[pygame.Rect, int, str]]] = {
+        tableau_cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]] = {
             "player_tableau0":  [],
             "player_tableau1":  [],
             "player_tableau2":  [],
@@ -384,23 +408,25 @@ class UIGameState:
             if "player_tableau" in stack:
                 #12 should be sufficient in reality as the ace should 
                 # go to the foundation, but...
-                for card in range(13):
-                    tableau_card_positions[stack].append((rect, card, ""))
-                    rect = rect.move((self.tableau_cards_shift,0))
+                for card_num in range(13):
+                    tableau_cards_positions[stack].append((rect, card_num, ""))
+                    rect = rect.move((self.tableau_cards_shift, 0))
                     
             elif "opponent_tableau" in stack:
                 #12 should be sufficient in reality as the ace should 
                 # go to the foundation, but...
-                for card in range(13):
-                    tableau_card_positions[stack].append((rect, card, ""))
-                    rect = rect.move((-self.tableau_cards_shift,0))
+                for card_num in range(13):
+                    tableau_cards_positions[stack].append((rect, card_num, ""))
+                    rect = rect.move((-self.tableau_cards_shift, 0))
         
         
         # Step 3:
         # merge
         
-        self._cards_positions = non_tableau_cards_positions | tableau_card_positions
-        
+        self._cards_positions = non_tableau_cards_positions | tableau_cards_positions
+        # pprint(f"{non_tableau_cards_positions}")
+        # pprint(f"{tableau_cards_positions}")
+        # input()
         
     
     # @property
@@ -530,6 +556,25 @@ class UIGameState:
 
     #endregion
     
+    #region Card To Move
+    @property
+    def card_to_move(self) -> dict[str, str| int| pygame.Rect | pygame.Surface]:
+        """the card to be moved"""
+        return self._card_to_move
+    
+    @card_to_move.setter
+    def card_to_move(self, card_to_move: dict[str, str| int| pygame.Rect | pygame.Surface]) -> None:
+        """Set the card to be moved"""
+        self._card_to_move = card_to_move
+    
+    def reset_card_to_move(self) -> None:
+        self._card_to_move = {
+            "stack": "", # stack found
+            "card_name": "", # card name found
+            "card_pos_on_stack": -1, # card position on stack
+            "card_rect_on_window": pygame.Rect((0,0,0,0)), # Position and size of the card found
+            "card_sprite": pygame.Surface((1,1))
+        }
     
     # Events Handling
     def on_window_resize(self, surface: pygame.Surface):
@@ -548,7 +593,7 @@ class UIGameState:
 
         self._set_tableau_cards_shift()        # Store the shift of the tableau card from the previous card of the same tableau stack
         self._set_stacks_spacing()              # Calculate and store the stacks spacings
-        self._set_stacks_locations()            # calculate and store the stacks base locations
+        self._set_stacks_positions()            # calculate and store the stacks base locations
 
         # self._set_tableau_cards_positions()
         # self._set_non_tableau_cards_positions()
