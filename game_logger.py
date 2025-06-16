@@ -13,9 +13,9 @@ class DebugLevel(Enum):
     cardstack = logging.WARNING
     client_game_comms = logging.WARNING
     client_game_state = logging.WARNING
-    client_msg_decoder = logging.WARNING
+    client_msg_decoder = logging.DEBUG
     client_msg_encoder = logging.WARNING
-    client_network = logging.WARNING
+    client_network = logging.DEBUG
     client_pygame = logging.DEBUG
     client_ui_cards = logging.DEBUG
     client_ui_game_state = logging.DEBUG
