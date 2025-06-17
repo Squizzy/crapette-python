@@ -27,7 +27,7 @@ class Game:
         client_logger.info("client gameui instantiated")
         
         
-        # TODO: Move the network stuff to a network_state
+        # TODO: Move the network stuff to a network_state?
         # connect to the server
         self._connection = ClientConnection()
         self._connection.connect()
@@ -69,9 +69,12 @@ class Game:
                 card_found = self._game_ui.check_for_collision(event)
                 client_logger.debug(f"{card_found}")
                 if card_found is not None:
+                    
                     self._game_ui._ui_game_state._is_moving = True
                     # rect = card.get_rect()
                     self._game_ui._ui_game_state.card_to_move = card_found
+
+                    self._game_ui._cards_ui.switch_cards_to_move_from_stack_to_moving_stack()
                     # self._game_ui._ui_game_state._card_to_move_sprite = card_found["ca"]
                     # self._game_ui._ui_game_state._card_to_move_rect = rect
                     client_logger.debug(f"{type(event.pos)=}, {event.pos=}")
@@ -83,16 +86,22 @@ class Game:
             # if rect.collidepoint(event.pos):
             #     client_logger.info("Collision detected")
             #     self._game_ui._ui_game_state._is_moving = True
-                
-        elif event.type == pygame.MOUSEBUTTONUP:
-            client_logger.debug("Button Up")
-            self._game_ui._ui_game_state._is_moving = False
-            self._game_ui._ui_game_state.reset_card_to_move()
             
         elif event.type == pygame.MOUSEMOTION and self._game_ui._ui_game_state._is_moving:
             ...
             # print(f"Mouse Move: {(rect.x, rect.y)=}, {event.rel=} \r", end="")
-            self._game_ui._ui_game_state._card_to_move["card_rect_on_window"].move_ip(event.rel)
+            # self._game_ui._ui_game_state._card_to_move["card_rect_on_window"].move_ip(event.rel)
+            for card_to_move in self._game_ui._ui_game_state.moving_cards:
+                # self._game_ui._ui_game_state.moving_cards[card_to_move]["card_pos_on_window"].move_ip(event.rel)
+                card_to_move["card_rect_on_window"].move_ip(event.rel)
+                # client_logger.debug(card_to_move)
+                
+        elif event.type == pygame.MOUSEBUTTONUP:
+            client_logger.debug("Button Up")
+            # self._game_ui._ui_game_state.reset_card_to_move()
+            if self._game_ui._ui_game_state._is_moving:
+                self._game_ui._cards_ui.switch_cards_to_move_from_moving_stack_to_stack()
+            self._game_ui._ui_game_state._is_moving = False
             
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
