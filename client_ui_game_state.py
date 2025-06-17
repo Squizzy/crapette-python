@@ -32,8 +32,10 @@ class UIGameState:
     _tableau_cards_shift: int  # the shift of the tableau card from the previous card of the same tableau stack
     _stacks_spacing_w: int  # the horizontal spacing between the stacks
     _stacks_spacing_y: int  # the vertical spacing between the stacks
-    _stacks_positions: dict[str, tuple[pygame.Rect, bool]]  # (Stack location as rect, V(True)/H)
+    _stacks_positions: dict[str, tuple[pygame.Rect, bool]]  # (Stack positiontion as rect, V(True)/H)
     
+    _moving_cards: list[dict[str, str | int | pygame.Rect]] # (source) "stack", card_pos_on_stack", "card_rect_on_window", "card_name"
+
     _cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]]  # location of cards. stackname(position-size, cardnum on the stack, cardname)
     
     # _non_tableau_cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]]  # location of the non-tableau cards. non-tableaus, x, y
@@ -68,6 +70,7 @@ class UIGameState:
         
         self.table_colour = TableColours.FELT_GREEN
         self._is_moving = False
+        self._moving_cards = []
         self.reset_card_to_move()
         # self._click_pos = (int, int)
      
@@ -327,7 +330,7 @@ class UIGameState:
         """Set the ordered position of each card of the stack"""
         self._cards_positions = cards_positions
     
-    def _set_cards_positions(self) -> None:
+    def _initialise_cards_positions(self) -> None:
         """Set the position of all the cards in all the stacks
         Values are set later when the information is available from the server"""
         
@@ -369,12 +372,18 @@ class UIGameState:
             "opponent_foundation3": [],
         }
 
+        moving_cards_positions:  dict[str, list[tuple[pygame.Rect, int, str]]] = {
+            "moving_cards": [],
+        }
+
+
         for stack in self.stacks_positions:
             # Initialise a rectangle at the base of the stack
             rect: pygame.Rect = self.stacks_positions[stack][0]
 
             if stack in non_tableau_cards_stacks:
-                #Foundations will have 13 cards max
+                # Foundations will have 13 cards max, you never know, 
+                # the ace might be put there then has to be moved at the right time not to cause a crapette.
                 if "foundation" in stack:
                     for card_num in range(13):
                         non_tableau_cards_positions[stack].append((rect , card_num, ""))
@@ -383,9 +392,10 @@ class UIGameState:
                 else:
                     for card_num in range(104):
                         non_tableau_cards_positions[stack].append((rect , card_num, ""))
-                        
-
-
+        
+        # 13 cards should never be moved, but you never know, as long as the ace is moved asap...
+        for card_num in range(13):
+            moving_cards_positions["moving_cards"].append((rect, card_num, ""))
         
         # Step 2:
         # Set the ordered position of each tableau card of the stack
@@ -428,7 +438,44 @@ class UIGameState:
         # pprint(f"{tableau_cards_positions}")
         # input()
         
-    
+
+    #region Moving Cards
+    @property
+    def moving_cards(self) -> list[str, int, pygame.Rect, str]:
+        """Returns the list of moving cards
+
+        returns:
+            list[dict [str | int | pygame.Rect]
+                (source) "stack", 
+                "card_pos_on_stack", 
+                "card_rect_on_window", 
+                "card_name"
+        """
+        return self._moving_cards
+
+    @moving_cards.setter
+    def moving_cards(self, moving_cards: list[str, int, pygame.Rect, str]) -> None:
+        """Sets the moving cards
+        
+        Args:
+            list[dict [str | int | pygame.Rect]
+                (source) "stack", 
+                "card_pos_on_stack", 
+                "card_rect_on_window", 
+                "card_name"
+        """
+        # for card in moving_cards:
+        self._moving_cards = moving_cards
+        
+        
+
+    def reset_moving_cards(self) -> None:
+        """Resets the moving cards list"""
+        self.moving_cards = {}
+
+
+            
+
     # @property
     # def tableau_cards_positions(self) -> dict[str, list[tuple[pygame.Rect, int, str]]]:
     #     """the ordered location of each card of the stack"""
@@ -598,7 +645,7 @@ class UIGameState:
         # self._set_tableau_cards_positions()
         # self._set_non_tableau_cards_positions()
         
-        self._set_cards_positions()
+        self._initialise_cards_positions()
         # pprint(f"{self.tableau_cards_positions}")
         # client_logger.debug(f"{self.tableau_cards_positions}")
         

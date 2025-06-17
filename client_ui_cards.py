@@ -1,6 +1,7 @@
 import pygame
 import os
-from pprint import pprint
+from pprint import pprint, pformat
+
 
 from constants import CARD_FACES_DIR, Players
 from client_game_state import GameState
@@ -280,26 +281,31 @@ class CardsUI:
     def place_card2(self, stack: str, card: tuple[pygame.Rect, int, str]) -> None:
         card_graphic: pygame.Surface = self.get_card_graphic(card[2])
         card_position: tuple[int, int] = (card[0].x, card[0].y)
-        self.card_orientate(card_graphic, self._ui_game_state.stacks_positions[stack][1])
+        # TODO: Define a "is_vertical" method
+        if stack != "moving_cards":
+            self.card_orientate(card_graphic, self._ui_game_state.stacks_positions[stack][1])
         self._ui_game_state.window.blit(card_graphic, card_position)
 
         
 
     def place_cards(self) -> None:
         self.fill_card_positions()
+        self.fill_moving_card_positions()
         for stack, cards_list in self._ui_game_state.cards_positions.items():
             for card in cards_list:
                 # this_player = int(card[2][-1])
                 # self.place_card(this_player, stack, card[2])
                 # print(stack, card)
                 if card[2] != "":
-                    client_logger.debug(f"placing card {card[2]}")
+                # if card_name != "":
+                    # client_logger.debug(f"placing card {card[2]}")
+                    # client_logger.debug(f"placing card {card_name}")
                     self.place_card2(stack, card)
                 
 
     def fill_card_positions(self) -> None:
         """
-        Fill the tableau card locations with the correct card values
+        Fill the tableau and non-tableau card locations with the correct card values
         """               
         
         # go player after player:
@@ -363,19 +369,114 @@ class CardsUI:
                         # update the tuple with the correct card number and card name       
                         temp_updated_stack.append((card_rect, card_num, stack_card_name)) 
                     self._ui_game_state.cards_positions[stack_prefix + stack] = temp_updated_stack                
-                        # if i <= len(self._ui_game_state.cards_positions[stack_prefix + stack]) - 1:
-                        #     self._ui_game_state.cards_positions[stack_prefix + stack][i] = card_rect, i, stack_card_name
-                        # else:
-                        #     self._ui_game_state.cards_positions[stack_prefix + stack].append((card_rect, i, stack_card_name))
-                        # if i <= len(self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack]) - 1:
-                        #     self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack][i] = card_rect, i, stack_card_name
-                        # else:
-                        #     self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack].append((card_rect, i, stack_card_name))
-                    
 
-                    # Remmove any element that was from a previous stack and above the current stack quantity        
-                    # while len(self._ui_game_state.cards_positions[stack_prefix + stack]) > len(stack):
-                    #         self._ui_game_state.cards_positions[stack_prefix + stack].pop()
-                    # while len(self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack]) > len(stack):
-                    #         self._ui_game_state.non_tableau_cards_positions[stack_prefix + stack].pop()
-                    # pprint(self._ui_game_state.cards_positions)
+
+
+    def fill_moving_card_positions(self) -> None:
+        
+        temp_updated_stack: list[tuple[pygame.Rect, int, str]] = []
+
+        for card in self._ui_game_state.moving_cards:
+            temp_updated_stack.append((card["card_rect_on_window"], card["card_pos_on_stack"], card["card_name"]))
+
+        self._ui_game_state.cards_positions["moving_cards"] = temp_updated_stack
+
+
+
+
+    def switch_cards_to_move_from_stack_to_moving_stack(self) -> None:
+
+        client_logger.debug("switching cards to moving stack")
+
+        client_logger.debug(f"0 - {pformat(self._ui_game_state.cards_positions["player_tableau3"])}")
+        client_logger.debug(f"0 - {pformat(self._ui_game_state.cards_positions["moving_cards"])}")
+
+        from_stack: str = self._ui_game_state.card_to_move["stack"]
+        stack_pos: int = self._ui_game_state.card_to_move["card_pos_on_stack"]
+        # stack_size = len(self._ui_game_state.cards_positions[from_stack]) 
+        stack_size = len([card for card in self._ui_game_state.cards_positions[from_stack] if card[2] != ""]) 
+        temp_stack = []
+
+        if "tableau" in from_stack:
+            for card in range(stack_size -1, stack_pos - 1, -1):
+                temp_stack.append({
+                        "stack": from_stack, 
+                        "card_pos_on_stack": stack_pos, 
+                        "card_rect_on_window": self._ui_game_state.card_to_move["card_rect_on_window"].copy(), 
+                        "card_name": self._ui_game_state.card_to_move["card_name"]})
+                
+                self._ui_game_state.cards_positions[from_stack][card] = (\
+                    self._ui_game_state.cards_positions[from_stack][card][0], \
+                    -1, \
+                    "")
+            client_logger.debug(f"{pformat(temp_stack)}")
+            self._ui_game_state.moving_cards = temp_stack
+        else:
+            temp_stack.append({
+                    "stack": from_stack, 
+                    "card_pos_on_stack": stack_pos, 
+                    "card_rect_on_window": self._ui_game_state.card_to_move["card_rect_on_window"].copy(), 
+                    "card_name":self._ui_game_state.card_to_move["card_name"]})
+            self._ui_game_state.moving_cards = temp_stack
+
+            # self._ui_game_state.cards_positions[from_stack][stack_pos] = pygame.Rect((0,0,0,0)), -1, ""
+            self._ui_game_state.cards_positions[from_stack][stack_pos] = (\
+                    self._ui_game_state.cards_positions[from_stack][stack_pos][0], \
+                    -1, \
+                    "")
+
+        # pprint(f"1 {self._ui_game_state.cards_positions}")
+        client_logger.debug(f"0.5 - {pformat(self._ui_game_state.cards_positions["player_tableau3"])}")
+        self.fill_moving_card_positions()
+
+        client_logger.debug(f"1 - {pformat(self._ui_game_state.cards_positions["player_tableau3"])}")
+        client_logger.debug(f"1 - {pformat(self._ui_game_state.cards_positions["moving_cards"])}")
+
+
+    def switch_cards_to_move_from_moving_stack_to_stack(self) -> None:
+
+        client_logger.debug("switching cards back")
+
+        # client_logger.debug(f"{self._ui_game_state.cards_positions}")
+        # pprint("")
+        # pprint(f"2 {self._ui_game_state.cards_positions}")
+
+        # input()
+        client_logger.debug(f"2 - {pformat(self._ui_game_state.cards_positions["player_tableau3"])}")
+        client_logger.debug(f"2 - {pformat(self._ui_game_state.cards_positions["moving_cards"])}")
+
+
+
+        to_stack: str = self._ui_game_state.moving_cards[0]["stack"]
+        to_stack_pos: int = self._ui_game_state.moving_cards[0]["card_pos_on_stack"]
+        # to_stack_pos = len([card for card in self._ui_game_state.cards_positions[from_stack] if  card[2] != ""]) 
+        moving_stack_size = len([card for card in self._ui_game_state.moving_cards if card["card_name"] != ""]) 
+        # stack_size = len(self._ui_game_state.cards_positions[from_stack]) 
+        # temp_stack = []
+
+        if "tableau" in to_stack:
+            for card in range(to_stack_pos, to_stack_pos + moving_stack_size):
+                self._ui_game_state.cards_positions[to_stack][card] = (\
+                        self._ui_game_state.cards_positions[to_stack][card][0], \
+                        self._ui_game_state.moving_cards[card]["card_pos_on_stack"], \
+                        self._ui_game_state.moving_cards[card]["card_name"])
+                        # self._ui_game_state.stacks_positions[to_stack][0] + self._ui_game_state, 
+                        # self._ui_game_state.moving_cards[card]["card_rect_on_window"], 
+
+        else:
+            self._ui_game_state.cards_positions[to_stack][to_stack_pos] = (\
+                    self._ui_game_state.cards_positions[to_stack][to_stack_pos][0], \
+                    self._ui_game_state.moving_cards[0]["card_pos_on_stack"], \
+                    self._ui_game_state.moving_cards[0]["card_name"])
+
+
+        # pprint(f"3 {self._ui_game_state.cards_positions}")
+        client_logger.debug(f"3 - {pformat(self._ui_game_state.cards_positions["player_tableau3"])}")
+        client_logger.debug(f"3 - {pformat(self._ui_game_state.cards_positions["moving_cards"])}")
+        # input()
+
+
+        self._ui_game_state.reset_moving_cards()
+        client_logger.debug(f"4 - {pformat(self._ui_game_state.cards_positions["player_tableau3"])}")
+        client_logger.debug(f"4 - {pformat(self._ui_game_state.cards_positions["moving_cards"])}")
+        # self.fill_card_positions()
