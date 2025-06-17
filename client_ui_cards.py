@@ -11,11 +11,9 @@ from game_logger import GameLogger, DebugLevel
 client_logger: GameLogger = GameLogger("client_ui_cards", level=DebugLevel.client_ui_cards.value)
 
 
-
 class CardsUI:
     _game_state: GameState
     _ui_game_state: UIGameState
-
     
     def __init__(self, client_game_state: GameState, client_game_ui_state: UIGameState) -> None:
         
@@ -110,8 +108,7 @@ class CardsUI:
         # self.scale_cards_faces()
         # This is not stored in the _ui_game_state - only the rescaled sprites are stored there
     
-    
-    def get_card_face(self, card: str) -> pygame.Surface:
+    def get_card_face_sprite(self, card: str) -> pygame.Surface:
         """
         Return the card face for the given card
         
@@ -127,7 +124,7 @@ class CardsUI:
         
         return card_graphic
         
-    def get_card_back(self, card:str) -> pygame.Surface:
+    def get_card_back_sprite(self, card:str) -> pygame.Surface:
         """
         Return the card back for the given card
 
@@ -159,39 +156,19 @@ class CardsUI:
         #   playerOwner [1 char]    0 or 1
         
         if card[-2] == 'u':
-            card_graphic = self.get_card_face(card)
+            card_graphic = self.get_card_face_sprite(card)
         else:
-            card_graphic = self.get_card_back(card)
+            card_graphic = self.get_card_back_sprite(card)
             
         return card_graphic
     
-    def get_stack_name(self, stack: str, this_player:int) -> str:
+    def get_stack_name_with_prefix(self, stack: str, this_player:int) -> str:
         """Return the stack to be used for this card"""
         player: int = self._game_state.player_id.value        
         stack_prefix = "player_" if this_player == player else "opponent_"
         
         return stack_prefix + stack
     
-    def where_to_place_card_initially(self, this_player: int, stack:str) -> tuple[tuple[int, int], bool]:
-        """
-        Calculate the position where the card should be placed
-        
-        Args:
-            this_player (int): the player whose turn it is
-            stack (str): the stack where the card should go
-            
-        Returns:
-            The top left position of the card on the window
-        """
-        
-        stack_name = self.get_stack_name(stack, this_player)
-        # player: int = self._game_state.player_id.value        
-        # stack_prefix = "player_" if this_player == player else "opponent_"
-
-        ((x, y, w, h), vertical) = self._ui_game_state.stacks_positions[stack_name]
-        
-        return (x, y), vertical
-        
     def card_orientate(self, card: pygame.Surface, vertical: bool) -> pygame.Surface:
         """
         Rotate the card as needed for the target stack
@@ -205,88 +182,105 @@ class CardsUI:
         """
         
         return card if vertical else pygame.transform.rotate(card.copy(), 90)
-        
-    def place_card(self, this_player: int, stack: str, card: str) -> None:
-        """
-        Place a card on the screen, at initialisation time
 
-        Args:
-            screen (pygame.surface): the main display area for the game
-            player (int): the player whose turn it is
-            stack (str): the stack where the card is located
-            card (str): the card to be placed
-        """
 
-        # Get the card graphic, either face or back
-        card_graphic = self.get_card_graphic(card)
+    # def where_to_place_card_initially(self, this_player: int, stack:str) -> tuple[tuple[int, int], bool]:
+    #     """
+    #     Calculate the position where the card should be placed
         
-        # Get the card placement for the stack. Also get the vertical orientation information
-        card_placement, vertical = self.where_to_place_card_initially(this_player, stack)
+    #     Args:
+    #         this_player (int): the player whose turn it is
+    #         stack (str): the stack where the card should go
+            
+    #     Returns:
+    #         The top left position of the card on the window
+    #     """
         
-        # Orientate the card for the stack
-        card_graphic = self.card_orientate(card_graphic, vertical) 
+    #     stack_name = self.get_stack_name(stack, this_player)
+    #     # player: int = self._game_state.player_id.value        
+    #     # stack_prefix = "player_" if this_player == player else "opponent_"
+
+    #     ((x, y, w, h), vertical) = self._ui_game_state.stacks_positions[stack_name]
         
-        # render the graphic on the window
-        self._ui_game_state.window.blit(card_graphic, card_placement)
+    #     return (x, y), vertical
+        
+    # def place_card(self, this_player: int, stack: str, card: str) -> None:
+    #     """
+    #     Place a card on the screen, at initialisation time
+
+    #     Args:
+    #         screen (pygame.surface): the main display area for the game
+    #         player (int): the player whose turn it is
+    #         stack (str): the stack where the card is located
+    #         card (str): the card to be placed
+    #     """
+
+    #     # Get the card graphic, either face or back
+    #     card_graphic = self.get_card_graphic(card)
+        
+    #     # Get the card placement for the stack. Also get the vertical orientation information
+    #     card_placement, vertical = self.where_to_place_card_initially(this_player, stack)
+        
+    #     # Orientate the card for the stack
+    #     card_graphic = self.card_orientate(card_graphic, vertical) 
+        
+    #     # render the graphic on the window
+    #     self._ui_game_state.window.blit(card_graphic, card_placement)
     
-    
-    def place_on_stack_initially(self, this_player: int, stack: str,  cards_list: list[str]) -> None:
+    # def place_on_stack_initially(self, this_player: int, stack: str,  cards_list: list[str]) -> None:
         
-        card_placement, vertical = self.where_to_place_card_initially(this_player, stack)
+    #     card_placement, vertical = self.where_to_place_card_initially(this_player, stack)
         
-        cards_blits: list[pygame.Surface] = []
+    #     cards_blits: list[pygame.Surface] = []
         
-        # Get all the cards for this stack
-        for card in cards_list:
-            card_graphic: pygame.Surface = self.get_card_graphic(card)    
-            card_graphic = self.card_orientate(card_graphic, vertical)
+    #     # Get all the cards for this stack
+    #     for card in cards_list:
+    #         card_graphic: pygame.Surface = self.get_card_graphic(card)    
+    #         card_graphic = self.card_orientate(card_graphic, vertical)
             
-            cards_blits.append(card_graphic)
+    #         cards_blits.append(card_graphic)
         
-        for card_blit in cards_blits:
-            # Render the card on the display
-            self._ui_game_state.window.blit(card_blit, card_placement )
+    #     for card_blit in cards_blits:
+    #         # Render the card on the display
+    #         self._ui_game_state.window.blit(card_blit, card_placement )
             
-            if "tableau" in stack:
-                shift: int = self._ui_game_state.tableau_cards_shift
-                # If the card belongs to player
-                if this_player == self._game_state.player_id.value:
-                    # shift right the position for the next card to be placed down
-                    next_card_position = (card_placement[0] + shift, card_placement[1])
-                else:
-                    # shift left
-                    next_card_position = (card_placement[0] - shift, card_placement[1])
-                card_placement = next_card_position
+    #         if "tableau" in stack:
+    #             shift: int = self._ui_game_state.tableau_cards_shift
+    #             # If the card belongs to player
+    #             if this_player == self._game_state.player_id.value:
+    #                 # shift right the position for the next card to be placed down
+    #                 next_card_position = (card_placement[0] + shift, card_placement[1])
+    #             else:
+    #                 # shift left
+    #                 next_card_position = (card_placement[0] - shift, card_placement[1])
+    #             card_placement = next_card_position
 
-            # stack_name = self.get_stack_name(stack, this_player)
+    #         # stack_name = self.get_stack_name(stack, this_player)
             
-            # # record that the card was placed on the stack
-            # self._ui_game_state.stacks_locations[stack_name] = (card_placement[0], card_placement[1], vertical)
+    #         # # record that the card was placed on the stack
+    #         # self._ui_game_state.stacks_locations[stack_name] = (card_placement[0], card_placement[1], vertical)
+            
+    # def place_stacks_cards_initially(self) -> None:
+    #     stacks: dict[str, dict[str, list[str]]] = self._game_state.stacks_cards
+    #     player = self._game_state.player_id.value
+    #     opponent = 1 - player
 
-                
-    def place_stacks_cards_initially(self) -> None:
-        stacks: dict[str, dict[str, list[str]]] = self._game_state.stacks_cards
-        player = self._game_state.player_id.value
-        opponent = 1 - player
-
-        # our cards
-        for stack_name, card_stack in stacks[Players(player).name].items():
-            self.place_on_stack_initially(player, stack_name, card_stack)
+    #     # our cards
+    #     for stack_name, card_stack in stacks[Players(player).name].items():
+    #         self.place_on_stack_initially(player, stack_name, card_stack)
        
-        # #opponent cards
-        for stack_name, card_stack in stacks[Players(opponent).name].items():
-            self.place_on_stack_initially(opponent, stack_name, card_stack)
+    #     # #opponent cards
+    #     for stack_name, card_stack in stacks[Players(opponent).name].items():
+    #         self.place_on_stack_initially(opponent, stack_name, card_stack)
 
 
-    def place_card2(self, stack: str, card: tuple[pygame.Rect, int, str]) -> None:
+    def place_card_on_window(self, stack: str, card: tuple[pygame.Rect, int, str]) -> None:
         card_graphic: pygame.Surface = self.get_card_graphic(card[2])
         card_position: tuple[int, int] = (card[0].x, card[0].y)
         # TODO: Define a "is_vertical" method
         if stack != "moving_cards":
             self.card_orientate(card_graphic, self._ui_game_state.stacks_positions[stack][1])
         self._ui_game_state.window.blit(card_graphic, card_position)
-
-        
 
     def place_cards(self) -> None:
         self.fill_card_positions()
@@ -300,9 +294,8 @@ class CardsUI:
                 # if card_name != "":
                     # client_logger.debug(f"placing card {card[2]}")
                     # client_logger.debug(f"placing card {card_name}")
-                    self.place_card2(stack, card)
+                    self.place_card_on_window(stack, card)
                 
-
     def fill_card_positions(self) -> None:
         """
         Fill the tableau and non-tableau card locations with the correct card values
@@ -370,8 +363,6 @@ class CardsUI:
                         temp_updated_stack.append((card_rect, card_num, stack_card_name)) 
                     self._ui_game_state.cards_positions[stack_prefix + stack] = temp_updated_stack                
 
-
-
     def fill_moving_card_positions(self) -> None:
         
         temp_updated_stack: list[tuple[pygame.Rect, int, str]] = []
@@ -380,9 +371,6 @@ class CardsUI:
             temp_updated_stack.append((card["card_rect_on_window"], card["card_pos_on_stack"], card["card_name"]))
 
         self._ui_game_state.cards_positions["moving_cards"] = temp_updated_stack
-
-
-
 
     def switch_cards_to_move_from_stack_to_moving_stack(self) -> None:
 
@@ -431,7 +419,6 @@ class CardsUI:
 
         client_logger.debug(f"1 - {pformat(self._ui_game_state.cards_positions["player_tableau3"])}")
         client_logger.debug(f"1 - {pformat(self._ui_game_state.cards_positions["moving_cards"])}")
-
 
     def switch_cards_to_move_from_moving_stack_to_stack(self) -> None:
 
