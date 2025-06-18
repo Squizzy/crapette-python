@@ -275,35 +275,56 @@ class CardsUI:
 
 
     def place_card_on_window(self, stack: str, card: tuple[pygame.Rect, int, str]) -> None:
+        """Place a card on the table on a stack
+        1. from the card name get the graphics (front or back) - from _card_faces
+        2. from the stack, get the orentiation - from stacks_positions
+        3. from the card, get the coordinate - from cards_positions
+
+        Args:
+            stack (str): _description_
+            card (tuple[pygame.Rect, int, str]): Card position on the table, card position on the stack, card name (4/5 digits)
+        """
+        # Get the appropriate graphic (front face or back)
         card_graphic: pygame.Surface = self.get_card_graphic(card[2])
-        card_position: tuple[int, int] = (card[0].x, card[0].y)
+
         # TODO: Define a "is_vertical" method
         if stack != "moving_cards":
             self.card_orientate(card_graphic, self._ui_game_state.stacks_positions[stack][1])
+
+        card_position: tuple[int, int] = (card[0].x, card[0].y)
+
+        # Render on the window
         self._ui_game_state.window.blit(card_graphic, card_position)
 
     def place_cards(self) -> None:
+        """Go through all the stacks and display each card on the window
+        1. Update the _cards_positions list from the various stacks
+        2. Update the _cards_positions list with the cards that are currently moving (by the mouse)
+        3. Go through the _cards_positions list and send each card to the correct position
+        """
+
         self.fill_card_positions()
         self.fill_moving_card_positions()
+
         for stack, cards_list in self._ui_game_state.cards_positions.items():
             for card in cards_list:
-                # this_player = int(card[2][-1])
-                # self.place_card(this_player, stack, card[2])
-                # print(stack, card)
-                if card[2] != "":
-                # if card_name != "":
-                    # client_logger.debug(f"placing card {card[2]}")
-                    # client_logger.debug(f"placing card {card_name}")
+                if card[2] != "": # does the card slot in cards_position have a card_name? if yes, there is a card
                     self.place_card_on_window(stack, card)
                 
     def fill_card_positions(self) -> None:
-        """
+        """ Make up the _cards_position list of cards per stack
+        1. Get the information from the cards list received from the server (_stacks_cards)
+        2. Process the cards list player by player.
+        3. Process separately the non-tableau stacks from the tableau stacks, because the tableau stacks shift the cards so several can be picked
+        4. 
+
         Fill the tableau and non-tableau card locations with the correct card values
         """               
         
         # go player after player:
         for player_name, player_stacks in self._game_state.stacks_cards.items():
             
+            # As the list of cards from the server 
             if Players[player_name] == self._game_state.player_id:
                 stack_prefix = "player_"
             else:
@@ -314,17 +335,24 @@ class CardsUI:
                 
                 temp_updated_stack: list[tuple[pygame.Rect, int, str]] = []
                 
-                # if the stack coming from the server is empty, reset the default entry
+                        # # if the stack coming from the server is empty, reset the default entry
+                        # if len(self._game_state.stacks_cards[self._game_state.player_id.name][stack]) == 0:
+                        #     card_rect, card_num, card_name = self._ui_game_state.cards_positions[stack_prefix + stack][0]
+                        #     self._ui_game_state.cards_positions[stack_prefix + stack][0] = (card_rect, -1, "")
+                        #     continue
+
+                # if the stack coming from the server is empty of cards, 
+                # make the _cards_position for this stack emtpy
                 if len(self._game_state.stacks_cards[self._game_state.player_id.name][stack]) == 0:
-                    card_rect, card_num, card_name = self._ui_game_state.cards_positions[stack_prefix + stack][0]
-                    self._ui_game_state.cards_positions[stack_prefix + stack][0] = (card_rect, -1, "")
-                    continue
+                    temp_updated_stack = []
+
                 
-                
-                # if the stack is a tableau
-                # taken separately because there is a max of 13 and the card_rect is different per card
-                # so all placeholders have been pre-allocated
-                if "tableau" in stack:
+                # if the stack is a tableau stack, 
+                # process separately to take care of the card shift position 
+                        # taken separately because there is a max of 13 and the card_rect is different per card
+                        # so all placeholders have been pre-allocated
+                elif "tableau" in stack:
+                    
                     # enumerate through the cards
                     for i in range(len(self._game_state.stacks_cards[self._game_state.player_id.name][stack])):
                         # Get the card name that was provided by the server
