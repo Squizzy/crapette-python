@@ -28,12 +28,16 @@ class UIGameState:
     _card_dimensions: tuple[int, int]  # (width, height)
     _cards_faces: dict[str, pygame.Surface]  # the scaled cards sprites [cardname: sprite]
     
-    _tableau_stacks_cards_quantity: dict[str, int]
-    _tableau_cards_shift: int  # the shift of the tableau card from the previous card of the same tableau stack
     _stacks_spacing_w: int  # the horizontal spacing between the stacks
     _stacks_spacing_y: int  # the vertical spacing between the stacks
     _stacks_positions: dict[str, tuple[pygame.Rect, bool]]  # (Stack positiontion as rect, V(True)/H)
     
+    
+    _tableau_stacks_cards_quantity: dict[str, int]  # TODO: REMOVE THIS EARLY DEV HACK
+
+    _tableau_cards_shift: int  # the shift of the tableau card from the previous card of the same tableau stack
+    _tableau_stack_card_slot_positions: dict[str, tuple[int, int]]  # tableau_name, (x, y) coordinates
+
     _moving_cards: list[dict[str, str | int | pygame.Rect]] # (source) "stack", card_pos_on_stack", "card_rect_on_window", "card_name"
 
     _cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]]  # location of cards. stackname(position-size, cardnum on the stack, cardname)
@@ -265,14 +269,14 @@ class UIGameState:
         self._stacks_spacing_y = self.card_height // 7
         
     def _set_stacks_positions(self) -> None:
+        """ Sets the position for all the card stacks on the window
+            Assign the top left corner coordinate of the stacks
+                For the Tableau stacks, the coordinate only represents the 
+                position of the first (bottom of pile) card, as the next ones are shifted
+            Assign the orientation of the cards in the stacks
         """
-        Calculate the positions of the stacks
-        Assign the top left corner coordiinate of the stacks
-        Assign the orientation of the cards in the stacks           
-        """
-        
-        # TODO: Rework these as rects, not (x,y)
-        
+
+        # 1. Calculate x and y for each stack
         # x positions (top left corner)
         player_center_x = self.window_centre_x - self.card_width // 2
         player_left_x = player_center_x - self.card_width - self._stacks_spacing_w
@@ -293,7 +297,7 @@ class UIGameState:
         foundation_top_y = tableau_top_y + (self.card_height - self.card_width) //2
         tableau_spacing_y = self.card_height + self._stacks_spacing_y
 
-        # Assign the positions
+        # 2. Assign the positions
         opponent_base_stacks_positions: dict[str, tuple[pygame.Rect, bool]] = {
             "opponent_crapette":    (pygame.Rect(opponent_right_x,  opponent_y, self.card_width, self.card_height), True),
             "opponent_remainder":   (pygame.Rect(opponent_center_x, opponent_y, self.card_width, self.card_height), True),
@@ -306,17 +310,80 @@ class UIGameState:
             "player_bin":       (pygame.Rect(player_right_x, player_y, self.card_width, self.card_height), True),
         }
         
-        center_stacks_positions: dict[str, tuple[pygame.Rect, bool]] = {}
+        tableau_stacks_positions: dict[str, tuple[pygame.Rect, bool]] = {}
         for p in range(4):
             o = 3 - p
-            center_stacks_positions[f"opponent_tableau{p}"] = (pygame.Rect(opponent_tableau_x, tableau_top_y + tableau_spacing_y * o, self.card_width, self.card_height), True)
-            center_stacks_positions[f"opponent_foundation{p}"] = (pygame.Rect(opponent_foundation_x, foundation_top_y + tableau_spacing_y * o, self.card_height, self.card_width), False)
-            center_stacks_positions[f"player_tableau{p}"] = (pygame.Rect(player_tableau_x, tableau_top_y + tableau_spacing_y * p, self.card_width, self.card_height), True)
-            center_stacks_positions[f"player_foundation{p}"] = (pygame.Rect(player_foundation_x, foundation_top_y + tableau_spacing_y * p, self.card_height, self.card_width), False)
+            tableau_stacks_positions[f"opponent_tableau{p}"] = (pygame.Rect(opponent_tableau_x, tableau_top_y + tableau_spacing_y * o, self.card_width, self.card_height), True)
+            tableau_stacks_positions[f"player_tableau{p}"] = (pygame.Rect(player_tableau_x, tableau_top_y + tableau_spacing_y * p, self.card_width, self.card_height), True)
+            
+        foundation_stacks_positions: dict[str, tuple[pygame.Rect, bool]] = {}
+        for p in range(4):
+            o = 3 - p
+            tableau_stacks_positions[f"opponent_foundation{p}"] = (pygame.Rect(opponent_foundation_x, foundation_top_y + tableau_spacing_y * o, self.card_height, self.card_width), False)
+            tableau_stacks_positions[f"player_foundation{p}"] = (pygame.Rect(player_foundation_x, foundation_top_y + tableau_spacing_y * p, self.card_height, self.card_width), False)
 
-        # combine the 3 dictionaries
-        self._stacks_positions = opponent_base_stacks_positions |center_stacks_positions | player_base_stacks_positions    
+        # 3. combine the 3 dictionaries and store
+        self._stacks_positions = opponent_base_stacks_positions | tableau_stacks_positions | foundation_stacks_positions | player_base_stacks_positions    
     
+        # 4. ensure the tableau card slot positions are calculated
+        self._set_tableau_cards_slot_position()
+
+    def _set_tableau_cards_slot_position(self) -> None:
+        """ Sets the position for each of the 13 cards of each tableau on the window
+            Method called by _set_stacks_positions method as it depends on 
+            calculations of coordinates of stacks positions
+        """
+
+        self._tableau_stack_card_slot_positions = {}
+
+        for stack in self.stacks_positions:
+            if "tableau" in stack:
+                for card_num in range(13):
+                    x: int
+                    y: int
+                    if "player" in stack:
+                        x = self.stacks_positions[stack][0].x + card_num * self.tableau_cards_shift
+                    else:
+                        x = self.stacks_positions[stack][0].x - card_num * self.tableau_cards_shift
+                    y = self.stacks_positions[stack][0].y
+                    self._tableau_stack_card_slot_positions[stack] = (x, y)
+                    
+
+    def get_stack_position(self, stack: str) -> tuple[int, int]:
+        """returns the (x, y) coordinate of a given non-tableau stack
+
+        Args:
+            stack (str): stack to place the card on
+
+        Returns:
+            tuple[int, int]: the coordinate of the card on the window (table)
+        """
+        return self._stacks_positions[stack][0], self._stacks_positions[stack][1]
+
+    def is_stack_vertical(self, stack) -> bool:
+        """ informs if the stack is to be placed vertically or horizontally
+
+        Returns:
+            true if the card is supposed to be placed vertical (portrait)
+        """
+        # TODO: ought to be tightened to make sure the stack is an existing stack name
+        for key, stack_position in self._stacks_positions:
+            if not stack_position[2]:
+                return False
+        return True
+
+    def get_tableau_card_slot_position(self, stack: str, card_num: int) -> tuple[int, int]:
+        """returns the (x, y) coordinate of a card for a given tableau stack
+
+        Args:
+            stack (str): stack to place the card on
+            card_num (int): card position in the stack
+
+        Returns:
+            tuple[int, int]: the coordinate of the card on the window (table)
+        """
+        return self._tableau_stack_card_slot_positions[stack][card_num]
+
     #endregion
     
     #region Cards Positions
@@ -331,29 +398,14 @@ class UIGameState:
         self._cards_positions = cards_positions
     
     def _initialise_cards_positions(self) -> None:
-        """Set the position of all the cards in all the stacks
-        Values are set later when the information is available from the server"""
+        """ Initialise the _cards_positions dictionary
+        Set the position of all the cards in all the stacks
+        Values are set later when the information is available from the server
+        """
         
         # Step 1
         # Set the ordered position of each non-tableau card of the stack
         # All the cards are in the same position so needs to be handled differently from Tableau where a shift happens
-        
-        non_tableau_cards_stacks = [
-            "player_crapette",
-            "player_remainder",
-            "player_bin",
-            "player_foundation0",
-            "player_foundation1",
-            "player_foundation2",
-            "player_foundation3",
-            "opponent_crapette",
-            "opponent_remainder",
-            "opponent_bin",
-            "opponent_foundation0",
-            "opponent_foundation1",
-            "opponent_foundation2",
-            "opponent_foundation3",
-        ]
         
         non_tableau_cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]] = {
             "player_crapette": [],
@@ -372,34 +424,6 @@ class UIGameState:
             "opponent_foundation3": [],
         }
 
-        moving_cards_positions:  dict[str, list[tuple[pygame.Rect, int, str]]] = {
-            "moving_cards": [],
-        }
-
-
-        for stack in self.stacks_positions:
-            # Initialise a rectangle at the base of the stack
-            rect: pygame.Rect = self.stacks_positions[stack][0]
-
-            if stack in non_tableau_cards_stacks:
-                # Foundations will have 13 cards max, you never know, 
-                # the ace might be put there then has to be moved at the right time not to cause a crapette.
-                if "foundation" in stack:
-                    for card_num in range(13):
-                        non_tableau_cards_positions[stack].append((rect , card_num, ""))
-                
-                # In extreme case (impossible) other player stacks will have 104 cards (2x decks of cards)
-                else:
-                    for card_num in range(104):
-                        non_tableau_cards_positions[stack].append((rect , card_num, ""))
-        
-        # 13 cards should never be moved, but you never know, as long as the ace is moved asap...
-        for card_num in range(13):
-            moving_cards_positions["moving_cards"].append((rect, card_num, ""))
-        
-        # Step 2:
-        # Set the ordered position of each tableau card of the stack
-        
         tableau_cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]] = {
             "player_tableau0":  [],
             "player_tableau1":  [],
@@ -411,33 +435,88 @@ class UIGameState:
             "opponent_tableau3": [],
         }
         
-        for stack in self.stacks_positions:
-            # Initialise a rectangle at the base of the stack
-            rect = self.stacks_positions[stack][0]
+        moving_cards_positions:  dict[str, list[tuple[pygame.Rect, int, str]]] = {
+            "moving_cards": [],
+        }
+
+
+        # Trying to move this here in case I don't need the below
+        self._cards_positions = non_tableau_cards_positions | tableau_cards_positions | moving_cards_positions
+
+
+
+
+        # non_tableau_cards_stacks = [
+        #     "player_crapette",
+        #     "player_remainder",
+        #     "player_bin",
+        #     "player_foundation0",
+        #     "player_foundation1",
+        #     "player_foundation2",
+        #     "player_foundation3",
+        #     "opponent_crapette",
+        #     "opponent_remainder",
+        #     "opponent_bin",
+        #     "opponent_foundation0",
+        #     "opponent_foundation1",
+        #     "opponent_foundation2",
+        #     "opponent_foundation3",
+        # ]
+        
+        
+        # for stack in self.stacks_positions:
+        #     # Initialise a rectangle at the base of the stack
+        #     rect: pygame.Rect = self.stacks_positions[stack][0]
+
+        #     if stack in non_tableau_cards_stacks:
+        #         # Foundations will have 13 cards max, you never know, 
+        #         # the ace might be put there then has to be moved at the right time not to cause a crapette.
+        #         if "foundation" in stack:
+        #             for card_num in range(13):
+        #                 non_tableau_cards_positions[stack].append((rect , card_num, ""))
+                
+        #         # In extreme case (impossible) other player stacks will have 104 cards (2x decks of cards)
+        #         else:
+        #             for card_num in range(104):
+        #                 non_tableau_cards_positions[stack].append((rect , card_num, ""))
+        
+        # # 13 cards should never be moved, but you never know, as long as the ace is moved asap...
+        # for card_num in range(13):
+        #     moving_cards_positions["moving_cards"].append((rect, card_num, ""))
+        
+        # # Step 2:
+        # # Set the ordered position of each tableau card of the stack
+        
+        # for stack in self.stacks_positions:
+        #     # Initialise a rectangle at the base of the stack
+        #     rect = self.stacks_positions[stack][0]
             
-            if "player_tableau" in stack:
-                #12 should be sufficient in reality as the ace should 
-                # go to the foundation, but...
-                for card_num in range(13):
-                    tableau_cards_positions[stack].append((rect, card_num, ""))
-                    rect = rect.move((self.tableau_cards_shift, 0))
+        #     if "player_tableau" in stack:
+        #         #12 should be sufficient in reality as the ace should 
+        #         # go to the foundation, but...
+        #         for card_num in range(13):
+        #             tableau_cards_positions[stack].append((rect, card_num, ""))
+        #             rect = rect.move((self.tableau_cards_shift, 0))
                     
-            elif "opponent_tableau" in stack:
-                #12 should be sufficient in reality as the ace should 
-                # go to the foundation, but...
-                for card_num in range(13):
-                    tableau_cards_positions[stack].append((rect, card_num, ""))
-                    rect = rect.move((-self.tableau_cards_shift, 0))
+        #     elif "opponent_tableau" in stack:
+        #         #12 should be sufficient in reality as the ace should 
+        #         # go to the foundation, but...
+        #         for card_num in range(13):
+        #             tableau_cards_positions[stack].append((rect, card_num, ""))
+        #             rect = rect.move((-self.tableau_cards_shift, 0))
         
         
-        # Step 3:
-        # merge
+        # # Step 3:
+        # # merge
         
-        self._cards_positions = non_tableau_cards_positions | tableau_cards_positions
-        # pprint(f"{non_tableau_cards_positions}")
-        # pprint(f"{tableau_cards_positions}")
-        # input()
+        # self._cards_positions = non_tableau_cards_positions | tableau_cards_positions
+        # # pprint(f"{non_tableau_cards_positions}")
+        # # pprint(f"{tableau_cards_positions}")
+        # # input()
         
+    def set_card_in_positions(self) -> None:
+        ...
+
 
     #region Moving Cards
     @property
@@ -578,7 +657,7 @@ class UIGameState:
 
     #endregion
 
-    #region Card Shift
+    #region Tableau Card Shift
     @property
     def tableau_cards_shift(self) -> int:
         """The shift of the tableau card from the previous card of the same tableau stack
@@ -623,6 +702,8 @@ class UIGameState:
             "card_sprite": pygame.Surface((1,1))
         }
     
+    #endregion
+
     # Events Handling
     def on_window_resize(self, surface: pygame.Surface):
 
