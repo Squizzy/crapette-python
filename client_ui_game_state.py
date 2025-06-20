@@ -1,5 +1,5 @@
 import pygame
-# from typing import TypedDict
+from typing import TypedDict
 from pprint import pprint
 
 from constants import CARD_IMG_WIDTH, CARD_IMG_HEIGHT, TABLEAU_CARDS_SHIFT,  TableColours
@@ -15,6 +15,27 @@ client_logger: GameLogger = GameLogger("client_ui_game_state", level=DebugLevel.
 #        card_rect_on_window: pygame.Rect # Position and size of the card found
 #        card_sprite: pygame.Surface # the card sprite
 
+class CardsPositions(TypedDict):
+    stack: str  # stack found
+    position: tuple[int, int]  # position of the card on the window (table)
+    card_num: int  # card number on the stack
+    card_name: str  # card name found
+    card_rect_on_window: pygame.Rect  # Position and size of the card found
+    card_sprite: pygame.Surface  # the card sprite
+
+class CardToMove(TypedDict):
+    stack: str
+    card_name: str
+    card_pos_on_stack: int
+    card_rect_on_window: pygame.Rect
+    # card_sprite: pygame.Surface 
+
+# class MovingCard(TypedDict):
+#     stack: str
+#     card_name: str
+#     card_pos_on_stack: int
+#     card_rect_on_window:  pygame.Rect
+    
 
 class UIGameState:
     
@@ -24,31 +45,35 @@ class UIGameState:
     _game_icon: pygame.Surface
     _table_colour: tuple[int, int, int]
     
-    _originally_loaded_cards_faces: dict[str, pygame.Surface]  # the sprites from the original file
-    _card_dimensions: tuple[int, int]  # (width, height)
-    _cards_faces: dict[str, pygame.Surface]  # the scaled cards sprites [cardname: sprite]
+    _originally_loaded_cards_faces: dict[str, pygame.Surface]  # stores the sprites from the original file
+    _card_dimensions: tuple[int, int]  # (width, height) - the dimensions recalculated for the window dimensions
+    _cards_faces: dict[str, pygame.Surface]  # the cards sprites scaled for the window dimensions [cardname: sprite]
     
     _stacks_spacing_w: int  # the horizontal spacing between the stacks
     _stacks_spacing_y: int  # the vertical spacing between the stacks
-    _stacks_positions: dict[str, tuple[pygame.Rect, bool]]  # (Stack positiontion as rect, V(True)/H)
+    _stacks_positions: dict[str, tuple[pygame.Rect, bool]]  # stores the position of all the stacks for the window dimensions as (rect, V(True)/H)
     
     
-    _tableau_stacks_cards_quantity: dict[str, int]  # TODO: REMOVE THIS EARLY DEV HACK
+    _tableau_stacks_cards_quantity: dict[str, int]  # TODO: REMOVE THIS EARLY DEV TEMP
 
-    _tableau_cards_shift: int  # the shift of the tableau card from the previous card of the same tableau stack
-    _tableau_stack_card_slot_positions: dict[str, tuple[int, int]]  # tableau_name, (x, y) coordinates
+    _tableau_cards_shift: int  # the shift of the tableau card from the previous tableau card of the same tableau
+    _tableau_stack_card_slot_positions: dict[str, list[tuple[int, int]]]  # sotres the position of all the cards in the tableau stacks as (x, y) coordinates
 
-    _moving_cards: list[dict[str, str | int | pygame.Rect]] # (source) "stack", card_pos_on_stack", "card_rect_on_window", "card_name"
+    # _moving_cards: list[dict[str, str | int | pygame.Rect]] # (source) "stack", card_pos_on_stack", "card_rect_on_window", "card_name"
+    _moving_cards: list[CardToMove]  # Contains all the cards that are currently attempted to be moved
 
-    _cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]]  # location of cards. stackname(position-size, cardnum on the stack, cardname)
+    # TODO: as this is duplication information, it might be better to remove in time.
+    _cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]]  # location of all the cards on the window. as stackname: (position-size, cardnum on stack, cardname)
+
     
     # _non_tableau_cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]]  # location of the non-tableau cards. non-tableaus, x, y
     # _tableau_cards_positions: dict[str, list[tuple[pygame.Rect, int, str]]]  # location of the tableau cards. tableaux, x, card__str__
     
-    _is_moving: bool
+    _is_moving: bool  # value set if a card has been selected (mousedown) to be moved to another stack
+    _card_to_move: CardToMove  # The card that has been selected to be moved to another stack
     # _card_to_move: dict[str, str | int | pygame.Rect | pygame.Surface]
     # _card_to_move: dict[str, str| int| pygame.Rect | pygame.Surface]
-    _card_to_move: dict
+    # _card_to_move: dict
     # _card_to_move_sprite: pygame.Surface
     # _card_to_move_rect: pygame.Rect
 
@@ -334,7 +359,16 @@ class UIGameState:
             calculations of coordinates of stacks positions
         """
 
-        self._tableau_stack_card_slot_positions = {}
+        self._tableau_stack_card_slot_positions = {
+            "player_tableau0": [],
+            "player_tableau1": [],
+            "player_tableau2": [],
+            "player_tableau3": [],
+            "opponent_tableau0": [],
+            "opponent_tableau1": [],
+            "opponent_tableau2": [],
+            "opponent_tableau3": [],
+        }
 
         for stack in self.stacks_positions:
             if "tableau" in stack:
@@ -346,7 +380,9 @@ class UIGameState:
                     else:
                         x = self.stacks_positions[stack][0].x - card_num * self.tableau_cards_shift
                     y = self.stacks_positions[stack][0].y
-                    self._tableau_stack_card_slot_positions[stack] = (x, y)
+                    self._tableau_stack_card_slot_positions[stack].append((x, y))
+                    
+        # client_logger.debug(f"{self._tableau_stack_card_slot_positions}")
                     
 
     def get_stack_position(self, stack: str) -> tuple[int, int]:
@@ -358,7 +394,7 @@ class UIGameState:
         Returns:
             tuple[int, int]: the coordinate of the card on the window (table)
         """
-        return self._stacks_positions[stack][0], self._stacks_positions[stack][1]
+        return self._stacks_positions[stack][0].x, self._stacks_positions[stack][0].y
 
     def is_stack_vertical(self, stack) -> bool:
         """ informs if the stack is to be placed vertically or horizontally
@@ -367,8 +403,8 @@ class UIGameState:
             true if the card is supposed to be placed vertical (portrait)
         """
         # TODO: ought to be tightened to make sure the stack is an existing stack name
-        for key, stack_position in self._stacks_positions:
-            if not stack_position[2]:
+        for key, stack_position in self._stacks_positions.items():
+            if not stack_position[1]:
                 return False
         return True
 
@@ -520,7 +556,8 @@ class UIGameState:
 
     #region Moving Cards
     @property
-    def moving_cards(self) -> list[str, int, pygame.Rect, str]:
+    def moving_cards(self) -> list[CardToMove]:
+    # def moving_cards(self) -> list[tuple[str, int, pygame.Rect, str]]:
         """Returns the list of moving cards
 
         returns:
@@ -533,7 +570,8 @@ class UIGameState:
         return self._moving_cards
 
     @moving_cards.setter
-    def moving_cards(self, moving_cards: list[str, int, pygame.Rect, str]) -> None:
+    def moving_cards(self, moving_cards: list[CardToMove]) -> None:
+    # def moving_cards(self, moving_cards: list[tuple[str, int, pygame.Rect, str]]) -> None:
         """Sets the moving cards
         
         Args:
@@ -550,7 +588,7 @@ class UIGameState:
 
     def reset_moving_cards(self) -> None:
         """Resets the moving cards list"""
-        self.moving_cards = {}
+        self.moving_cards = []
 
 
             
@@ -684,23 +722,26 @@ class UIGameState:
     
     #region Card To Move
     @property
-    def card_to_move(self) -> dict[str, str| int| pygame.Rect | pygame.Surface]:
+    def card_to_move(self) -> CardToMove:
+    # def card_to_move(self) -> dict[str, str| int| pygame.Rect | pygame.Surface]:
         """the card to be moved"""
         return self._card_to_move
     
     @card_to_move.setter
-    def card_to_move(self, card_to_move: dict[str, str| int| pygame.Rect | pygame.Surface]) -> None:
+    def card_to_move(self, card_to_move: CardToMove) -> None:
+    # def card_to_move(self, card_to_move: dict[str, str| int| pygame.Rect | pygame.Surface]) -> None:
         """Set the card to be moved"""
         self._card_to_move = card_to_move
     
     def reset_card_to_move(self) -> None:
-        self._card_to_move = {
-            "stack": "", # stack found
-            "card_name": "", # card name found
-            "card_pos_on_stack": -1, # card position on stack
-            "card_rect_on_window": pygame.Rect((0,0,0,0)), # Position and size of the card found
-            "card_sprite": pygame.Surface((1,1))
-        }
+        self._card_to_move = CardToMove(
+            stack = "", # stack found
+            card_name = "", # card name found
+            card_pos_on_stack = -1, # card position on stack
+            card_rect_on_window = pygame.Rect((0,0,0,0)) # Position and size of the card found
+            # "card_sprite": pygame.Surface((1,1)
+            )
+            
     
     #endregion
 
