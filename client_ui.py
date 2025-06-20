@@ -6,7 +6,7 @@ from constants import GAME_ICON_FILE
 from constants import TableColours
 from client_ui_cards import CardsUI
 from client_ui_stacks_layout import StacksLayoutUI
-from client_ui_game_state import UIGameState
+from client_ui_game_state import UIGameState, CardToMove
 from client_game_state import GameState
 
 from game_logger import GameLogger, DebugLevel
@@ -116,7 +116,8 @@ class GameUI:
         
         # if a card needs to move, movie it
         if self._ui_game_state._card_to_move["card_name"] != "":
-            sprite = self._ui_game_state.card_to_move["card_sprite"]
+            sprite = self._ui_game_state.card_face(self._ui_game_state._card_to_move["card_name"][:-2])
+            # sprite = self._ui_game_state.card_to_move["card_sprite"]
             pos = self._ui_game_state.card_to_move["card_rect_on_window"]
             # pos = (
             #     self._ui_game_state._card_to_move_rect[0] + int(self._ui_game_state._click_pos[0]),
@@ -137,17 +138,26 @@ class GameUI:
         pygame.display.flip()
 
 
-    def detect_tableau_collision(self, event: pygame.event.Event) -> dict[str, str| int| pygame.Rect | pygame.Surface] | None:
+    def detect_tableau_collision(self, event: pygame.event.Event) -> CardToMove | None:
+    # def detect_tableau_collision(self, event: pygame.event.Event) -> dict[str, str| int| pygame.Rect | pygame.Surface] | None:
         
-        card_found: dict[str, str| int| pygame.Rect | pygame.Surface]
+        # card_found: dict[str, str| int| pygame.Rect | pygame.Surface]
+        card_found: CardToMove
         
-        card_found = {
-            "stack": "table", # stack found
-            "card_name": "", # card name found
-            "card_pos_on_stack": -1, # card position on stack
-            "card_rect_on_window": pygame.Rect((0,0,0,0)), # Position and size of the card found
-            "card_sprite": pygame.Surface((1,1))
-        }
+        
+        card_found = CardToMove(
+            stack = "table", # stack found
+            card_name= "", # card name found
+            card_rect_on_window= pygame.Rect((0,0,0,0)), # Position and size of the card found
+            card_pos_on_stack = -1, # card position on stack
+        )
+        # card_found = {
+        #     "stack": "table", # stack found
+        #     "card_name": "", # card name found
+        #     "card_pos_on_stack": -1, # card position on stack
+        #     "card_rect_on_window": pygame.Rect((0,0,0,0)), # Position and size of the card found
+        #     "card_sprite": pygame.Surface((1,1))
+        # }
         # area: str = "table" # default value: hit the table
         # card_rect: pygame.Rect
         # card_num_on_stack_found: int = -1
@@ -176,11 +186,18 @@ class GameUI:
             for card_rect, card_num, card_name in reversed(self._ui_game_state.cards_positions[stack]):
                 if card_rect.collidepoint(event.pos):
                     if card_name != "":
-                        card_found["stack"] = stack
-                        card_found["card_name"] = card_name
-                        card_found["card_pos_on_stack"] = card_num
-                        card_found["card_rect_on_window"] = card_rect
-                        card_found["card_sprite"] = self._ui_game_state.card_face(card_name[:-2])
+                        card_found = CardToMove(
+                            stack = stack, # stack found
+                            card_name= card_name,
+                            card_rect_on_window= card_rect,
+                            card_pos_on_stack = card_num
+                        )
+                        
+                        # card_found["stack"] = stack
+                        # card_found["card_name"] = card_name
+                        # card_found["card_pos_on_stack"] = card_num
+                        # card_found["card_rect_on_window"] = card_rect
+                        # card_found["card_sprite"] = self._ui_game_state.card_face(card_name[:-2])
                         found_collision = True
                         # area = stack
                         # found_collision = True
@@ -199,17 +216,28 @@ class GameUI:
             return None
 
 
-    def detect_non_tableau_collision (self, event: pygame.event.Event) -> dict[str, str| int| pygame.Rect | pygame.Surface] | None:
+    def detect_non_tableau_collision (self, event: pygame.event.Event) -> CardToMove | None:
+    # def detect_non_tableau_collision (self, event: pygame.event.Event) -> dict[str, str| int| pygame.Rect | pygame.Surface] | None:
         
-        card_found: dict[str, str| int| pygame.Rect | pygame.Surface]
+        # card_found: dict[str, str| int| pygame.Rect | pygame.Surface]
+        card_found: CardToMove
         
-        card_found = {
-            "stack": "table", # stack found
-            "card_name": "", # card name found
-            "card_pos_on_stack": -1, # card position on stack
-            "card_rect_on_window": pygame.Rect((0,0,0,0)), # Position and size of the card found
-            "card_sprite": pygame.Surface((1,1))
-        }
+        # card_found = {
+        #     "stack": "table", # stack found
+        #     "card_name": "", # card name found
+        #     "card_pos_on_stack": -1, # card position on stack
+        #     "card_rect_on_window": pygame.Rect((0,0,0,0)), # Position and size of the card found
+        #     "card_sprite": pygame.Surface((1,1))
+        # }
+        
+        card_found = CardToMove(
+            stack = "table", # stack found
+            card_name= "", # card name found
+            card_rect_on_window= pygame.Rect((0,0,0,0)), # Position and size of the card found
+            card_pos_on_stack = -1, # card position on stack
+        )
+        
+        
         # stack_found: str = "table" # default value: hit the table
         # card_num_on_stack_found: int = -1
         # card_rect: pygame.Rect
@@ -242,11 +270,19 @@ class GameUI:
             for card_rect, card_num, card_name in reversed(self._ui_game_state.cards_positions[stack]):
                 if card_rect.collidepoint(event.pos):
                     if card_name != "":
-                        card_found["stack"] = stack
-                        card_found["card_name"] = card_name
-                        card_found["card_pos_on_stack"] = card_num
-                        card_found["card_rect_on_window"] = card_rect
-                        card_found["card_sprite"] = self._ui_game_state.card_face(card_name[:-2])
+                        card_found = CardToMove(
+                            stack = stack, # stack found
+                            card_name= card_name,
+                            card_rect_on_window= card_rect,
+                            card_pos_on_stack= card_num,
+                        )
+                            
+                            
+                        # card_found["stack"] = stack
+                        # card_found["card_name"] = card_name
+                        # card_found["card_pos_on_stack"] = card_num
+                        # card_found["card_rect_on_window"] = card_rect
+                        # card_found["card_sprite"] = self._ui_game_state.card_face(card_name[:-2])
 
                         found_collision = True
                         break
@@ -262,15 +298,18 @@ class GameUI:
 
 
         
-    def check_for_collision(self, event: pygame.event.Event) -> dict[str, str| int| pygame.Rect | pygame.Surface] | None:
+    def check_for_collision(self, event: pygame.event.Event) -> CardToMove | None:
+    # def check_for_collision(self, event: pygame.event.Event) -> dict[str, str| int| pygame.Rect | pygame.Surface] | None:
         
-        card_found: dict[str, str| int| pygame.Rect | pygame.Surface] | None
+        # card_found: dict[str, str| int| pygame.Rect | pygame.Surface] | None
+        card_found: CardToMove | None
         
         card_found = self.detect_tableau_collision(event)
         
         if not card_found:
             card_found = self.detect_non_tableau_collision(event)
-            
+        
+
         return card_found
         # if not card_found:
         #     return "", pygame.Surface((1,1)), pygame.Rect((0,0,0,0))  # Return a surface of size 1x1 to indicate no collision
