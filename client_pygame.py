@@ -5,6 +5,7 @@ from client_network import ClientConnection
 from client_game_comms import ClientGameComms
 from client_ui import GameUI
 from client_game_state import GameState
+from client_ui_game_state import CardToMove
 
 from game_logger import GameLogger, DebugLevel
 client_logger: GameLogger = GameLogger("client_pygame", level=DebugLevel.client_pygame.value)
@@ -66,6 +67,7 @@ class Game:
             client_logger.debug("Button Down")
             if event.pos:
                 # card_found: dict[str, str| int| pygame.Rect | pygame.Surface] | None
+                card_found: CardToMove | None
                 card_found = self._game_ui.check_for_collision(event)
                 client_logger.debug(f"{card_found}")
                 if card_found is not None:
