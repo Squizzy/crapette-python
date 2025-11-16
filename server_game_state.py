@@ -14,6 +14,7 @@ class GameStates(Flag):
     # Player-related Stacks States
     class Player(Flag):
         # TODO: If all three below are empty, the player has won the game
+        UNDEFINED_FLAG = auto()
         # If set, the crapette stack is empty
         CRAPETTE_IS_EMPTY = auto()  
         # If set, the remainder stack is empty

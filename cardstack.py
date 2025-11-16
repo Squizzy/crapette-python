@@ -136,7 +136,7 @@ class CardStack(ABC):
             self.top_card.turn_face_up()
             
         if self.size == 0:
-            flag: GameStates.Player
+            flag: GameStates.Player = GameStates.Player.UNDEFINED_FLAG
             match self.what_stack_am_i:
                 case Stacks.CRAPETTE:
                     flag = GameStates.Player.CRAPETTE_IS_EMPTY
