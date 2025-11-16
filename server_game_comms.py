@@ -46,23 +46,23 @@ class ServerGameComms(ServerGameCommsInterface):
         
         self._message_encoder = ServerMessageEncoder(logger)
     
-    def send_player_id(self, player: Players):
+    def send_player_id(self, player_id: Players):
         """
         Sends the player_ID to the requesting client
         """
-        server_logger.debug(f"sending player_id to {player.name}")
+        server_logger.debug(f"sending player_id to {player_id.name}")
         
-        message = self._message_encoder.encode_player_id(player)
+        message = self._message_encoder.encode_player_id(player_id)
         
-        self._connection.send_message_to_client(player, message)
+        self._connection.send_message_to_client(player_id, message)
         
         server_logger.info("player_id sent")
         
         
-    def send_stacks_cards(self, client: Players, stacks_cards):
+    def send_stacks_cards(self, player_id: Players, stacks_cards: dict[str, list[str]]):
         server_logger.info("sending stacks cards")
         cards = self._message_encoder.encode_stacks_cards(stacks_cards)
-        self._connection.send_message_to_client(client, cards)
+        self._connection.send_message_to_client(player_id, cards)
         server_logger.info("stacks cards sent")
 
 
