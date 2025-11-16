@@ -78,7 +78,7 @@ class ClientConnection(ClientInterface):
         """
         # self.__del__()
         # TODO: Announce client disconnection to the server
-        self._client_socket.shutdown()
+        self._client_socket.shutdown(socket.SHUT_RDWR)
         self._client_socket.close()
         self._is_connected = False
         client_logger.info("client disconnected")
