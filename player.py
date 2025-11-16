@@ -73,3 +73,51 @@ class Player:
         log_message(f"{self._foundation3.size=}")
         log_message(f"{deck.size=}")
         
+    
+    @property
+    def player_num(self) -> Players:
+        return self._player_num
+    
+    @property
+    def crapette(self) -> CrapetteStack:
+        return self._crapette
+    
+    @property
+    def remainder(self) -> RemainderStack:
+        return self._remainder
+    
+    @property
+    def bin(self) -> BinStack:
+        return self._bin
+    
+    @property
+    def tableau0(self) -> TableauStack:
+        return self._tableau0
+    
+    @property
+    def tableau1(self) -> TableauStack:
+        return self._tableau1
+    
+    @property
+    def tableau2(self) -> TableauStack:
+        return self._tableau2
+    
+    @property
+    def tableau3(self) -> TableauStack:
+        return self._tableau3
+    
+    @property
+    def foundation0(self) -> FoundationStack:
+        return self._foundation0
+    
+    @property
+    def foundation1(self) -> FoundationStack:
+        return self._foundation1
+    
+    @property
+    def foundation2(self) -> FoundationStack:
+        return self._foundation2
+    
+    @property
+    def foundation3(self) -> FoundationStack:
+        return self._foundation3
