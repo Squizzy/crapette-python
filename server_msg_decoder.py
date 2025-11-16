@@ -1,7 +1,8 @@
 from json import loads
 
-from constants import Players
-from network_messages import ServerNetworkMessage, ClientNetworkMessage
+# from constants import Players
+# from network_messages import ServerNetworkMessage
+from network_messages import ClientNetworkMessage
 from game_logger import GameLogger
 
 server_logger: GameLogger
