@@ -66,7 +66,11 @@ class ServerGameComms(ServerGameCommsInterface):
         server_logger.info("stacks cards sent")
 
 
-    def send_players_stacks(self, msg):
+    def _send(self, msg: object) -> None:
+        # TODO: IMPORTANT: Complete sending players all stacks
+        ...
+
+    def send_players_stacks(self, msg: object):
         server_logger.info("sending all players stacks cards")
         # TODO: Complete sending players all stacks
         self._send(msg)
