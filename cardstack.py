@@ -24,7 +24,7 @@ class CardStack(ABC):
     def to_list(self) -> list[str]:
         return [str(card) for card in self._cards]
     
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, str | list[dict[str,str]]]:
         """Return the stack as a dictionary."""
         # return [card.to_dict() for card in self._cards]
         return {
