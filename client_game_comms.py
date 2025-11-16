@@ -82,6 +82,8 @@ class ClientGameComms(ClientGameCommsInterface):
 
         client_logger.info("retrieving the player_id as sent by the server")
         
+        message: str = ""
+        
         received_type: ServerNetworkMessage = ServerNetworkMessage.NONE
         # received_value: Players = Players.ERROR
         
@@ -129,6 +131,8 @@ class ClientGameComms(ClientGameCommsInterface):
     def retrieve_stacks_cards(self) -> dict[str, dict[str, list[str]]]:
         
         client_logger.info("retrieving the stacks cards as sent by the server")
+        
+        message: str = ""
         
         received_type: ServerNetworkMessage = ServerNetworkMessage.NONE
         # received_value: dict[str, list[str]] = {}
