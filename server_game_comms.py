@@ -28,7 +28,7 @@ class ServerGameCommsInterface(ABC):
         pass
     
     @abstractmethod
-    def send_stacks_cards(self, player_id: Players, stacks_cards) -> None:
+    def send_stacks_cards(self, player_id: Players, stacks_cards: dict[str, list[str]]) -> None:
         """send the current status of all cards in all stacks
         to the player"""
         pass
@@ -38,7 +38,7 @@ class ServerGameComms(ServerGameCommsInterface):
     _connection: ServerInterface
     _message_encoder: ServerMessageEncoder
     
-    def __init__(self,logger: GameLogger, connection) -> None:
+    def __init__(self,logger: GameLogger, connection: ServerInterface) -> None:
         global server_logger
         server_logger = logger
         
@@ -68,6 +68,7 @@ class ServerGameComms(ServerGameCommsInterface):
 
     def send_players_stacks(self, msg):
         server_logger.info("sending all players stacks cards")
+        # TODO: Complete sending players all stacks
         self._send(msg)
         # self._client_socket.sendall(msg.encode())
         
