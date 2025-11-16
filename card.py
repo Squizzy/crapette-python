@@ -78,7 +78,7 @@ class Card:
     def __str__(self) -> str:
         return self._suit.short + self._rank.short +  ('u' if self._face_up else 'd') + str(self._player_num.value)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, str]:
         # TODO: Check if still needed
         # return the card detail in dictionary format to be JSON serialisable
         # return self._rank.short + self._suit.short + ('u' if self._face_up else 'd')
@@ -196,11 +196,11 @@ class TransferredNCards:
     
     @property
     def from_stack_name(self) -> Stacks:
-        return self._transferred_cards[0]._from_stack_name
+        return self._transferred_cards[0].from_stack_name
     
     @property
     def from_stack_owner(self) -> Players:
-        return self._transferred_cards[0]._from_stack_owner
+        return self._transferred_cards[0].from_stack_owner
     
     @property
     def transferred_cards(self) -> list[TransferredCard]:
@@ -216,7 +216,7 @@ class TransferredNCards:
     
     @property
     def from_player(self) -> Players:
-        return self._transferred_cards[0]._from_player    
+        return self._transferred_cards[0].from_player    
     
     # @property
     # def top_card(self) -> Card:
