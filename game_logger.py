@@ -70,7 +70,7 @@ class ColoredFormatter(logging.Formatter):
     #     logging.CRITICAL: TextColours.RED + "%(asctime)s - %(levelname)s - %(message)s" + TextColours.RESET
     # }
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord):
         # global log_time, log_message
         log_fmt = f"{self.log_time} {self.log_levels.get(record.levelno)} {self.log_message}"
         # log_fmt = self.FORMATS.get(record.levelno)
