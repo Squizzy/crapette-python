@@ -3,6 +3,7 @@ from json import dumps
 from constants import Players
 from network_messages import ServerNetworkMessage, ClientNetworkMessage
 from game_logger import GameLogger
+from enum import EnumType
 
 server_logger: GameLogger
 
@@ -45,6 +46,8 @@ class ServerMessageEncoder:
 
     def encode_stacks_cards(self, stacks_cards: dict[str, list[str]]) -> str:
         server_logger.info("encoding stacks_cards")
+        msg: dict[str, EnumType | str | dict[str, list[str]]]
+        
         msg = {
             "type": ServerNetworkMessage.SENDING_STACKS_CARDS.value,
             "target": "",
@@ -53,3 +56,4 @@ class ServerMessageEncoder:
         server_logger.debug(f"{msg}")
 
         return dumps(msg)
+    
