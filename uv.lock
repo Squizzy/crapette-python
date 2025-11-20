@@ -39,16 +39,16 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "asttokens", specifier = "==3.0.0" },
-    { name = "colorama", specifier = "==0.4.6" },
-    { name = "executing", specifier = "==2.2.0" },
-    { name = "icecream", specifier = "==2.1.4" },
-    { name = "iniconfig", specifier = "==2.1.0" },
-    { name = "packaging", specifier = "==25.0" },
-    { name = "pluggy", specifier = "==1.5.0" },
-    { name = "pygments", specifier = "==2.19.1" },
-    { name = "pytest", specifier = "==8.3.5" },
-    { name = "ruff", specifier = "==0.11.7" },
+    { name = "asttokens", specifier = ">=3.0.0" },
+    { name = "colorama", specifier = ">=0.4.6" },
+    { name = "executing", specifier = ">=2.2.0" },
+    { name = "icecream", specifier = ">=2.1.4" },
+    { name = "iniconfig", specifier = ">=2.1.0" },
+    { name = "packaging", specifier = ">=25.0" },
+    { name = "pluggy", specifier = ">=1.5.0" },
+    { name = "pygments", specifier = ">=2.19.1" },
+    { name = "pytest", specifier = ">=8.3.5" },
+    { name = "ruff", specifier = ">=0.11.7" },
 ]
 
 [[package]]
