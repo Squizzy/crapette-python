@@ -1,0 +1,7 @@
+[project]
+name = "crapette-python"
+version = "0.1.0"
+description = "Jeu de crapette en python / SDL"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
