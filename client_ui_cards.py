@@ -108,7 +108,7 @@ class CardsUI:
         # self.scale_cards_faces()
         # This is not stored in the _ui_game_state - only the rescaled sprites are stored there
     
-    def get_card_face_sprite(self, card: str) -> pygame.Surface:
+    def get_card_face_sprite(self, card:str) -> pygame.Surface:
         """
         Return the card face for the given card
         
@@ -162,14 +162,14 @@ class CardsUI:
             
         return card_graphic
     
-    def get_stack_name_with_prefix(self, stack: str, this_player:int) -> str:
+    def get_stack_name_with_prefix(self, stack:str, this_player:int) -> str:
         """Return the stack to be used for this card"""
-        player: int = self._game_state.player_id.value        
+        player:int = self._game_state.player_id.value        
         stack_prefix = "player_" if this_player == player else "opponent_"
         
         return stack_prefix + stack
     
-    def card_orientate(self, card: pygame.Surface, vertical: bool) -> pygame.Surface:
+    def card_orientate(self, card:pygame.Surface, vertical:bool) -> pygame.Surface:
         """
         Rotate the card as needed for the target stack
         
@@ -426,9 +426,9 @@ class CardsUI:
 
     def fill_moving_card_positions(self) -> dict[str, list[tuple[pygame.Rect, int, str]]]:
         
-        moving_cards_list: dict[str, list[tuple[pygame.Rect, int, str]]] = {}
+        moving_cards_list:dict[str, list[tuple[pygame.Rect, int, str]]] = {}
         
-        temp_updated_stack: list[tuple[pygame.Rect, int, str]] = []
+        temp_updated_stack:list[tuple[pygame.Rect, int, str]] = []
 
         for card in self._ui_game_state.moving_cards:
             temp_updated_stack.append((card["card_rect_on_window"], card["card_pos_on_stack"], card["card_name"]))
@@ -446,11 +446,11 @@ class CardsUI:
         client_logger.debug(f"0 - {pformat(self._ui_game_state.cards_positions["player_tableau3"])}")
         client_logger.debug(f"0 - {pformat(self._ui_game_state.cards_positions["moving_cards"])}")
 
-        from_stack: str = str(self._ui_game_state.card_to_move["stack"])
-        stack_pos: int = int(self._ui_game_state.card_to_move["card_pos_on_stack"])
+        from_stack:str = str(self._ui_game_state.card_to_move["stack"])
+        stack_pos:int = int(self._ui_game_state.card_to_move["card_pos_on_stack"])
         # stack_size = len(self._ui_game_state.cards_positions[from_stack]) 
         stack_size = len([card for card in self._ui_game_state.cards_positions[from_stack] if card[2] != ""]) 
-        temp_stack = []
+        temp_stack:list[CardToMove] = []
 
         if "tableau" in from_stack:
             for card in range(stack_size -1, stack_pos - 1, -1):
