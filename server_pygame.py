@@ -77,6 +77,14 @@ class GameState:
         self._is_player1_turn = True
     
     @property
+    def is_running(self) -> bool:
+        return self._is_running
+    
+    @is_running.setter
+    def is_running(self, value:bool) -> None:
+        self._is_running = value
+    
+    @property
     def stacks_cards(self) -> dict[str, dict[str, list[str]]]:
         return self._stacks_cards
     
@@ -202,20 +210,20 @@ class Game:
         elif message == ClientNetworkMessage.QUIT:
             # self._acknowledge("quit accepted")
             server_logger.info("Ok, about to quit")
-            self._game_state._is_running = False
+            self._game_state.is_running = False
         ...
 
 
     def _quit(self) -> None:
-        self._game_state._is_running = False
+        self._game_state.is_running = False
         self._conn.stop()
         server_logger.info("server stopped")
 
 
     def _game_loop(self):
-        self._game_state._is_running =  True
+        self._game_state.is_running =  True
         
-        while self._game_state._is_running:
+        while self._game_state.is_running:
             
             for client in self._conn.connected_clients:
                 # received_message = ""
