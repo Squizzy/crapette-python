@@ -185,9 +185,9 @@ class Game:
     def _get_players_cards(self) ->  dict[str, dict[str, list[str]]]:
 
         self._game_state.update_stacks_cards(self._player0, self._player1)
-        server_logger.debug(f"{self._game_state._stacks_cards}")
+        server_logger.debug(f"{self._game_state.stacks_cards}")
 
-        return self._game_state._stacks_cards
+        return self._game_state.stacks_cards
 
     def _process_messages_received(self, msg: str, client: Players):
         
